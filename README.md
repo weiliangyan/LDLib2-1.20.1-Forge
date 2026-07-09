@@ -14,7 +14,6 @@
 - **当前移植目标：** Minecraft 1.20.1 + Forge 47.x
 - **开源协议：** GNU Lesser General Public License v3.0，见仓库根目录 `LICENSE`
 
-原项目中的作者信息、源码注释和版权声明都会尽量保留。这个移植版只做 1.20.1 Forge 兼容、构建环境调整，以及必要的运行修复。
 
 ## 现在能做什么
 
