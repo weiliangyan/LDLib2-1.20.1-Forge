@@ -110,8 +110,6 @@ public abstract class Editor extends UIElement {
     public Editor() {
         getLayout().widthPercent(100);
         getLayout().heightPercent(100);
-        getLayout().paddingAll(4);
-        getStyle().backgroundTexture(ColorPattern.BLACK.rectTexture());
 
         addClass("__editor__");
 
@@ -193,8 +191,7 @@ public abstract class Editor extends UIElement {
                 mainView.layout(layout -> {
                     layout.widthPercent(100);
                     layout.flex(1);
-                }).style(style -> style.backgroundTexture(ColorPattern.DARK_GRAY.rectTexture()))
-                        .addChild(rootWindow)
+                }).addChild(rootWindow)
         );
 
         closeButton.setOnClick(e -> close());
