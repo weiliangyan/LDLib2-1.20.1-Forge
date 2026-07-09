@@ -1,0 +1,20 @@
+.panel_bg {
+    background: built-in(ui-gdp:RECT_SOLID);
+    padding-all: 5;
+    gap-all: 4;
+}
+
+.preview_bg {
+  background: built-in(ui-gdp:BORDER1_RT1);
+  padding-all: 3;
+}
+
+button.__disabled__ .__button_text__ {
+  text-color: #666;
+  text-shadow: false;
+}
+
+.__node-title_collapse-toggle__ {
+  width: 8;
+  height: 8;
+}

@@ -1,0 +1,308 @@
+plugins {
+    id 'java-library'
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'org.spongepowered.mixin' version '0.7.+'
+    id 'org.jetbrains.kotlin.jvm' version '2.1.20'
+    id 'org.jetbrains.kotlin.plugin.lombok' version '2.1.20'
+    id 'io.freefair.lombok' version '8.6'
+}
+
+version = mod_version
+group = maven_group
+
+base {
+    archivesName = "${project.name}-${minecraft_version}"
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(17)
+    withSourcesJar()
+}
+
+kotlin {
+    jvmToolchain(17)
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
+}
+
+configurations {
+    libraries
+    api.extendsFrom libraries
+
+    localImplementation
+    runtimeClasspath.extendsFrom localImplementation
+    compileOnly.extendsFrom localImplementation
+
+    yogaSources
+    taffyLibrary
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven { url = "https://maven.minecraftforge.net/" }
+    maven { url = "https://maven.shedaniel.me/" }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
+    maven { url = "https://maven.architectury.dev/" }
+    maven {
+        name = "CurseForge"
+        url = "https://cursemaven.com"
+    }
+    maven {
+        name = "Jared's maven"
+        url = "https://maven.blamejared.com/"
+    }
+    maven {
+        name = "ModMaven"
+        url = "https://modmaven.dev"
+    }
+    maven { url = "https://maven.parchmentmc.org" }
+    maven { url = "https://maven.quiltmc.org/repository/release" }
+    maven {
+        url = "https://maven.tterrag.com/"
+        content {
+            includeGroup("com.jozufozu.flywheel")
+            includeGroup("com.tterrag.registrate")
+            includeGroup("com.simibubi.create")
+        }
+    }
+    maven { url = "https://maven.theillusivec4.top/" }
+    maven { url = "https://maven.terraformersmc.com/releases/" }
+    maven { url = "https://jitpack.io/" }
+    maven {
+        url = "https://maven.latvian.dev/releases"
+        content {
+            includeGroup "dev.latvian.mods"
+            includeGroup "dev.latvian.apps"
+        }
+    }
+}
+
+minecraft {
+    mappings channel: 'official', version: minecraft_version
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                "${mod_id}" {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        client {
+            property 'forge.enabledGameTestNamespaces', mod_id
+        }
+
+        server {
+            property 'forge.enabledGameTestNamespaces', mod_id
+            args '--nogui'
+        }
+
+        gameTestServer {
+            property 'forge.enabledGameTestNamespaces', mod_id
+        }
+
+        data {
+            args '--mod', mod_id, '--all',
+                    '--output', file('src/generated/resources/'),
+                    '--existing', file('src/main/resources/')
+        }
+    }
+}
+
+mixin {
+    add sourceSets.main, "${mod_id}.refmap.json"
+    config "${mod_id}.mixins.json"
+}
+
+sourceSets.main.resources {
+    srcDir 'src/generated/resources'
+    srcDir(layout.buildDirectory.dir("generated/resources/taffy"))
+}
+sourceSets.main.kotlin { srcDir("src/main/java") }
+sourceSets.main.java { srcDir(layout.buildDirectory.dir("generated/sources/yoga")) }
+
+tasks.register('extractYogaSources', Copy) {
+    from {
+        zipTree(configurations.yogaSources.singleFile)
+    }
+    include '**/*.java'
+    into layout.buildDirectory.dir("generated/sources/yoga")
+}
+
+tasks.named('compileJava') {
+    dependsOn tasks.named('extractYogaSources')
+}
+
+tasks.named('compileKotlin') {
+    dependsOn tasks.named('extractYogaSources')
+}
+
+tasks.register('vendorTaffyClasses', Copy) {
+    from {
+        zipTree(configurations.taffyLibrary.singleFile)
+    }
+    include '**/*.class'
+    exclude 'module-info.class'
+    into layout.buildDirectory.dir("generated/resources/taffy")
+}
+
+tasks.named('processResources') {
+    dependsOn tasks.named('vendorTaffyClasses')
+}
+
+tasks.register('syncMixinRefmapForRuns', Copy) {
+    dependsOn tasks.named('processResources')
+    dependsOn tasks.named('compileJava')
+    from layout.buildDirectory.file("tmp/compileJava/${mod_id}.refmap.json")
+    into layout.buildDirectory.dir("resources/main")
+}
+
+tasks.configureEach {
+    if (name in ['prepareRunClient', 'prepareRunServer', 'prepareRunGameTestServer', 'prepareRunData']) {
+        dependsOn tasks.named('syncMixinRefmapForRuns')
+    }
+}
+
+tasks.named('sourcesJar') {
+    dependsOn tasks.named('vendorTaffyClasses')
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    libraries("org.jetbrains.kotlin:kotlin-stdlib:${kotlin_stdlib_version}") {
+        exclude group: "org.jetbrains", module: "annotations"
+    }
+
+    // JEI
+    compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}") { transitive = false }
+    compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}") { transitive = false }
+    localImplementation fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
+
+    // REI
+    compileOnly fg.deobf("me.shedaniel:RoughlyEnoughItems-default-plugin-forge:${rei_version}")
+    compileOnly fg.deobf("me.shedaniel:RoughlyEnoughItems-api-forge:${rei_version}")
+    compileOnly fg.deobf("me.shedaniel:RoughlyEnoughItems-forge:${rei_version}")
+
+    // EMI
+    compileOnly fg.deobf("dev.emi:emi-forge:${emi_version}:api")
+    compileOnly fg.deobf("dev.emi:emi-forge:${emi_version}")
+
+    // AE2
+    localImplementation fg.deobf("appeng:appliedenergistics2-forge:${ae2_version}")
+
+    // KubeJS
+    localImplementation fg.deobf("dev.latvian.mods:kubejs-forge:${kjs_version}")
+    localImplementation fg.deobf("dev.latvian.mods:rhino-forge:${rhino_version}")
+
+    // REI and KubeJS publish parts of their 1.20.1 Forge API through these
+    // dependencies, but ForgeGradle's remapped classpath does not keep them
+    // transitively in this single-loader setup.
+    localImplementation fg.deobf("dev.architectury:architectury-forge:${architectury_version}")
+    localImplementation fg.deobf("me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}")
+    compileOnly "me.shedaniel.cloth:basic-math:${cloth_basic_math_version}"
+
+    // Oculus / Embeddium are the Forge 1.20.1 equivalents for Iris / Sodium compatibility.
+    compileOnly fg.deobf("maven.modrinth:embeddium:${embeddium_version}") { transitive = false }
+    compileOnly fg.deobf("maven.modrinth:oculus:${oculus_version}") { transitive = true }
+    runtimeOnly("org.anarres:jcpp:1.4.14")
+
+    // Yoga 1.0.0 is published as Java 21 bytecode. Recompile its sources for the Java 17
+    // runtime used by Minecraft Forge 1.20.1 while preserving the public Yoga API.
+    yogaSources("org.appliedenergistics.yoga:yoga:${yoga_version}:sources@jar")
+    compileOnly "org.jetbrains:annotations:24.1.0"
+
+    // Taffy
+    libraries("dev.vfyjxf:taffy:${taffy_version}")
+    taffyLibrary("dev.vfyjxf:taffy:${taffy_version}") {
+        transitive = false
+    }
+
+    annotationProcessor("org.spongepowered:mixin:0.8.5")
+    annotationProcessor("org.ow2.asm:asm-tree:9.8")
+    annotationProcessor("com.google.code.gson:gson:2.10")
+    annotationProcessor("com.google.guava:guava:31.1-jre")
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:${mixinextras_version}"))
+    implementation("io.github.llamalad7:mixinextras-forge:${mixinextras_version}")
+    jarJar("io.github.llamalad7:mixinextras-common:${mixinextras_version}") {
+        jarJar.ranged(it, "[${mixinextras_version},)")
+    }
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.0'
+    testImplementation 'org.mockito:mockito-core:5.5.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.5.0'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(ProcessResources).configureEach {
+    def replaceProperties = [
+            "mod_id"             : mod_id,
+            "version"            : version,
+            "loader_version"     : loader_version,
+            "forge_version"      : forge_version.split("\\.")[0],
+            "minecraft_version"  : minecraft_version,
+            "mod_license"        : mod_license,
+            "mod_name"           : mod_name,
+            "mod_description"    : mod_description,
+            "mod_url"            : mod_url,
+            "resource_pack_format": resource_pack_format
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+        showStandardStreams = false
+    }
+}
+
+tasks.register("printVersion") {
+    println(mod_version)
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            artifactId = archivesBaseName
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url "https://maven.firstdark.dev/snapshots"
+            credentials {
+                username System.getenv("MAVEN_USER")
+                password System.getenv("MAVEN_PASS")
+            }
+        }
+    }
+}
