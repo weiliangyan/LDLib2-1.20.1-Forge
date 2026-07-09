@@ -9,8 +9,8 @@ public record BlockPosFace(BlockPos pos, Direction facing) {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        if (other instanceof BlockPosFace(BlockPos pos1, Direction facing1)) {
-            return pos.equals(pos1) && facing1 == facing;
+        if (other instanceof BlockPosFace blockPosFace) {
+            return pos.equals(blockPosFace.pos()) && blockPosFace.facing() == facing;
         }
         return false;
     }

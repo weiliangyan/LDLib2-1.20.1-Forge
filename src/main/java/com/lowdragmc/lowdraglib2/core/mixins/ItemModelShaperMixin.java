@@ -13,8 +13,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelData;
-import net.neoforged.neoforge.common.util.TriState;
+import net.minecraftforge.client.model.data.ModelData;
+import com.lowdragmc.lowdraglib2.compat.TriState;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -53,8 +53,9 @@ public abstract class ItemModelShaperMixin {
                     }
 
                     @Override
-                    public TriState useAmbientOcclusion(BlockState state, ModelData data, RenderType renderType) {
-                        return r.useAO(state, data, renderType);
+                    public boolean useAmbientOcclusion(BlockState state, RenderType renderType) {
+                        var ao = r.useAO(state, ModelData.EMPTY, renderType);
+                        return ao == TriState.DEFAULT || ao == TriState.TRUE;
                     }
 
                     @Override

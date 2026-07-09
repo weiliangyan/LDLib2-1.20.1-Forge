@@ -7,6 +7,8 @@ import com.lowdragmc.lowdraglib2.configurator.ui.Configurator;
 import com.lowdragmc.lowdraglib2.configurator.ui.SearchComponentConfigurator;
 import com.lowdragmc.lowdraglib2.configurator.ui.StringConfigurator;
 import com.lowdragmc.lowdraglib2.configurator.ui.TagKeySearchComponent;
+import com.lowdragmc.lowdraglib2.core.mixins.accessor.FontManagerAccessor;
+import com.lowdragmc.lowdraglib2.core.mixins.accessor.MinecraftAccessor;
 import com.lowdragmc.lowdraglib2.gui.ui.utils.UIElementProvider;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
 import net.minecraft.client.Minecraft;
@@ -48,7 +50,8 @@ public class ResourceLocationAccessor extends TypesAccessor<ResourceLocation> {
                 case FONT -> new SearchComponentConfigurator<>(name, supplier, consumer, defaultValue(field, String.class), forceUpdate,
                         (word, handler) -> {
                             var search = word.toLowerCase();
-                            for (var fontName : Minecraft.getInstance().fontManager.fontSets.keySet()) {
+                            var fontManager = ((MinecraftAccessor) Minecraft.getInstance()).ldlib2$getFontManager();
+                            for (var fontName : ((FontManagerAccessor) fontManager).ldlib2$getFontSets().keySet()) {
                                 if (Thread.currentThread().isInterrupted()) return;
                                 if (fontName.toString().contains(search)) {
                                     handler.accept(fontName);

@@ -25,7 +25,7 @@ public class PortDefinitionContext implements IPortDefinitionContext {
         if (pool.isEmpty()) {
             builder = new PortBuilder();
         } else {
-            builder = pool.removeLast();
+            builder = pool.remove(pool.size() - 1);
         }
         active.add(builder);
         return builder;
@@ -41,7 +41,7 @@ public class PortDefinitionContext implements IPortDefinitionContext {
 
     public void finish() {
         while (!active.isEmpty()) {
-            active.getFirst().build();
+            active.get(0).build();
         }
     }
 

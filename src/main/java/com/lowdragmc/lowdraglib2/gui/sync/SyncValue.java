@@ -5,7 +5,7 @@ import com.lowdragmc.lowdraglib2.syncdata.ISubscription;
 import com.lowdragmc.lowdraglib2.syncdata.SyncValueHolder;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import com.lowdragmc.lowdraglib2.compat.network.RegistryFriendlyByteBuf;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;

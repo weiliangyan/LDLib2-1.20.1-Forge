@@ -29,10 +29,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
-import net.neoforged.neoforge.items.ItemStackHandler;
-import org.apache.commons.lang3.function.Consumers;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.templates.FluidTank;
+import net.minecraftforge.items.ItemStackHandler;
+import com.lowdragmc.lowdraglib2.utils.function.LDConsumers;
 import org.appliedenergistics.yoga.YogaEdge;
 
 import org.jetbrains.annotations.Nullable;
@@ -155,7 +155,7 @@ public class TestSync implements IMenuTest {
         selector1.addChild(
                 // a placeholder element value to sync candidates, it won't affect layout
                 new BindableValue<String[]>().bind(DataBindingBuilder.create(
-                        () -> serverCandidates1.toArray(String[]::new), Consumers.nop())
+                        () -> serverCandidates1.toArray(String[]::new), LDConsumers.nop())
                         .c2sStrategy(SyncStrategy.NONE) // only s -> c
                         .remoteSetter(candidates -> {
                             selector1.setCandidates(Arrays.stream(candidates).toList());
@@ -171,7 +171,7 @@ public class TestSync implements IMenuTest {
         selector2.addChild(
                 // a placeholder element value to sync candidates, it won't affect layout
                 new BindableValue<List<String>>().bind(DataBindingBuilder.create(
-                                () -> LDLib2.isRemote() ? clientCandidates : serverCandidates2, Consumers.nop())
+                                () -> LDLib2.isRemote() ? clientCandidates : serverCandidates2, LDConsumers.nop())
                         .syncType(type)
                         .initialValue(LDLib2.isRemote() ? clientCandidates : serverCandidates2)
                         .c2sStrategy(SyncStrategy.NONE) // only s -> c

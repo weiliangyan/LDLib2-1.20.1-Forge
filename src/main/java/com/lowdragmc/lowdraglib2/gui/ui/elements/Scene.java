@@ -42,8 +42,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.appliedenergistics.yoga.YogaOverflow;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -66,7 +66,7 @@ public class Scene extends UIElement {
     private static final Object PAN_DRAGGING = new Object();
     @Nullable
     @OnlyIn(Dist.CLIENT)
-    @Getter(onMethod_ = @OnlyIn(Dist.CLIENT))
+    @Getter
     protected WorldSceneRenderer renderer;
     @Nullable
     @Getter
@@ -490,14 +490,16 @@ public class Scene extends UIElement {
         float g = (float) FastColor.ARGB32.red(color) / 255.0F;
         float h = (float) FastColor.ARGB32.green(color) / 255.0F;
         float j = (float) FastColor.ARGB32.blue(color) / 255.0F;
-        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        var tesselator = Tesselator.getInstance();
+        BufferBuilder bufferBuilder = tesselator.getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         RenderSystem.enableBlend();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        bufferBuilder.addVertex(matrix4f, (float)x1, (float)y1, (float)z).setColor(g, h, j, f);
-        bufferBuilder.addVertex(matrix4f, (float)x1, (float)y2, (float)z).setColor(g, h, j, f);
-        bufferBuilder.addVertex(matrix4f, (float)x2, (float)y2, (float)z).setColor(g, h, j, f);
-        bufferBuilder.addVertex(matrix4f, (float)x2, (float)y1, (float)z).setColor(g, h, j, f);
-        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+        bufferBuilder.vertex(matrix4f, (float)x1, (float)y1, (float)z).color(g, h, j, f).endVertex();
+        bufferBuilder.vertex(matrix4f, (float)x1, (float)y2, (float)z).color(g, h, j, f).endVertex();
+        bufferBuilder.vertex(matrix4f, (float)x2, (float)y2, (float)z).color(g, h, j, f).endVertex();
+        bufferBuilder.vertex(matrix4f, (float)x2, (float)y1, (float)z).color(g, h, j, f).endVertex();
+        BufferUploader.drawWithShader(bufferBuilder.end());
         RenderSystem.disableBlend();
     }
 

@@ -6,14 +6,15 @@ import com.lowdragmc.lowdraglib2.syncdata.var.FieldVar;
 import com.lowdragmc.lowdraglib2.syncdata.ref.DirectRef;
 import com.lowdragmc.lowdraglib2.syncdata.var.IVar;
 import com.lowdragmc.lowdraglib2.syncdata.ref.UniqueDirectRef;
+import com.lowdragmc.lowdraglib2.utils.LDLibExtraCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import lombok.Getter;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
+import com.lowdragmc.lowdraglib2.compat.network.RegistryFriendlyByteBuf;
+import com.lowdragmc.lowdraglib2.compat.network.codec.ByteBufCodecs;
+import com.lowdragmc.lowdraglib2.compat.network.codec.StreamCodec;
 import org.jetbrains.annotations.NotNull;
 
 @Getter
@@ -41,7 +42,7 @@ public final class RegistryAccessor<TYPE> implements IDirectAccessor<TYPE> {
 
     @Override
     public <T> T readDirectVar(DynamicOps<T> op, IVar<TYPE> var) {
-        return codec.encodeStart(op, var.value()).getOrThrow();
+        return LDLibExtraCodecs.getOrThrow(codec.encodeStart(op, var.value()));
     }
 
     @Override

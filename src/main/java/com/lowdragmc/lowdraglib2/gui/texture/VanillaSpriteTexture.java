@@ -16,12 +16,12 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.metadata.gui.GuiSpriteScaling;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -81,17 +81,8 @@ public class VanillaSpriteTexture extends TransformTexture {
         if (sprite == null || width <= 0 || height <= 0) {
             return;
         }
-        var spriteManager = Minecraft.getInstance().getGuiSprites();
-        TextureAtlasSprite atlasSprite = spriteManager.getSprite(sprite);
-        GuiSpriteScaling scaling = spriteManager.getSpriteScaling(atlasSprite);
-        if (scaling instanceof GuiSpriteScaling.Stretch) {
-            blitSpriteFloat(graphics, atlasSprite, x, y, width, height);
-        } else if (scaling instanceof GuiSpriteScaling.Tile tile) {
-            blitTiledSpriteFloat(graphics, atlasSprite, x, y, width, height,
-                    0, 0, tile.width(), tile.height(), tile.width(), tile.height());
-        } else if (scaling instanceof GuiSpriteScaling.NineSlice nineSlice) {
-            blitNineSlicedSpriteFloat(graphics, atlasSprite, nineSlice, x, y, width, height);
-        }
+        TextureAtlasSprite atlasSprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(sprite);
+        blitSpriteFloat(graphics, atlasSprite, x, y, width, height);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -106,8 +97,8 @@ public class VanillaSpriteTexture extends TransformTexture {
             @Override
             public void search(String word, IResultHandler<ResourceLocation> searchHandler) {
                 var lowerWord = word.toLowerCase();
-                var atlas = Minecraft.getInstance().getGuiSprites().textureAtlas;
-                for (var key : atlas.getTextures().keySet()) {
+                var atlas = (TextureAtlas) Minecraft.getInstance().getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS);
+                for (var key : atlas.getTextureLocations()) {
                     if (Thread.currentThread().isInterrupted()) return;
                     if (key.toString().toLowerCase().contains(lowerWord)) {
                         searchHandler.acceptResult(key);
@@ -169,10 +160,10 @@ public class VanillaSpriteTexture extends TransformTexture {
 
         var matrix = graphics.pose().last().pose();
         var buffer = graphics.bufferSource().getBuffer(LDLibRenderTypes.guiTexture(sprite.atlasLocation()));
-        buffer.addVertex(matrix, x1, y1, 0).setUv(u0, v0).setColor(r, g, b, a);
-        buffer.addVertex(matrix, x1, y2, 0).setUv(u0, v1).setColor(r, g, b, a);
-        buffer.addVertex(matrix, x2, y2, 0).setUv(u1, v1).setColor(r, g, b, a);
-        buffer.addVertex(matrix, x2, y1, 0).setUv(u1, v0).setColor(r, g, b, a);
+        buffer.vertex(matrix, x1, y1, 0).uv(u0, v0).color(r, g, b, a).endVertex();
+        buffer.vertex(matrix, x1, y2, 0).uv(u0, v1).color(r, g, b, a).endVertex();
+        buffer.vertex(matrix, x2, y2, 0).uv(u1, v1).color(r, g, b, a).endVertex();
+        buffer.vertex(matrix, x2, y1, 0).uv(u1, v0).color(r, g, b, a).endVertex();
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -192,57 +183,4 @@ public class VanillaSpriteTexture extends TransformTexture {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
-    private void blitNineSlicedSpriteFloat(GuiGraphics graphics, TextureAtlasSprite sprite,
-                                           GuiSpriteScaling.NineSlice nineSlice,
-                                           float x, float y, float width, float height) {
-        var border = nineSlice.border();
-        float left = Math.min(border.left(), width / 2);
-        float right = Math.min(border.right(), width / 2);
-        float top = Math.min(border.top(), height / 2);
-        float bottom = Math.min(border.bottom(), height / 2);
-        int nsW = nineSlice.width();
-        int nsH = nineSlice.height();
-
-        if (width == nsW && height == nsH) {
-            blitSubSpriteFloat(graphics, sprite, nsW, nsH, 0, 0, x, y, width, height);
-            return;
-        }
-
-        float centerW = width - left - right;
-        float centerH = height - top - bottom;
-        int bLeft = border.left();
-        int bRight = border.right();
-        int bTop = border.top();
-        int bBottom = border.bottom();
-
-        // corners
-        if (left > 0 && top > 0)
-            blitSubSpriteFloat(graphics, sprite, nsW, nsH, 0, 0, x, y, left, top);
-        if (right > 0 && top > 0)
-            blitSubSpriteFloat(graphics, sprite, nsW, nsH, nsW - bRight, 0, x + width - right, y, right, top);
-        if (left > 0 && bottom > 0)
-            blitSubSpriteFloat(graphics, sprite, nsW, nsH, 0, nsH - bBottom, x, y + height - bottom, left, bottom);
-        if (right > 0 && bottom > 0)
-            blitSubSpriteFloat(graphics, sprite, nsW, nsH, nsW - bRight, nsH - bBottom, x + width - right, y + height - bottom, right, bottom);
-
-        // edges
-        if (centerW > 0 && top > 0)
-            blitTiledSpriteFloat(graphics, sprite, x + left, y, centerW, top,
-                    bLeft, 0, nsW - bLeft - bRight, bTop, nsW, nsH);
-        if (centerW > 0 && bottom > 0)
-            blitTiledSpriteFloat(graphics, sprite, x + left, y + height - bottom, centerW, bottom,
-                    bLeft, nsH - bBottom, nsW - bLeft - bRight, bBottom, nsW, nsH);
-        if (left > 0 && centerH > 0)
-            blitTiledSpriteFloat(graphics, sprite, x, y + top, left, centerH,
-                    0, bTop, bLeft, nsH - bTop - bBottom, nsW, nsH);
-        if (right > 0 && centerH > 0)
-            blitTiledSpriteFloat(graphics, sprite, x + width - right, y + top, right, centerH,
-                    nsW - bRight, bTop, bRight, nsH - bTop - bBottom, nsW, nsH);
-
-        // center
-        if (centerW > 0 && centerH > 0)
-            blitTiledSpriteFloat(graphics, sprite, x + left, y + top, centerW, centerH,
-                    bLeft, bTop, nsW - bLeft - bRight, nsH - bTop - bBottom, nsW, nsH);
-    }
 }

@@ -29,27 +29,18 @@ public class ElementsByType {
         for (var element : graphElementModels) {
             if (element instanceof IGraphElementContainer container)
                 recursiveSortElements(container.getGraphElementModels());
-            switch (element) {
-                case StickyNoteModel stickyNoteModel:
-                    stickyNoteModels.add(stickyNoteModel);
-                    break;
-                case PlacematModel placematModel:
-                    placematModels.add(placematModel);
-                    break;
-                case VariableDeclarationModelBase variableDeclarationModel:
-                    variableDeclarationsModels.add(variableDeclarationModel);
-                    break;
-                case GroupModel groupModel:
-                    groupModels.add(groupModel);
-                    break;
-                case WireModel wireModel:
-                    wireModels.add(wireModel);
-                    break;
-                case AbstractNodeModel nodeModel:
-                    nodeModels.add(nodeModel);
-                    break;
-                default:
-                    break;
+            if (element instanceof StickyNoteModel stickyNoteModel) {
+                stickyNoteModels.add(stickyNoteModel);
+            } else if (element instanceof PlacematModel placematModel) {
+                placematModels.add(placematModel);
+            } else if (element instanceof VariableDeclarationModelBase variableDeclarationModel) {
+                variableDeclarationsModels.add(variableDeclarationModel);
+            } else if (element instanceof GroupModel groupModel) {
+                groupModels.add(groupModel);
+            } else if (element instanceof WireModel wireModel) {
+                wireModels.add(wireModel);
+            } else if (element instanceof AbstractNodeModel nodeModel) {
+                nodeModels.add(nodeModel);
             }
         }
     }

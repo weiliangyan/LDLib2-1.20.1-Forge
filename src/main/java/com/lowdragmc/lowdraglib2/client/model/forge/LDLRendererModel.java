@@ -17,18 +17,19 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.ChunkRenderTypeSet;
-import net.neoforged.neoforge.client.model.data.ModelData;
-import net.neoforged.neoforge.client.model.data.ModelProperty;
-import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
-import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
-import net.neoforged.neoforge.client.model.geometry.IUnbakedGeometry;
-import net.neoforged.neoforge.common.util.TriState;
+import net.minecraftforge.client.ChunkRenderTypeSet;
+import net.minecraftforge.client.model.data.ModelData;
+import net.minecraftforge.client.model.data.ModelProperty;
+import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
+import net.minecraftforge.client.model.geometry.IGeometryLoader;
+import net.minecraftforge.client.model.geometry.IUnbakedGeometry;
+import com.lowdragmc.lowdraglib2.compat.TriState;
 import org.jetbrains.annotations.NotNull;
 
 import org.jetbrains.annotations.Nullable;
@@ -50,7 +51,7 @@ public class LDLRendererModel implements IUnbakedGeometry<LDLRendererModel> {
     private LDLRendererModel() {}
 
     @Override
-    public BakedModel bake(IGeometryBakingContext iGeometryBakingContext, ModelBaker arg, Function<Material, TextureAtlasSprite> function, ModelState arg2, ItemOverrides arg3) {
+    public BakedModel bake(IGeometryBakingContext iGeometryBakingContext, ModelBaker arg, Function<Material, TextureAtlasSprite> function, ModelState arg2, ItemOverrides arg3, ResourceLocation modelLocation) {
         return new RendererBakedModel();
     }
 
@@ -115,14 +116,15 @@ public class LDLRendererModel implements IUnbakedGeometry<LDLRendererModel> {
         }
 
         @Override
-        public TriState useAmbientOcclusion(BlockState state, ModelData data, RenderType renderType) {
+        public boolean useAmbientOcclusion(BlockState state, RenderType renderType) {
             if (state.getBlock() instanceof IBlockRendererProvider rendererProvider) {
                 IRenderer renderer = rendererProvider.getRenderer(state);
                 if (renderer != null) {
-                    return renderer.useAO(state, data, renderType);
+                    var ao = renderer.useAO(state, ModelData.EMPTY, renderType);
+                    return ao == TriState.DEFAULT || ao == TriState.TRUE;
                 }
             }
-            return BakedModel.super.useAmbientOcclusion(state, data, renderType);
+            return BakedModel.super.useAmbientOcclusion(state, renderType);
         }
 
 

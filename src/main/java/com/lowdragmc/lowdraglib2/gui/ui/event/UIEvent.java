@@ -6,7 +6,7 @@ import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.Pair;
 import lombok.ToString;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
+import com.lowdragmc.lowdraglib2.compat.network.codec.StreamCodec;
 
 import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;

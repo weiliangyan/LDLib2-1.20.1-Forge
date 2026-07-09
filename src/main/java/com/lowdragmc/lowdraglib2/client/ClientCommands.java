@@ -3,14 +3,18 @@ package com.lowdragmc.lowdraglib2.client;
 import com.lowdragmc.lowdraglib2.LDLib2Registries;
 import com.lowdragmc.lowdraglib2.client.shader.LDLibShaders;
 import com.lowdragmc.lowdraglib2.client.shader.management.ShaderManager;
+import com.lowdragmc.lowdraglib2.editor.ui.EditorWindow;
+import com.lowdragmc.lowdraglib2.gui.editor.UIEditor;
 import com.lowdragmc.lowdraglib2.gui.holder.ModularUIScreen;
+import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
+import com.lowdragmc.lowdraglib2.gui.ui.UI;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,11 +38,32 @@ public class ClientCommands {
                     LDLibShaders.reload();
                     ShaderManager.getInstance().reload();
                     return 1;
-                })));
+                }))
+                .then(createLiteral("ui_editor")
+                        .executes(context -> {
+                            if (!openUIEditor()) {
+                                context.getSource().sendFailure(Component.literal("LDLib2 UI editor can only be opened in-game"));
+                                return 0;
+                            }
+                            context.getSource().sendSuccess(() -> Component.literal("Opening LDLib2 UI editor"), false);
+                            return 1;
+                        })));
         if (LDLib2Registries.SCREEN_TESTS != null && !LDLib2Registries.SCREEN_TESTS.values().isEmpty()) {
             commands.add(createScreenTestCommands());
         }
         return commands;
+    }
+
+    public static boolean openUIEditor() {
+        var minecraft = Minecraft.getInstance();
+        if (minecraft.player == null) {
+            return false;
+        }
+        var ui = new ModularUI(UI.of(EditorWindow.open(UIEditor.WINDOW_ID, UIEditor::new)))
+                .shouldCloseOnEsc(false)
+                .shouldCloseOnKeyInventory(false);
+        minecraft.setScreen(new ModularUIScreen(ui, Component.literal("LDLib2 UI Editor")));
+        return true;
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> createScreenTestCommands() {

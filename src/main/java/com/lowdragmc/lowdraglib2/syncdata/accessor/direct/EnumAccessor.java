@@ -5,8 +5,9 @@ import com.lowdragmc.lowdraglib2.syncdata.var.FieldVar;
 import com.lowdragmc.lowdraglib2.syncdata.ref.DirectRef;
 import com.lowdragmc.lowdraglib2.syncdata.var.IVar;
 import com.lowdragmc.lowdraglib2.syncdata.ref.UniqueDirectRef;
+import com.lowdragmc.lowdraglib2.utils.LDLibExtraCodecs;
 import com.mojang.serialization.DynamicOps;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import com.lowdragmc.lowdraglib2.compat.network.RegistryFriendlyByteBuf;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
 
@@ -62,7 +63,7 @@ public class EnumAccessor implements IDirectAccessor<Enum<?>> {
 
     @Override
     public <T> void writeDirectVar(DynamicOps<T> op, IVar<Enum<?>> var, T payload) {
-        var.set(getEnum(var.getType(), op.getStringValue(payload).getOrThrow()));
+        var.set(getEnum(var.getType(), LDLibExtraCodecs.getOrThrow(op.getStringValue(payload))));
     }
 
     @Override

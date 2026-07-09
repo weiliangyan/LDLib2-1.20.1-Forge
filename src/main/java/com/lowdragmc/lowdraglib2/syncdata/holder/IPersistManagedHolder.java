@@ -16,7 +16,7 @@ public interface IPersistManagedHolder extends IManagedHolder {
     default void saveManagedPersistentData(HolderLookup.Provider provider, CompoundTag tag, boolean forDrop) {
         var persistedFields = getRootStorage().getPersistedFields();
         var managedTag = new CompoundTag();
-        var ctx = provider.createSerializationContext(NbtOps.INSTANCE);
+        var ctx = com.lowdragmc.lowdraglib2.Platform.registryOps(NbtOps.INSTANCE, provider);
         for (var persistedField : persistedFields) {
             if (forDrop && !persistedField.getKey().isDrop()) {
                 continue;
@@ -41,7 +41,7 @@ public interface IPersistManagedHolder extends IManagedHolder {
     default void loadManagedPersistentData(HolderLookup.Provider provider, CompoundTag tag) {
         var refs = getRootStorage().getPersistedFields();
         var managedTag = tag.getCompound("managed");
-        var ctx = provider.createSerializationContext(NbtOps.INSTANCE);
+        var ctx = com.lowdragmc.lowdraglib2.Platform.registryOps(NbtOps.INSTANCE, provider);
         for (var ref : refs) {
             var key = ref.getPersistedKey();
             var data = TagUtils.getTagExtended(managedTag, key);

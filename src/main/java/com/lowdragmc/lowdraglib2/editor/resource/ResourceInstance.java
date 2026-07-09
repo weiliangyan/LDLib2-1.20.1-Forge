@@ -13,7 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.Tag;
-import net.neoforged.neoforge.common.util.INBTSerializable;
+import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nonnull;
 import org.jetbrains.annotations.Nullable;
@@ -49,9 +49,9 @@ public class ResourceInstance<T> implements INBTSerializable<CompoundTag> {
         buildBuiltin();
         var metaFile = new File(LDLib2.getAssetsDir(), "ldlib2/resources/" + resource.getName() + ".meta.nbt");
         try {
-            var data = NbtIo.read(metaFile.toPath());
+            var data = NbtIo.read(metaFile);
             if (data != null) {
-                deserializeNBT(Platform.getFrozenRegistry(), data);
+                deserializeNBT(data);
             }
         } catch (Exception ignored) {}
     }
@@ -69,8 +69,8 @@ public class ResourceInstance<T> implements INBTSerializable<CompoundTag> {
                     return;
                 }
             }
-            var data = serializeNBT(Platform.getFrozenRegistry());
-            NbtIo.write(data, metaFile.toPath());
+            var data = serializeNBT();
+            NbtIo.write(data, metaFile);
         } catch (Exception e) {
             LDLib2.LOGGER.error("Failed to save resource {} meta file", resource, e);
         }
@@ -211,7 +211,7 @@ public class ResourceInstance<T> implements INBTSerializable<CompoundTag> {
     }
 
     @Override
-    public @Nonnull CompoundTag serializeNBT(@Nonnull HolderLookup.Provider provider) {
+    public @Nonnull CompoundTag serializeNBT() {
         var data = new CompoundTag();
 
         data.putString("displayMode", displayMode.name());
@@ -236,7 +236,7 @@ public class ResourceInstance<T> implements INBTSerializable<CompoundTag> {
     }
 
     @Override
-    public void deserializeNBT(@Nonnull HolderLookup.Provider provider, @Nonnull CompoundTag nbt) {
+    public void deserializeNBT(@Nonnull CompoundTag nbt) {
         clearCache();
         customProviders.clear();
 

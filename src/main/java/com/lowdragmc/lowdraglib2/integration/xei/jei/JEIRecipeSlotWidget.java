@@ -27,7 +27,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Unmodifiable;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -117,23 +116,11 @@ public class JEIRecipeSlotWidget implements IRecipeSlotDrawable {
     @Deprecated
     public void getTooltip(ITooltipBuilder tooltipBuilder) {}
 
-    @Override
-    public void drawTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        // necessary ?
-        JeiTooltip tooltip = new JeiTooltip();
-        getDisplayedIngredient()
-                .ifPresent(ingredient -> {
-                    getTooltip(tooltip, ingredient);
-                    tooltip.draw(guiGraphics, mouseX, mouseY);
-                });
-
-    }
-
     private <T> void getTooltip(ITooltipBuilder tooltip, ITypedIngredient<T> typedIngredient) {
         IIngredientManager ingredientManager = Internal.getJeiRuntime().getIngredientManager();
         IIngredientType<T> ingredientType = typedIngredient.getType();
         IIngredientRenderer<T> ingredientRenderer = getIngredientRenderer(ingredientType);
-        SafeIngredientUtil.getRichTooltip(tooltip, ingredientManager, ingredientRenderer, typedIngredient);
+        SafeIngredientUtil.getTooltip(tooltip, ingredientManager, ingredientRenderer, typedIngredient);
         addTagNameTooltip(tooltip, ingredientManager, typedIngredient);
         addIngredientsToTooltip(tooltip, typedIngredient);
         if (tooltipCallback != null) {
@@ -149,7 +136,7 @@ public class JEIRecipeSlotWidget implements IRecipeSlotDrawable {
         }
 
         IClientConfig clientConfig = Internal.getJeiClientConfigs().getClientConfig();
-        if (clientConfig.getHideSingleTagContentTooltipEnabled() && ingredients.size() == 1) {
+        if (clientConfig.isHideSingleIngredientTagsEnabled() && ingredients.size() == 1) {
             return;
         }
 
@@ -215,24 +202,13 @@ public class JEIRecipeSlotWidget implements IRecipeSlotDrawable {
     @Override
     @Deprecated
     public Rect2i getRect() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Rect2i getAreaIncludingBackground() {
-        throw new UnsupportedOperationException();
+        return new Rect2i(0, 0, 0, 0);
     }
 
     @Override
     public Stream<ITypedIngredient<?>> getAllIngredients() {
-        return getAllIngredientsList().stream().filter(Objects::nonNull);
+        return allIngredients == null ? Stream.empty() : allIngredients.get().stream().filter(Objects::nonNull);
     }
-
-    @Override
-    public @Unmodifiable List<@Nullable ITypedIngredient<?>> getAllIngredientsList() {
-        return allIngredients == null ? List.of() : allIngredients.get();
-    }
-
 
     @Override
     public RecipeIngredientRole getRole() {

@@ -39,12 +39,12 @@ public class TexturesResource extends Resource<IGuiTexture> {
 
     @Override
     public Tag serializeResource(IGuiTexture value, HolderLookup.Provider provider) {
-        return IGuiTexture.CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), value).result().orElse(null);
+        return IGuiTexture.CODEC.encodeStart(com.lowdragmc.lowdraglib2.Platform.registryOps(NbtOps.INSTANCE, provider), value).result().orElse(null);
     }
 
     @Override
     public IGuiTexture deserializeResource(Tag nbt, HolderLookup.Provider provider) {
-        return IGuiTexture.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), nbt).result().orElse(IGuiTexture.MISSING_TEXTURE);
+        return IGuiTexture.CODEC.parse(com.lowdragmc.lowdraglib2.Platform.registryOps(NbtOps.INSTANCE, provider), nbt).result().orElse(IGuiTexture.MISSING_TEXTURE);
     }
 
     @Override

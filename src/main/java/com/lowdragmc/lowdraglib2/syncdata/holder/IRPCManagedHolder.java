@@ -2,16 +2,15 @@ package com.lowdragmc.lowdraglib2.syncdata.holder;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.Platform;
+import com.lowdragmc.lowdraglib2.networking.LDLNetworking;
 import com.lowdragmc.lowdraglib2.syncdata.IManaged;
 import com.lowdragmc.lowdraglib2.syncdata.rpc.RPCMethodMeta;
 import com.lowdragmc.lowdraglib2.syncdata.rpc.RPCSender;
 import com.lowdragmc.lowdraglib2.utils.ByteBufUtil;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.lowdragmc.lowdraglib2.compat.network.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.PacketDistributor;
-
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 
@@ -46,17 +45,17 @@ public interface IRPCManagedHolder extends IManagedHolder {
     @OnlyIn(Dist.CLIENT)
     default void rpcToServer(IManaged managed, String methodName, Object... args) {
         var packet = createRPCPacket(parseArgs2Bytes(managed, methodName, args));
-        PacketDistributor.sendToServer(packet);
+        LDLNetworking.sendToServer(packet);
     }
 
     default void rpcToPlayer(IManaged managed, ServerPlayer player, String methodName, Object... args) {
         var packet = createRPCPacket(parseArgs2Bytes(managed, methodName, args));
-        PacketDistributor.sendToPlayer(player, packet);
+        LDLNetworking.sendToPlayer(player, packet);
     }
 
     default void rpcToTracking(IManaged managed, String methodName, Object... args) {
         var packet = createRPCPacket(parseArgs2Bytes(managed, methodName, args));
-        PacketDistributor.sendToPlayersTrackingChunk(getServerLevel(), getTrackingPos(), packet);
+        LDLNetworking.sendToPlayersTrackingChunk(getServerLevel(), getTrackingPos(), packet);
     }
 
     default void handleRPCPacket(RPCSender sender, byte[] data) {

@@ -8,12 +8,12 @@ import lombok.Setter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.Tag;
 
-import net.neoforged.fml.ModLoader;
+import net.minecraftforge.fml.ModLoader;
 import org.jetbrains.annotations.Nullable;
 import java.io.File;
 
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.common.NeoForge;
+import net.minecraftforge.common.MinecraftForge;
 
 public abstract class Resource<T> {
     public enum DisplayMode {
@@ -65,7 +65,7 @@ public abstract class Resource<T> {
 
         // send an Event to register built resources
         var event = new EditorResourceEvent.LoadBuiltin(resourceInstance);
-        ModLoader.postEvent(event);
+        ModLoader.get().postEvent(event);
     }
 
     /**

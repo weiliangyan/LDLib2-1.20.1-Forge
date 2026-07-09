@@ -6,7 +6,7 @@ import com.lowdragmc.lowdraglib2.syncdata.field.ManagedKey;
 import com.lowdragmc.lowdraglib2.syncdata.ref.IManagedReadOnlyRef;
 import com.lowdragmc.lowdraglib2.syncdata.var.ReadOnlyVar;
 import com.mojang.serialization.DynamicOps;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import com.lowdragmc.lowdraglib2.compat.network.RegistryFriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;

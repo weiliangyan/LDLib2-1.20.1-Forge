@@ -23,7 +23,7 @@ public interface ITypeConfigurable {
                         candidates,
                         valueConfigurable::getValue,
                         valueConfigurable::setValue,
-                        candidates.getFirst(),
+                        candidates.get(0),
                         valueConfigurable.forceUpdate()
                         ))
             );

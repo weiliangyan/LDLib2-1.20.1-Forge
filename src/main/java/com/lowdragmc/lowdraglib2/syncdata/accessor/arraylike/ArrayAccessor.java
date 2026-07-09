@@ -11,7 +11,7 @@ import com.lowdragmc.lowdraglib2.syncdata.var.ReadOnlyVar;
 import com.lowdragmc.lowdraglib2.utils.LDLibExtraCodecs;
 import com.mojang.serialization.DynamicOps;
 import lombok.Getter;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import com.lowdragmc.lowdraglib2.compat.network.RegistryFriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
@@ -66,7 +66,7 @@ public class ArrayAccessor<TYPE, TYPE_ARRAY> implements IArrayLikeAccessor<TYPE,
         for (IRef<TYPE> ref : refs) {
             listBuilder.add(childAccessor.readField(op, ref));
         }
-        return listBuilder.build(op.empty()).getOrThrow();
+        return LDLibExtraCodecs.getOrThrow(listBuilder.build(op.empty()));
     }
 
     @Override
@@ -77,14 +77,14 @@ public class ArrayAccessor<TYPE, TYPE_ARRAY> implements IArrayLikeAccessor<TYPE,
             if (refs == null) {
                 throw new IllegalArgumentException("readonly field %s has a null reference".formatted(ref.getKey()));
             }
-            writeListField(op, ref, op.getStream(payload).getOrThrow().toList(), refs);
+            writeListField(op, ref, LDLibExtraCodecs.getOrThrow(op.getStream(payload)).toList(), refs);
         } else {
             var refs = arrayRef.getRefs();
             if (LDLibExtraCodecs.isEmptyOrStringNull(op, payload)) {
                 ((DirectArrayRef<TYPE, TYPE_ARRAY>)ref).getField().set(null);
                 return;
             }
-            var payloads = op.getStream(payload).getOrThrow().toList();
+            var payloads = LDLibExtraCodecs.getOrThrow(op.getStream(payload)).toList();
             if (refs == null || refs.length != payloads.size()) {
                 var newValues = (TYPE_ARRAY) Array.newInstance(getChildType(), payloads.size());
                 ((DirectArrayRef<TYPE, TYPE_ARRAY>)ref).getField().set(newValues);

@@ -1,8 +1,8 @@
 package com.lowdragmc.lowdraglib2.editor.ui.sceneeditor.sceneobject;
 
 import com.lowdragmc.lowdraglib2.math.Transform;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import org.jetbrains.annotations.Nullable;
 import java.util.List;

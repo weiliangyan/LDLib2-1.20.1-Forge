@@ -1,7 +1,7 @@
 package com.lowdragmc.lowdraglib2.networking.rpc;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
-import com.lowdragmc.lowdraglib2.Platform;
+import com.lowdragmc.lowdraglib2.networking.LDLNetworking;
 import com.lowdragmc.lowdraglib2.networking.both.PacketRPCPacket;
 import com.lowdragmc.lowdraglib2.syncdata.rpc.RPCMethodMeta;
 import com.lowdragmc.lowdraglib2.syncdata.rpc.RPCSender;
@@ -11,9 +11,8 @@ import lombok.experimental.UtilityClass;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import org.jetbrains.annotations.Nullable;
 import java.util.Map;
@@ -59,22 +58,22 @@ public final class RPCPacketDistributor {
     @OnlyIn(Dist.CLIENT)
     public void rpcToServer(String packetID, Object... args) {
         var data = getSafePacketHandler(packetID).args2Bytes(args);
-        PacketDistributor.sendToServer(PacketRPCPacket.of(packetID, data));
+        LDLNetworking.sendToServer(PacketRPCPacket.of(packetID, data));
     }
 
     public void rpcToPlayer(ServerPlayer player, String packetID, Object... args) {
         var data = getSafePacketHandler(packetID).args2Bytes(args);
-        PacketDistributor.sendToPlayer(player, PacketRPCPacket.of(packetID, data));
+        LDLNetworking.sendToPlayer(player, PacketRPCPacket.of(packetID, data));
     }
 
     public void rpcToAllPlayers(String packetID, Object... args) {
         var data = getSafePacketHandler(packetID).args2Bytes(args);
-        PacketDistributor.sendToAllPlayers(PacketRPCPacket.of(packetID, data));
+        LDLNetworking.sendToAllPlayers(PacketRPCPacket.of(packetID, data));
     }
 
     public void rpcToTracking(ServerLevel level, ChunkPos chunkPos, String packetID, Object... args) {
         var data = getSafePacketHandler(packetID).args2Bytes(args);
-        PacketDistributor.sendToPlayersTrackingChunk(level, chunkPos, PacketRPCPacket.of(packetID, data));
+        LDLNetworking.sendToPlayersTrackingChunk(level, chunkPos, PacketRPCPacket.of(packetID, data));
     }
 
 }

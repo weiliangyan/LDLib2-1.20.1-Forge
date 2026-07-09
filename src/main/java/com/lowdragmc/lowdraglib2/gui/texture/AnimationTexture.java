@@ -22,8 +22,8 @@ import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * @author KilaBash
@@ -149,10 +149,10 @@ public class AnimationTexture extends TransformTexture {
         RenderSystem.disableDepthTest();
 
         var matrix4f = graphics.pose().last().pose();
-        buffer.addVertex(matrix4f, x, y + height, 0).setUv(imageU, imageV + cell).setColor(color);
-        buffer.addVertex(matrix4f, x + width, y + height, 0).setUv(imageU + cell, imageV + cell).setColor(color);
-        buffer.addVertex(matrix4f, x + width, y, 0).setUv(imageU + cell, imageV).setColor(color);
-        buffer.addVertex(matrix4f, x, y, 0).setUv(imageU, imageV).setColor(color);
+        buffer.vertex(matrix4f, x, y + height, 0).uv(imageU, imageV + cell).color(color).endVertex();
+        buffer.vertex(matrix4f, x + width, y + height, 0).uv(imageU + cell, imageV + cell).color(color).endVertex();
+        buffer.vertex(matrix4f, x + width, y, 0).uv(imageU + cell, imageV).color(color).endVertex();
+        buffer.vertex(matrix4f, x, y, 0).uv(imageU, imageV).color(color).endVertex();
     }
 
     @Override

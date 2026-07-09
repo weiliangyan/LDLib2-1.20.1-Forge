@@ -398,7 +398,7 @@ public class ResourceProviderContainer<T> extends UIElement {
     public void renameResource(IResourcePath key) {
         if (key != null && canRename.test(key)) {
             var ui = resourceUIs.get(key);
-            if (ui != null && ui.getChildren().getLast() instanceof Label label) {
+            if (ui != null && !ui.getChildren().isEmpty() && ui.getChildren().get(ui.getChildren().size() - 1) instanceof Label label) {
                 // remove current label and add a TextField for renaming
                 var textField = new TextField().setText(nameSupplier.apply(key)).setCharValidator(ResourceLocation::isAllowedInResourceLocation);
                 textField.addEventListener(UIEvents.BLUR, e -> {

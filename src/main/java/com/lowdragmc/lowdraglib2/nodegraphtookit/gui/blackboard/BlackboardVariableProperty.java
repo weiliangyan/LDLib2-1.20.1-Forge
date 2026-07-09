@@ -97,7 +97,7 @@ public class BlackboardVariableProperty extends BlackboardElement implements Sea
         Style.defaultPipeline(typeSearchComponent.getLayout(), l -> l.flexGrow(1).minWidth(55));
         typeSearchComponent.setSearchUI(this);
         typeSearchComponent.setCandidateUIProvider(UIElementProvider.text(value -> value == null ?
-                Component.translatable("text_field.empty").withColor(ColorPattern.LIGHT_GRAY.color) :
+                Component.translatable("text_field.empty").withStyle(style -> style.withColor(ColorPattern.LIGHT_GRAY.color)) :
                 Component.translatable(value.getFriendlyName())));
 
         valueFieldInspector.addClass("__blackboard-var-prop_value-inspector__");

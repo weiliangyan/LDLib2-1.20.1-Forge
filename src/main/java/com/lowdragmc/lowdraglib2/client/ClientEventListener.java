@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib2.editor.resource.EditorResourceEvent;
 import com.lowdragmc.lowdraglib2.editor.resource.ResourceInstance;
 import com.lowdragmc.lowdraglib2.editor.resource.TexturesResource;
 import com.lowdragmc.lowdraglib2.gui.holder.IModularUIHolder;
+import com.lowdragmc.lowdraglib2.gui.holder.ModularUIContainerScreen;
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.MCSprites;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.OreSprites;
@@ -12,12 +13,13 @@ import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.commands.CommandSourceStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
-import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.RegisterClientCommandsEvent;
+import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.event.TickEvent;
 
 import java.util.List;
 
@@ -29,6 +31,18 @@ import java.util.List;
 @EventBusSubscriber(modid = LDLib2.MOD_ID, value = Dist.CLIENT)
 @OnlyIn(Dist.CLIENT)
 public class ClientEventListener {
+    private static long clientTickCount;
+
+    public static long getClientTickCount() {
+        return clientTickCount;
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) {
+            clientTickCount++;
+        }
+    }
 
     @SubscribeEvent
     public static void onRegisterClientCommands(RegisterClientCommandsEvent event) {
@@ -40,6 +54,9 @@ public class ClientEventListener {
     @SubscribeEvent
     public static void onRegisterClientCommands(ScreenEvent.Init.Pre event) {
         var screen = event.getScreen();
+        if (screen instanceof ModularUIContainerScreen) {
+            return;
+        }
         if (screen instanceof AbstractContainerScreen<?> containerScreen && containerScreen.getMenu() instanceof IModularUIHolder holder) {
             var mui = holder.getModularUI();
             if (mui != null) {

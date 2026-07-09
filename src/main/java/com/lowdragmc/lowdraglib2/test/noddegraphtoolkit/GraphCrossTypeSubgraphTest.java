@@ -10,8 +10,8 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import org.joml.Vector2f;
 
 /**
@@ -39,7 +39,8 @@ public class GraphCrossTypeSubgraphTest {
         // Inline subgraph of a DIFFERENT (accepted) graph type.
         var sub = rootModel.createLocalSubgraphInstance(AnnotatedOtherGraph.class);
         if (sub == null) { helper.fail("createLocalSubgraphInstance(AnnotatedOtherGraph) returned null"); return; }
-        if (!(sub instanceof CustomGraphModelImpl c) || !(c.getGraph() instanceof AnnotatedOtherGraph)) {
+        var c = (CustomGraphModelImpl) sub;
+        if (!(c.getGraph() instanceof AnnotatedOtherGraph)) {
             helper.fail("inline subgraph is not an AnnotatedOtherGraph"); return;
         }
         rootModel.addLocalSubgraph(sub);
@@ -62,7 +63,8 @@ public class GraphCrossTypeSubgraphTest {
             helper.fail("localSubGraphs not restored"); return;
         }
         var restoredSub = root2.graphModel.getLocalSubGraphs().get(0);
-        if (!(restoredSub instanceof CustomGraphModelImpl rc) || !(rc.getGraph() instanceof AnnotatedOtherGraph)) {
+        var rc = (CustomGraphModelImpl) restoredSub;
+        if (!(rc.getGraph() instanceof AnnotatedOtherGraph)) {
             helper.fail("restored subgraph lost its foreign type (expected AnnotatedOtherGraph)"); return;
         }
         if (!restoredSub.getUid().equals(sub.getUid())) {
@@ -99,7 +101,8 @@ public class GraphCrossTypeSubgraphTest {
 
         // Accepted foreign type
         var accepted = gm.createLocalSubgraphInstance(AnnotatedOtherGraph.class);
-        if (!(accepted instanceof CustomGraphModelImpl c) || !(c.getGraph() instanceof AnnotatedOtherGraph)) {
+        var c = (CustomGraphModelImpl) accepted;
+        if (!(c.getGraph() instanceof AnnotatedOtherGraph)) {
             helper.fail("accepted foreign type did not instantiate"); return;
         }
         // Rejected foreign type
@@ -109,11 +112,13 @@ public class GraphCrossTypeSubgraphTest {
         }
         // Same type is always allowed (both the typed and the no-arg factory).
         var same = gm.createLocalSubgraphInstance(TestGraph.class);
-        if (!(same instanceof CustomGraphModelImpl sc) || !(sc.getGraph() instanceof TestGraph)) {
+        var sc = (CustomGraphModelImpl) same;
+        if (!(sc.getGraph() instanceof TestGraph)) {
             helper.fail("same-type subgraph should always be allowed"); return;
         }
         var sameNoArg = gm.createLocalSubgraphInstance();
-        if (!(sameNoArg instanceof CustomGraphModelImpl nc) || !(nc.getGraph() instanceof TestGraph)) {
+        var nc = (CustomGraphModelImpl) sameNoArg;
+        if (!(nc.getGraph() instanceof TestGraph)) {
             helper.fail("no-arg factory should produce a same-type subgraph"); return;
         }
 
@@ -160,7 +165,8 @@ public class GraphCrossTypeSubgraphTest {
             helper.fail("legacy localSubGraphs not restored"); return;
         }
         var restored = root2.graphModel.getLocalSubGraphs().get(0);
-        if (!(restored instanceof CustomGraphModelImpl rc) || !(rc.getGraph() instanceof TestGraph)) {
+        var rc = (CustomGraphModelImpl) restored;
+        if (!(rc.getGraph() instanceof TestGraph)) {
             helper.fail("legacy subgraph should load as the owner's own type (TestGraph)"); return;
         }
         if (countNonNull(restored.getGraphVariableModels()) != 1) {

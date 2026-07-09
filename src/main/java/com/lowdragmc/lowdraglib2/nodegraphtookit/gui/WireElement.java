@@ -177,7 +177,7 @@ public class WireElement extends GraphElement<WireModel> {
         var graphView = getGraphView();
         if (graphView == null) return new Vector2f();
         var nodeModel = port.getNodeModel();
-        boolean collapsed = nodeModel instanceof AbstractNodeModel anm && anm.isCollapsed();
+        boolean collapsed = nodeModel != null && nodeModel.isCollapsed();
         if (collapsed && graphView.getModelElement(nodeModel) instanceof NodeElement nodeElement
                 && nodeElement.getNodeTittle() != null) {
             var title = nodeElement.getNodeTittle();
@@ -296,7 +296,7 @@ public class WireElement extends GraphElement<WireModel> {
         if (input == null || input.size() < 3) return input;
 
         var out = new ArrayList<Vector2f>(input.size() * (cornerSegments + 1));
-        out.add(new Vector2f(input.getFirst()));
+        out.add(new Vector2f(input.get(0)));
 
         for (var i = 1; i < input.size() - 1; i++) {
             Vector2f A = input.get(i - 1);
@@ -355,7 +355,7 @@ public class WireElement extends GraphElement<WireModel> {
             out.add(P2);
         }
 
-        out.add(new Vector2f(input.getLast()));
+        out.add(new Vector2f(input.get(input.size() - 1)));
         return out;
     }
 

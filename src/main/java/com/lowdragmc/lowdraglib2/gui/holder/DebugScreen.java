@@ -12,8 +12,8 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
@@ -78,8 +78,15 @@ public class DebugScreen extends ModularUIScreen {
     }
 
     @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
+        if (!super.mouseScrolled(mouseX, mouseY, scrollY)) {
+            return targetUI.getWidget().mouseScrolled(mouseX, mouseY, 0, scrollY);
+        }
+        return true;
+    }
+
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        if (!super.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
+        if (!super.mouseScrolled(mouseX, mouseY, scrollY)) {
             return targetUI.getWidget().mouseScrolled(mouseX, mouseY, scrollX, scrollY);
         }
         return true;

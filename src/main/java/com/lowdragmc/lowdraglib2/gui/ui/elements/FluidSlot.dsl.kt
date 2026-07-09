@@ -4,8 +4,8 @@ import com.lowdragmc.lowdraglib2.gui.ui.ElementSpec
 import com.lowdragmc.lowdraglib2.gui.ui.UIContainer
 import com.lowdragmc.lowdraglib2.gui.ui.data.FillDirection
 import com.lowdragmc.lowdraglib2.integration.xei.IngredientIO
-import net.neoforged.neoforge.fluids.FluidStack
-import net.neoforged.neoforge.fluids.capability.IFluidHandler
+import net.minecraftforge.fluids.FluidStack
+import net.minecraftforge.fluids.capability.IFluidHandler
 import java.util.function.Consumer
 
 /**

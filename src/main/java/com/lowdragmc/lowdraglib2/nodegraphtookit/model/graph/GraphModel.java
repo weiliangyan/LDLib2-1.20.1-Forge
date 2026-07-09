@@ -624,46 +624,34 @@ public abstract class GraphModel extends GraphElementModel implements IGraphElem
      */
     protected void removeElements(Collection<? extends GraphElementModel> elements) {
         for (var element : elements) {
-            switch (element) {
-                case IPlaceHolder placeHolder:
-                    removePlaceholder(placeHolder);
-                    break;
-                case StickyNoteModel stickyNoteModel:
-                    removeStickyNote(stickyNoteModel);
-                    break;
-                case PlacematModel placematModel:
-                    removePlacemat(placematModel);
-                    break;
-                case VariableDeclarationModelBase variableDeclarationModel:
-                    removeVariableDeclaration(variableDeclarationModel);
-                    break;
-                case WireModel wireModel:
-                    removeWire(wireModel);
-                    break;
-                case com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.BlockNodeModel blockNodeModel:
-                    // Blocks live inside a context, not in the top-level nodeModels list.
-                    // Route through the parent so its block list and wires stay consistent.
-                    if (blockNodeModel.getContextNodeModel() != null) {
-                        blockNodeModel.getContextNodeModel().removeBlock(blockNodeModel);
-                    } else {
-                        unregisterBlockNode(blockNodeModel);
-                    }
-                    break;
-                case AbstractNodeModel nodeModel:
-                    removeNode(nodeModel);
-                    break;
-                case PortModel portModel:
-                    unregisterPort(portModel);
-                    break;
-                case SectionModel sectionModel:
-                    removeSection(sectionModel);
-                    break;
-                case GroupModel groupModel:
-                    removeGroup(groupModel);
-                    break;
-                default:
-                    unregisterElement(element);
-                    break;
+            if (element instanceof IPlaceHolder placeHolder) {
+                removePlaceholder(placeHolder);
+            } else if (element instanceof StickyNoteModel stickyNoteModel) {
+                removeStickyNote(stickyNoteModel);
+            } else if (element instanceof PlacematModel placematModel) {
+                removePlacemat(placematModel);
+            } else if (element instanceof VariableDeclarationModelBase variableDeclarationModel) {
+                removeVariableDeclaration(variableDeclarationModel);
+            } else if (element instanceof WireModel wireModel) {
+                removeWire(wireModel);
+            } else if (element instanceof com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.BlockNodeModel blockNodeModel) {
+                // Blocks live inside a context, not in the top-level nodeModels list.
+                // Route through the parent so its block list and wires stay consistent.
+                if (blockNodeModel.getContextNodeModel() != null) {
+                    blockNodeModel.getContextNodeModel().removeBlock(blockNodeModel);
+                } else {
+                    unregisterBlockNode(blockNodeModel);
+                }
+            } else if (element instanceof AbstractNodeModel nodeModel) {
+                removeNode(nodeModel);
+            } else if (element instanceof PortModel portModel) {
+                unregisterPort(portModel);
+            } else if (element instanceof SectionModel sectionModel) {
+                removeSection(sectionModel);
+            } else if (element instanceof GroupModel groupModel) {
+                removeGroup(groupModel);
+            } else {
+                unregisterElement(element);
             }
         }
     }
@@ -1079,14 +1067,16 @@ public abstract class GraphModel extends GraphElementModel implements IGraphElem
             }
 
             // Remove missing port with no connections.
-            if (wireModel.getToPort() instanceof PortModel to && to.getPortType().equals(PortType.MISSING_PORT) && to.getConnectedWires().isEmpty()) {
+            var to = wireModel.getToPort();
+            if (to != null && to.getPortType().equals(PortType.MISSING_PORT) && to.getConnectedWires().isEmpty()) {
                 var nodeModel = to.getNodeModel();
                 if (nodeModel != null) {
                     nodeModel.removeUnusedMissingPort(to);
                 }
             }
 
-            if (wireModel.getFromPort() instanceof PortModel from && from.getPortType().equals(PortType.MISSING_PORT) && from.getConnectedWires().isEmpty()) {
+            var from = wireModel.getFromPort();
+            if (from != null && from.getPortType().equals(PortType.MISSING_PORT) && from.getConnectedWires().isEmpty()) {
                 var nodeModel = from.getNodeModel();
                 if (nodeModel != null) {
                     nodeModel.removeUnusedMissingPort(from);
@@ -1100,11 +1090,13 @@ public abstract class GraphModel extends GraphElementModel implements IGraphElem
             if (wireToDelete instanceof WirePlaceHolder placeHolder) {
                 removePlaceholder(placeHolder);
             } else {
-                if (wireToDelete.getToPort() instanceof PortModel port && port.getNodeModel() instanceof NodeModel nodeModel) {
-                    nodeModel.onDisconnection(wireToDelete.getToPort(), wireToDelete.getFromPort());
+                var toPort = wireToDelete.getToPort();
+                if (toPort != null && toPort.getNodeModel() instanceof NodeModel nodeModel) {
+                    nodeModel.onDisconnection(toPort, wireToDelete.getFromPort());
                 }
-                if (wireToDelete.getFromPort() instanceof PortModel port && port.getNodeModel() instanceof NodeModel nodeModel) {
-                    nodeModel.onDisconnection(wireToDelete.getFromPort(), wireToDelete.getToPort());
+                var fromPort = wireToDelete.getFromPort();
+                if (fromPort != null && fromPort.getNodeModel() instanceof NodeModel nodeModel) {
+                    nodeModel.onDisconnection(fromPort, wireToDelete.getToPort());
                 }
 
                 getCurrentGraphChangeDescription().addChangedModel(wireToDelete.getToPort(), ChangeHint.GRAPH_TOPOLOGY);

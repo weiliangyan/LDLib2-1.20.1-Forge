@@ -32,6 +32,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
@@ -39,9 +40,8 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.util.StringUtil;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.appliedenergistics.yoga.YogaEdge;
 import org.appliedenergistics.yoga.YogaOverflow;
 import org.lwjgl.glfw.GLFW;
@@ -68,9 +68,9 @@ public class TextArea extends BindableUIElement<String[]> {
     public record History(String[] lines, Cursor cursor) {
         @Override
         public boolean equals(Object obj) {
-            return obj instanceof History(String[] lines1, Cursor cursor1) &&
-                    Arrays.deepEquals(lines1, lines) &&
-                    Objects.equals(cursor1, cursor);
+            return obj instanceof History history &&
+                    Arrays.deepEquals(history.lines(), lines) &&
+                    Objects.equals(history.cursor(), cursor);
         }
     }
 
@@ -719,7 +719,8 @@ public class TextArea extends BindableUIElement<String[]> {
     }
 
     protected void onDragSource(UIEvent event) {
-        if (event.dragHandler.draggingObject instanceof CursorDragStart(Cursor anchor)) {
+        if (event.dragHandler.draggingObject instanceof CursorDragStart cursorDragStart) {
+            var anchor = cursorDragStart.anchor();
             var localMouse = getLocalMouse(event.x, event.y);
             var pos = getCursorUnderMouse(localMouse.x, localMouse.y);
             setCursor(pos.line(), pos.col());
@@ -762,7 +763,7 @@ public class TextArea extends BindableUIElement<String[]> {
 
     protected void onCharTyped(UIEvent event) {
         if (!isEditable()) return;
-        if (StringUtil.isAllowedChatCharacter(event.codePoint) && charValidator.test(event.codePoint)) {
+        if (SharedConstants.isAllowedChatCharacter(event.codePoint) && charValidator.test(event.codePoint)) {
             insertText(Character.toString(event.codePoint));
         }
     }
@@ -1026,11 +1027,11 @@ public class TextArea extends BindableUIElement<String[]> {
                 String before = s.substring(0, cursorCol);
                 String after = s.substring(cursorCol);
                 if (incoming.size() == 1) {
-                    lines.set(cursorLine, before + incoming.getFirst() + after);
-                    setCursor(cursorLine, cursorCol + incoming.getFirst().length());
+                    lines.set(cursorLine, before + incoming.get(0) + after);
+                    setCursor(cursorLine, cursorCol + incoming.get(0).length());
                 } else {
-                    String first = before + incoming.getFirst();
-                    String last = incoming.getLast() + after;
+                    String first = before + incoming.get(0);
+                    String last = incoming.get(incoming.size() - 1) + after;
                     lines.set(cursorLine, first);
                     for (int i = 1; i < incoming.size() - 1; i++) {
                         lines.add(cursorLine + i, incoming.get(i));
@@ -1184,7 +1185,7 @@ public class TextArea extends BindableUIElement<String[]> {
         }
 
         // Placeholder
-        if (lines.size() == 1 && lines.getFirst().isEmpty()) {
+        if (lines.size() == 1 && lines.get(0).isEmpty()) {
             drawPlaceHolder(guiContext, font, scale, x, y);
         }
     }

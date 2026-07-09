@@ -6,7 +6,7 @@ import com.lowdragmc.lowdraglib2.syncdata.field.ManagedKey;
 import com.lowdragmc.lowdraglib2.syncdata.var.ArrayVar;
 import com.lowdragmc.lowdraglib2.syncdata.var.ReadOnlyVar;
 import lombok.Getter;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import com.lowdragmc.lowdraglib2.compat.network.RegistryFriendlyByteBuf;
 
 import org.jetbrains.annotations.Nullable;
 

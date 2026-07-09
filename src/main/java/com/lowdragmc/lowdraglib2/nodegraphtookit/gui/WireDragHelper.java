@@ -391,7 +391,7 @@ public class WireDragHelper {
         var localPosition = graphView.getContentViewContainer().worldToLocalLayoutOffset(worldPosition);
         var portModels = wires.stream().map(w -> w.left().getOtherPort(w.right())).toList();
         if (!portModels.isEmpty()) {
-            if (portModels.getFirst().getDirection() == PortDirection.NONE) return;
+            if (portModels.get(0).getDirection() == PortDirection.NONE) return;
             graphView.itemLibrary.showWithNodesFitPort(worldPosition.x, worldPosition.y, portModels, item -> {
                 if (item instanceof NodeModelLibraryItem nodeItem) {
                     graphView.dispatchCommand(new NodeCommands.CreateNodeCommand().withNodeOnWires(nodeItem, wires, localPosition, null));

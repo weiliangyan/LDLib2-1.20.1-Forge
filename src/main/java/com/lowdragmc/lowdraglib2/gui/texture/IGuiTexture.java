@@ -26,8 +26,8 @@ import dev.vfyjxf.taffy.style.AlignItems;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import org.jetbrains.annotations.Nullable;
@@ -60,15 +60,16 @@ public interface IGuiTexture extends IPersistedSerializable, IConfigurable, ILDL
         @Override
         public void draw(GuiGraphics graphics, float mouseX, float mouseY, float x, float y, float width, float height, float partialTicks) {
             Tesselator tessellator = Tesselator.getInstance();
-            BufferBuilder bufferbuilder = tessellator.begin(VertexFormat.Mode.QUADS, POSITION_TEX);
+            BufferBuilder bufferbuilder = tessellator.getBuilder();
+            bufferbuilder.begin(VertexFormat.Mode.QUADS, POSITION_TEX);
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderTexture(0, MissingTextureAtlasSprite.getTexture().getId());
             var matrix4f = graphics.pose().last().pose();
-            bufferbuilder.addVertex(matrix4f, x, y + height, 0).setUv(0, 1);
-            bufferbuilder.addVertex(matrix4f, x + width, y + height, 0).setUv(1, 1);
-            bufferbuilder.addVertex(matrix4f, x + width, y, 0).setUv(1, 0);
-            bufferbuilder.addVertex(matrix4f, x, y, 0).setUv(0, 0);
-            BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
+            bufferbuilder.vertex(matrix4f, x, y + height, 0).uv(0, 1).endVertex();
+            bufferbuilder.vertex(matrix4f, x + width, y + height, 0).uv(1, 1).endVertex();
+            bufferbuilder.vertex(matrix4f, x + width, y, 0).uv(1, 0).endVertex();
+            bufferbuilder.vertex(matrix4f, x, y, 0).uv(0, 0).endVertex();
+            BufferUploader.drawWithShader(bufferbuilder.end());
         }
     }
     //endregion
@@ -81,7 +82,7 @@ public interface IGuiTexture extends IPersistedSerializable, IConfigurable, ILDL
         if (LDLib2.isClient()) {
             return LDLib2Registries.GUI_TEXTURES.optionalCodec().dispatch(ILDLRegisterClient::getRegistryHolderOptional,
                     optional -> optional.map(holder -> PersistedParser.createCodec(holder.value()).fieldOf("data"))
-                            .orElseGet(() -> MapCodec.unit(MISSING_TEXTURE)));
+                            .orElseGet(() -> MapCodec.unit(MISSING_TEXTURE)).codec());
         } else {
             return Codec.unit(MISSING_TEXTURE);
         }
@@ -126,9 +127,9 @@ public interface IGuiTexture extends IPersistedSerializable, IConfigurable, ILDL
      */
     default IGuiTexture copy() {
         try {
-            return CODEC.encodeStart(Platform.getFrozenRegistry().createSerializationContext(NbtOps.INSTANCE), this)
+            return CODEC.encodeStart(Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry()), this)
                     .result()
-                    .map(tag -> CODEC.parse(Platform.getFrozenRegistry().createSerializationContext(NbtOps.INSTANCE), tag).result()
+                    .map(tag -> CODEC.parse(Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry()), tag).result()
                             .orElse(this))
                     .orElse(this);
         } catch (Exception e) {

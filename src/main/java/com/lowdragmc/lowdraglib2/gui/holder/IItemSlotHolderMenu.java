@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib2.gui.holder;
 
+import com.lowdragmc.lowdraglib2.core.mixins.accessor.AbstractContainerMenuAccessor;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.ItemSlot;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
@@ -20,7 +21,7 @@ public interface IItemSlotHolderMenu {
      * @param itemSlot the {@link ItemSlot} to be added to the menu
      */
     default void addSlot(ItemSlot itemSlot) {
-        self().addSlot(itemSlot.getSlot());
+        ((AbstractContainerMenuAccessor) self()).ldlib2$invokeAddSlot(itemSlot.getSlot());
     }
 
     /**

@@ -8,9 +8,9 @@ import com.lowdragmc.lowdraglib2.syncdata.utils.TypeFabricator;
 import com.lowdragmc.lowdraglib2.syncdata.var.ManagedHolderVar;
 import com.lowdragmc.lowdraglib2.utils.LDLibExtraCodecs;
 import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.JavaOps;
 import lombok.Getter;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.nbt.NbtOps;
+import com.lowdragmc.lowdraglib2.compat.network.RegistryFriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -61,7 +61,7 @@ public class CollectionAccessor<TYPE> implements
 
     @Override
     public <T> void writeReadOnlyValue(DynamicOps<T> op, Collection<TYPE> value, T payload) {
-        var stream = op.getStream(payload).getOrThrow();
+        var stream = LDLibExtraCodecs.getOrThrow(op.getStream(payload));
         if (childAccessor instanceof IDirectAccessor<TYPE> directAccessor) {
             value.clear();
             var holder = ManagedHolderVar.ofNull(childType);
@@ -180,15 +180,14 @@ public class CollectionAccessor<TYPE> implements
             if (v == null) {
                 return null;
             }
-            return switch (childAccessor) {
-                case IMarkFunction markFunction -> markFunction.obtainManagedMark(v);
-                case IDirectAccessor<TYPE> directAccessor ->
-                        directAccessor.readDirectVar(Platform.getFrozenRegistry().createSerializationContext(JavaOps.INSTANCE), ManagedHolderVar.of(v));
-                case IReadOnlyAccessor<TYPE> readOnlyAccessor ->
-                        readOnlyAccessor.readReadOnlyValue(Platform.getFrozenRegistry().createSerializationContext(JavaOps.INSTANCE), v);
-                case null, default ->
-                        throw new IllegalArgumentException("Child accessor %s is not managed for collection accessor".formatted(childAccessor));
-            };
+            if (childAccessor instanceof IMarkFunction markFunction) {
+                return markFunction.obtainManagedMark(v);
+            } else if (childAccessor instanceof IDirectAccessor<TYPE> directAccessor) {
+                return directAccessor.readDirectVar(Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry()), ManagedHolderVar.of(v));
+            } else if (childAccessor instanceof IReadOnlyAccessor<TYPE> readOnlyAccessor) {
+                return readOnlyAccessor.readReadOnlyValue(Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry()), v);
+            }
+            throw new IllegalArgumentException("Child accessor %s is not managed for collection accessor".formatted(childAccessor));
         }).toArray();
     }
 
@@ -206,24 +205,20 @@ public class CollectionAccessor<TYPE> implements
                 }
                 continue;
             }
-            switch (childAccessor) {
-                case IMarkFunction markFunction -> {
-                    if (markFunction.areDifferent(mark, v)) {
-                        return true;
-                    }
+            if (childAccessor instanceof IMarkFunction markFunction) {
+                if (markFunction.areDifferent(mark, v)) {
+                    return true;
                 }
-                case IDirectAccessor<TYPE> directAccessor -> {
-                    if (!directAccessor.readDirectVar(Platform.getFrozenRegistry().createSerializationContext(JavaOps.INSTANCE), ManagedHolderVar.of(v)).equals(mark)) {
-                        return true;
-                    }
+            } else if (childAccessor instanceof IDirectAccessor<TYPE> directAccessor) {
+                if (!directAccessor.readDirectVar(Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry()), ManagedHolderVar.of(v)).equals(mark)) {
+                    return true;
                 }
-                case IReadOnlyAccessor<TYPE> readOnlyAccessor -> {
-                    if (!readOnlyAccessor.readReadOnlyValue(Platform.getFrozenRegistry().createSerializationContext(JavaOps.INSTANCE), v).equals(mark)) {
-                        return true;
-                    }
+            } else if (childAccessor instanceof IReadOnlyAccessor<TYPE> readOnlyAccessor) {
+                if (!readOnlyAccessor.readReadOnlyValue(Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry()), v).equals(mark)) {
+                    return true;
                 }
-                case null, default ->
-                        throw new IllegalArgumentException("Child accessor %s is not managed for collection accessor".formatted(childAccessor));
+            } else {
+                throw new IllegalArgumentException("Child accessor %s is not managed for collection accessor".formatted(childAccessor));
             }
         }
         return false;

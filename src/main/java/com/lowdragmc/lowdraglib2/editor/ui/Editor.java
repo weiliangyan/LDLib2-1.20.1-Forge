@@ -110,6 +110,8 @@ public abstract class Editor extends UIElement {
     public Editor() {
         getLayout().widthPercent(100);
         getLayout().heightPercent(100);
+        getLayout().paddingAll(4);
+        getStyle().backgroundTexture(ColorPattern.BLACK.rectTexture());
 
         addClass("__editor__");
 
@@ -191,7 +193,8 @@ public abstract class Editor extends UIElement {
                 mainView.layout(layout -> {
                     layout.widthPercent(100);
                     layout.flex(1);
-                }).addChild(rootWindow)
+                }).style(style -> style.backgroundTexture(ColorPattern.DARK_GRAY.rectTexture()))
+                        .addChild(rootWindow)
         );
 
         closeButton.setOnClick(e -> close());
@@ -663,7 +666,7 @@ public abstract class Editor extends UIElement {
                     .setOverflowVisible(false)
                     .layout(layout -> layout.flex(1)));
             dialog.show(this.getModularUI());
-            if (dialog.buttonContainer.getChildren().getFirst() instanceof Button button) {
+            if (!dialog.buttonContainer.getChildren().isEmpty() && dialog.buttonContainer.getChildren().get(0) instanceof Button button) {
                 button.setText("ldlib.gui.editor.menu.save");
             }
             return;

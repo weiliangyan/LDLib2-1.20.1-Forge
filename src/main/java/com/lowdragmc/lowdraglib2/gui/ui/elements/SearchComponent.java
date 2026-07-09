@@ -135,7 +135,7 @@ public class SearchComponent<T> extends BindableUIElement<T> {
     @Getter
     private final SearchStyle searchStyle = new SearchStyle();
     private UIElementProvider<T> candidateUIProvider = UIElementProvider.text(value -> value == null ?
-            Component.translatable("text_field.empty").withColor(ColorPattern.LIGHT_GRAY.color) :
+            Component.translatable("text_field.empty").withStyle(style -> style.withColor(ColorPattern.LIGHT_GRAY.color)) :
             Component.translatable(value.toString()));
     @Getter
     private ISearchUI<T> searchUI = ISearchUI.empty();

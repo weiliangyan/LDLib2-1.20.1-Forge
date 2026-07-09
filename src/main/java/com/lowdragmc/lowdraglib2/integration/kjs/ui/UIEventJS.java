@@ -5,10 +5,10 @@ import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.gui.factory.IContainerUIHolder;
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import com.lowdragmc.lowdraglib2.gui.holder.ModularUIContainerMenu;
-import dev.latvian.mods.kubejs.event.KubeEvent;
+import dev.latvian.mods.kubejs.event.EventJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import com.lowdragmc.lowdraglib2.compat.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -23,7 +23,7 @@ import java.util.function.Predicate;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public abstract class UIEventJS implements KubeEvent, MenuProvider, IContainerUIHolder {
+public abstract class UIEventJS extends EventJS implements MenuProvider, IContainerUIHolder {
     public final Player player;
     public final String id;
     public final Level level;
@@ -70,7 +70,6 @@ public abstract class UIEventJS implements KubeEvent, MenuProvider, IContainerUI
         }
     }
 
-    @Override
     @HideFromJS
     public void writeClientSideData(AbstractContainerMenu menu, RegistryFriendlyByteBuf buffer) {
         buffer.writeUtf(id);

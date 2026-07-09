@@ -5,8 +5,8 @@ import com.lowdragmc.lowdraglib2.syncdata.accessor.direct.IDirectAccessor;
 import com.lowdragmc.lowdraglib2.syncdata.field.ManagedKey;
 import com.lowdragmc.lowdraglib2.syncdata.accessor.IMarkFunction;
 import com.lowdragmc.lowdraglib2.syncdata.var.IVar;
-import com.mojang.serialization.JavaOps;
 import lombok.Getter;
+import net.minecraft.nbt.NbtOps;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
  * <br>
  * It will store the old value mark to compare with the new value mark every update.
  * Please implement {@link IMarkFunction} for the accessor.
- * If the {@link IMarkFunction} is not implemented, it will use codec to store the mark in a type of {@link com.mojang.serialization.JavaOps}
+ * If the {@link IMarkFunction} is not implemented, it will use codec to store the mark in NBT form.
  */
 @Getter
 @SuppressWarnings("unchecked")
@@ -28,7 +28,7 @@ public final class MutableDirectRef<TYPE> extends DirectRef<TYPE> {
         oldValueMark = value == null ? null :
                 accessor instanceof IMarkFunction markFunction ?
                 markFunction.obtainManagedMark(getField().value()) :
-                        accessor.readDirectVar(Platform.getFrozenRegistry().createSerializationContext(JavaOps.INSTANCE), field);
+                        accessor.readDirectVar(Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry()), field);
     }
 
     @Override
@@ -54,10 +54,10 @@ public final class MutableDirectRef<TYPE> extends DirectRef<TYPE> {
             }
         } else if (accessor instanceof IDirectAccessor) {
             if (oldValueMark == null) {
-                oldValueMark = accessor.readDirectVar(Platform.getFrozenRegistry().createSerializationContext(JavaOps.INSTANCE), field);
+                oldValueMark = accessor.readDirectVar(Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry()), field);
                 markAsDirty();
             } else {
-                var newValueMark = accessor.readDirectVar(Platform.getFrozenRegistry().createSerializationContext(JavaOps.INSTANCE), field);
+                var newValueMark = accessor.readDirectVar(Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry()), field);
                 if (!oldValueMark.equals(newValueMark)) {
                     oldValueMark = newValueMark;
                     markAsDirty();

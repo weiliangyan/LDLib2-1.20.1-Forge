@@ -8,8 +8,8 @@ import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
 import com.lowdragmc.lowdraglib2.utils.ColorUtils;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraft.client.gui.GuiGraphics;
 
 @LDLRegisterClient(name = "color_rect_texture", registry = "ldlib2:gui_texture")

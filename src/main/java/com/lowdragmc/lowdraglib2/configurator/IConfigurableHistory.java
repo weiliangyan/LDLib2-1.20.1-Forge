@@ -2,7 +2,7 @@ package com.lowdragmc.lowdraglib2.configurator;
 
 import com.lowdragmc.lowdraglib2.gui.ui.utils.IHistoryStack;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.common.util.INBTSerializable;
+import net.minecraftforge.common.util.INBTSerializable;
 import org.jetbrains.annotations.Nullable;
 
 /**

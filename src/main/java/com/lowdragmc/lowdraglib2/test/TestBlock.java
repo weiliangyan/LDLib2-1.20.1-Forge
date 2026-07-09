@@ -17,17 +17,16 @@ import dev.vfyjxf.taffy.style.AlignContent;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -81,7 +80,7 @@ public class TestBlock extends Block implements EntityBlock, IBlockRendererProvi
     IRenderer renderer = new IModelRenderer(LDLib2.id("block/cube"));
 
     @Override
-    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         } else if (player instanceof ServerPlayer serverPlayer){
@@ -118,35 +117,40 @@ public class TestBlock extends Block implements EntityBlock, IBlockRendererProvi
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
         if (!level.isClientSide) {
             if (level.getBlockEntity(pos) instanceof IPersistManagedHolder persistManagedHolder) {
-                Optional.ofNullable(stack.get(DataComponents.CUSTOM_DATA)).ifPresent(customData -> {
-                    persistManagedHolder.loadManagedPersistentData(level.registryAccess(), customData.copyTag());
+                Optional.ofNullable(stack.getTagElement("BlockEntityTag")).ifPresent(tag -> {
+                    persistManagedHolder.loadManagedPersistentData(level.registryAccess(), tag.copy());
                 });
             }
         }
     }
 
     @Override
-    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
-        var opt = Optional.ofNullable(params.getOptionalParameter(LootContextParams.BLOCK_ENTITY));
-        if (opt.isPresent() && opt.get() instanceof IPersistManagedHolder persistManagedHolder && opt.get().getLevel() instanceof Level level) {
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+        var blockEntity = params.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
+        if (blockEntity instanceof IPersistManagedHolder persistManagedHolder && blockEntity.getLevel() != null) {
             var drop = new ItemStack(this);
             var tag = new CompoundTag();
-            persistManagedHolder.saveManagedPersistentData(level.registryAccess(), tag, true);
-            drop.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+            persistManagedHolder.saveManagedPersistentData(blockEntity.getLevel().registryAccess(), tag, true);
+            drop.addTagElement("BlockEntityTag", tag);
             return List.of(drop);
         }
         return super.getDrops(state, params);
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
         if (level.getBlockEntity(pos) instanceof IPersistManagedHolder persistManagedHolder) {
             var clone = new ItemStack(this);
             var tag = new CompoundTag();
-            persistManagedHolder.saveManagedPersistentData(level.registryAccess(), tag, true);
-            clone.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+            persistManagedHolder.saveManagedPersistentData(blockEntityRegistryAccess(level, pos), tag, true);
+            clone.addTagElement("BlockEntityTag", tag);
             return clone;
         }
-        return super.getCloneItemStack(state, target, level, pos, player);
+        return super.getCloneItemStack(level, pos, state);
+    }
+
+    private net.minecraft.core.RegistryAccess blockEntityRegistryAccess(BlockGetter level, BlockPos pos) {
+        var blockEntity = level.getBlockEntity(pos);
+        return blockEntity != null && blockEntity.getLevel() != null ? blockEntity.getLevel().registryAccess() : Platform.getFrozenRegistry();
     }
 }

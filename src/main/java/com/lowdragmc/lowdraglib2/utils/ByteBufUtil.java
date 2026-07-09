@@ -3,9 +3,8 @@ package com.lowdragmc.lowdraglib2.utils;
 import io.netty.buffer.Unpooled;
 import lombok.experimental.UtilityClass;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.neoforged.neoforge.common.util.FriendlyByteBufUtil;
-import net.neoforged.neoforge.network.connection.ConnectionType;
+import com.lowdragmc.lowdraglib2.compat.network.RegistryFriendlyByteBuf;
+import com.lowdragmc.lowdraglib2.compat.network.ConnectionType;
 
 import java.util.function.Consumer;
 
@@ -29,7 +28,7 @@ public final class ByteBufUtil {
 
     /**
      * Writes custom data to a {@link RegistryFriendlyByteBuf}, then returns the written data as a byte array.
-     * This implementation fix bytes array too big in the {@link FriendlyByteBufUtil#writeCustomData(Consumer, RegistryAccess)}.
+     * This implementation fixes byte arrays larger than vanilla's small helper limits.
      *
      * @param dataWriter     The data writer.
      * @param registryAccess The registry access used by registry dependent writers on the buffer

@@ -16,8 +16,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -72,7 +72,7 @@ public class ModularUIREIWidget extends Widget {
             if (modularUI.getTooltipComponent() != null) tooltip.add(modularUI.getTooltipComponent());
             if (ConfigObject.getInstance().shouldAppendModNames()) {
                 var stack = modularUI.getTooltipStack();
-                var modId = stack.getItem() instanceof Item item ? BuiltInRegistries.ITEM.getKey(item).getNamespace() : null;
+                var modId = stack.isEmpty() ? null : BuiltInRegistries.ITEM.getKey(stack.getItem()).getNamespace();
                 ClientHelper.getInstance().appendModIdToTooltips(tooltip, modId);
             }
             tooltip.queue();
@@ -99,9 +99,9 @@ public class ModularUIREIWidget extends Widget {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
         var realMouse = getWorldMouse((float) (mouseX - bounds.x), (float) (mouseY - bounds.y));
-        return modularUI.getWidget().mouseScrolled(realMouse.x, realMouse.y, scrollX, scrollY);
+        return modularUI.getWidget().mouseScrolled(realMouse.x, realMouse.y, scrollY);
     }
 
     @Override

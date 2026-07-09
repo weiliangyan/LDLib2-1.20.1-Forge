@@ -1,6 +1,8 @@
 package com.lowdragmc.lowdraglib2.gui.ui.elements;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
+import com.lowdragmc.lowdraglib2.core.mixins.accessor.AbstractContainerMenuAccessor;
+import com.lowdragmc.lowdraglib2.core.mixins.accessor.AbstractContainerScreenAccessor;
 import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigSetter;
 import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
 import com.lowdragmc.lowdraglib2.core.mixins.accessor.SlotAccessor;
@@ -42,7 +44,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandlerModifiable;
+import net.minecraftforge.items.IItemHandlerModifiable;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
@@ -287,7 +289,7 @@ public class ItemSlot extends BindableUIElement<ItemStack> {
                     if (menu instanceof IItemSlotHolderMenu itemSlotHolderMenu) {
                         itemSlotHolderMenu.addSlot(this);
                     } else {
-                        menu.addSlot(slot);
+                        ((AbstractContainerMenuAccessor) menu).ldlib2$invokeAddSlot(slot);
                     }
                 }
             }
@@ -362,20 +364,21 @@ public class ItemSlot extends BindableUIElement<ItemStack> {
         var hovered = isHover() || isSelfOrChildHover();
         var drawDraggingBackground = false;
         // splitting
-        if (mui.getScreen() instanceof AbstractContainerScreen<?> containerScreen) {
+        if (mui.getScreen() instanceof AbstractContainerScreen<?> containerScreen && containerScreen instanceof AbstractContainerScreenAccessor screenAccessor) {
             var carried = containerScreen.getMenu().getCarried();
-            if (slot == containerScreen.clickedSlot && !containerScreen.draggingItem.isEmpty() && containerScreen.isSplittingStack && !value.isEmpty()) {
+            var quickCraftSlots = screenAccessor.ldlib2$getQuickCraftSlots();
+            if (slot == screenAccessor.ldlib2$getClickedSlot() && !screenAccessor.ldlib2$getDraggingItem().isEmpty() && screenAccessor.ldlib2$isSplittingStack() && !value.isEmpty()) {
                 value = value.copyWithCount(value.getCount() / 2);
                 drawDraggingBackground = true;
-            } else if (containerScreen.isQuickCrafting && containerScreen.quickCraftSlots.contains(slot) && !carried.isEmpty()) {
-                if (containerScreen.quickCraftSlots.size() == 1) {
+            } else if (screenAccessor.ldlib2$isQuickCrafting() && quickCraftSlots.contains(slot) && !carried.isEmpty()) {
+                if (quickCraftSlots.size() == 1) {
                     return;
                 }
 
                 if (AbstractContainerMenu.canItemQuickReplace(slot, carried, true) && containerScreen.getMenu().canDragTo(slot)) {
                     int k = Math.min(carried.getMaxStackSize(), slot.getMaxStackSize(carried));
                     int l = slot.getItem().isEmpty() ? 0 : slot.getItem().getCount();
-                    int i1 = AbstractContainerMenu.getQuickCraftPlaceCount(containerScreen.quickCraftSlots, containerScreen.quickCraftingType, carried) + l;
+                    int i1 = AbstractContainerMenu.getQuickCraftPlaceCount(quickCraftSlots, screenAccessor.ldlib2$getQuickCraftingType(), carried) + l;
                     if (i1 > k) {
                         i1 = k;
                     }
@@ -383,8 +386,8 @@ public class ItemSlot extends BindableUIElement<ItemStack> {
                     value = carried.copyWithCount(i1);
                     drawDraggingBackground = true;
                 } else {
-                    containerScreen.quickCraftSlots.remove(slot);
-                    containerScreen.recalculateQuickCraftRemaining();
+                    quickCraftSlots.remove(slot);
+                    screenAccessor.ldlib2$invokeRecalculateQuickCraftRemaining();
                 }
             }
         }

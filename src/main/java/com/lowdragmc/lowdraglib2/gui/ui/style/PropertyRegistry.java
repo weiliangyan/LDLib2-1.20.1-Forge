@@ -13,7 +13,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.style.values.*;
 import com.mojang.serialization.Codec;
 import lombok.experimental.UtilityClass;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
+import com.lowdragmc.lowdraglib2.compat.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;

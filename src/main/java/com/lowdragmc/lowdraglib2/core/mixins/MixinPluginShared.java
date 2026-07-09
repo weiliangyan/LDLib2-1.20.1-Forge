@@ -1,7 +1,7 @@
 package com.lowdragmc.lowdraglib2.core.mixins;
 
-import net.neoforged.fml.ModList;
-import net.neoforged.fml.loading.LoadingModList;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.loading.LoadingModList;
 
 public interface MixinPluginShared {
 

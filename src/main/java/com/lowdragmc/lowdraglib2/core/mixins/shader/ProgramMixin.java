@@ -1,16 +1,13 @@
 package com.lowdragmc.lowdraglib2.core.mixins.shader;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.lowdragmc.lowdraglib2.client.shader.LDLibShaders;
 import com.lowdragmc.lowdraglib2.client.shader.LDProgramDefineManager;
-import com.mojang.blaze3d.preprocessor.GlslPreprocessor;
 import com.mojang.blaze3d.shaders.Program;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-import java.io.InputStream;
 import java.util.*;
 
 @Mixin(Program.class)
@@ -37,15 +34,39 @@ public abstract class ProgramMixin {
 //        }
 //    }
 
-    @WrapMethod(method = "compileShader")
-    private static Program ldlib2$compileShader(Program.Type type, String name,
-                                                InputStream shaderData, String sourceName,
-                                                GlslPreprocessor preprocessor,
-                                                Operation<Program> original) {
-        if (LDProgramDefineManager.hasProgramDefines()) {
-            name = LDProgramDefineManager.createProgramNameWithDefines(name);
+    @ModifyArg(method = "compileShader",
+            at = @At(value = "INVOKE",
+                    target = "Lcom/mojang/blaze3d/shaders/Program;compileShaderInternal(Lcom/mojang/blaze3d/shaders/Program$Type;Ljava/lang/String;Ljava/io/InputStream;Ljava/lang/String;Lcom/mojang/blaze3d/preprocessor/GlslPreprocessor;)I"),
+            index = 1)
+    private static String ldlib2$compileShaderInternalName(String name) {
+        return ldlib2$programNameWithDefines(name);
+    }
+
+    @ModifyArg(method = "compileShader",
+            at = @At(value = "INVOKE",
+                    target = "Lcom/mojang/blaze3d/shaders/Program;<init>(Lcom/mojang/blaze3d/shaders/Program$Type;ILjava/lang/String;)V"),
+            index = 2)
+    private static String ldlib2$programConstructorName(String name) {
+        return ldlib2$programNameWithDefines(name);
+    }
+
+    @ModifyArg(method = "compileShader",
+            at = @At(value = "INVOKE",
+                    target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+                    remap = false),
+            index = 0)
+    private static Object ldlib2$programMapName(Object name) {
+        if (name instanceof String stringName) {
+            return ldlib2$programNameWithDefines(stringName);
         }
-        return original.call(type, name, shaderData, sourceName, preprocessor);
+        return name;
+    }
+
+    private static String ldlib2$programNameWithDefines(String name) {
+        if (LDProgramDefineManager.hasProgramDefines()) {
+            return LDProgramDefineManager.createProgramNameWithDefines(name);
+        }
+        return name;
     }
 
     @ModifyExpressionValue(method = "compileShaderInternal", at = @At(
@@ -53,14 +74,14 @@ public abstract class ProgramMixin {
             target = "Lcom/mojang/blaze3d/preprocessor/GlslPreprocessor;process(Ljava/lang/String;)Ljava/util/List;"))
     private static List<String> ldlib2$appendDefines(List<String> original) {
         if (LDProgramDefineManager.hasProgramDefines() && !original.isEmpty()) {
-            while (original.getFirst().isBlank()) {
+            while (original.get(0).isBlank()) {
                 original = original.subList(1, original.size());
                 if (original.isEmpty()) {
                     return original;
                 }
             }
             if (!original.isEmpty()) {
-                var firstLine = original.getFirst();
+                var firstLine = original.get(0);
                 var matcher = LDLibShaders.REGEX_VERSION.matcher(firstLine);
                 var defineLine = LDProgramDefineManager.createProgramDefinesString();
                 String newFirstLine;

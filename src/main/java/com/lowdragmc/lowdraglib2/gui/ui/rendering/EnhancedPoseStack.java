@@ -65,7 +65,7 @@ public class EnhancedPoseStack {
     }
 
     public void mulPose(Matrix4f pose) {
-       this.pose.mulPose(pose);
+       this.pose.mulPoseMatrix(pose);
         onTransform.run();
     }
 

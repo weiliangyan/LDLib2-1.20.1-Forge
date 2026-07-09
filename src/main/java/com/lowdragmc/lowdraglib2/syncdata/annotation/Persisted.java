@@ -34,7 +34,7 @@ public @interface Persisted {
     /**
      * If true, it will wrap the field's internal value based on its {@code non-null} instance.
      * It is very useful for `final` instance which doesn't allow new instance creation. If the filed set `subPersisted = true`, Ldlib2 will do:
-     * <li> if the field inherits from {@link  net.neoforged.neoforge.common.util.INBTSerializable}, it will try to use its api for serialization. </li>
+     * <li> if the field inherits from {@link  net.minecraftforge.common.util.INBTSerializable}, it will try to use its api for serialization. </li>
      * <li> otherwise, it will serialize the field's internal values and wrap it as a map. </li>
      *
      * <pre>{@code

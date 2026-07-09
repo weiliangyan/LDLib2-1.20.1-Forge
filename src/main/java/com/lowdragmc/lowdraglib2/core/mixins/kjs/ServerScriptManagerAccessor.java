@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ServerScriptManager.class)
 public interface ServerScriptManagerAccessor {
-    @Accessor
+    @Accessor("instance")
     static ServerScriptManager getStaticInstance() {
         throw new AssertionError();
     }

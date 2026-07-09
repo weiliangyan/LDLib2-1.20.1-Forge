@@ -104,7 +104,7 @@ public class TypeConstant extends Constant {
                 tag.putString("type", constant.getTypeHandle().getIdentification());
             }
             if (!constant.isSerializationEnabled()) return tag;
-            var ops = provider.createSerializationContext(NbtOps.INSTANCE);
+            var ops = com.lowdragmc.lowdraglib2.Platform.registryOps(NbtOps.INSTANCE, provider);
             if (constant.getValue() != null) {
                 encodeField(constant, ops, constant.getValue(), "value").ifPresent(t -> tag.put("value", t));
             }
@@ -196,7 +196,7 @@ public class TypeConstant extends Constant {
     private static void decodeFieldsInto(Constant target, HolderLookup.Provider provider, CompoundTag tag) {
         DynamicOps<Tag> ops;
         try {
-            ops = provider.createSerializationContext(NbtOps.INSTANCE);
+            ops = com.lowdragmc.lowdraglib2.Platform.registryOps(NbtOps.INSTANCE, provider);
         } catch (Exception e) {
             LDLib2.LOGGER.error("Could not build serialization context for constant decode", e);
             target.setDeserializeFailed(true);
@@ -254,7 +254,7 @@ public class TypeConstant extends Constant {
         try {
             var holder = new SyncValueHolder<>(fieldName, constant.getType(), value);
             var serialized = holder.ref.readPersisted(ops);
-            return serialized instanceof Tag nbtTag ? Optional.of(nbtTag) : Optional.empty();
+            return Optional.of(serialized);
         } catch (Exception e) {
             LDLib2.LOGGER.error("Failed to serialize constant {} of type {}", fieldName, safeTypeName(constant), e);
             return Optional.empty();

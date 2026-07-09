@@ -21,7 +21,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.fml.loading.FMLLoader;
+import net.minecraftforge.fml.loading.FMLLoader;
 import org.appliedenergistics.yoga.YogaEdge;
 
 import java.io.File;
@@ -142,7 +142,7 @@ public class EditorSettings implements IPersistedSerializable {
             var settings = entry.getValue();
             Codec codec = codecs.get(id);
             if (codec != null) {
-                var data = codec.encodeStart(Platform.getFrozenRegistry().createSerializationContext(JsonOps.INSTANCE), settings)
+                var data = codec.encodeStart(Platform.registryOps(JsonOps.INSTANCE, Platform.getFrozenRegistry()), settings)
                         .resultOrPartial(e -> LDLib2.LOGGER.error("Failed to serialize settings for {}, Error {}", id, e));
                 if (data.isPresent()) {
                     json.add(id.toString(), (JsonElement) data.get());
@@ -158,9 +158,9 @@ public class EditorSettings implements IPersistedSerializable {
             var codec = entry.getValue();
             if (json.has(id.toString())) {
                 var data = json.get(id.toString());
-                codec.parse(Platform.getFrozenRegistry().createSerializationContext(JsonOps.INSTANCE), data)
-                        .ifSuccess(settings -> this.settings.put(id, settings))
-                        .ifError(e -> LDLib2.LOGGER.error("Failed to load settings for {}, Error {}", id, e));
+                var result = codec.parse(Platform.registryOps(JsonOps.INSTANCE, Platform.getFrozenRegistry()), data);
+                result.result().ifPresent(settings -> this.settings.put(id, settings));
+                result.error().ifPresent(e -> LDLib2.LOGGER.error("Failed to load settings for {}, Error {}", id, e.message()));
             }
         }
     }

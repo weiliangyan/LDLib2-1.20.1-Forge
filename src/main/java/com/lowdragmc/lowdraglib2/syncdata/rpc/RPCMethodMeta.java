@@ -7,7 +7,7 @@ import com.lowdragmc.lowdraglib2.syncdata.accessor.direct.IDirectAccessor;
 import com.lowdragmc.lowdraglib2.syncdata.var.ManagedHolderVar;
 import com.lowdragmc.lowdraglib2.utils.ByteBufUtil;
 import lombok.Getter;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import com.lowdragmc.lowdraglib2.compat.network.RegistryFriendlyByteBuf;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;

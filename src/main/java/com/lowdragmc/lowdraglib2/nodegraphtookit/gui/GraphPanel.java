@@ -191,7 +191,7 @@ public class GraphPanel extends UIElement {
         if (selected != null) {
             active = toolTabs.inverse().get(selected);
         }
-        if (active == null) active = tools.getFirst();
+        if (active == null) active = tools.get(0);
         title.setText(active.getTitle());
     }
 

@@ -38,6 +38,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -48,10 +49,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
-import net.minecraft.util.StringUtil;
 import net.minecraft.util.Tuple;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.appliedenergistics.yoga.*;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
@@ -293,7 +293,8 @@ public class TextField extends BindableUIElement<String> {
     /// events
     protected void onDragSource(UIEvent event) {
         if (isNumberField()) {
-            if (event.dragHandler.draggingObject instanceof NumberStart(double numberStart)) {
+            if (event.dragHandler.draggingObject instanceof NumberStart numberStartValue) {
+                var numberStart = numberStartValue.value();
                 var localMouse = getLocalMouse(event.x, event.y);
                 var localStart = getLocalMouse(event.dragStartX, event.dragStartY);
                 if (Mth.abs(localMouse.x - localStart.x) < 4) {
@@ -304,7 +305,8 @@ public class TextField extends BindableUIElement<String> {
                     handleNumber(value, false);
                 }
             }
-        } else if (event.dragHandler.draggingObject instanceof CursorStart(int cursorStart)) {
+        } else if (event.dragHandler.draggingObject instanceof CursorStart cursorStartValue) {
+            var cursorStart = cursorStartValue.value();
             var cursor = getCursorUnderMouseX(getLocalMouse(event.x, event.y).x);
             if (cursor != -1) {
                 setCursor(cursor);
@@ -775,7 +777,7 @@ public class TextField extends BindableUIElement<String> {
 
     protected void onCharTyped(UIEvent event) {
         if (!isEditable()) return;
-        if (StringUtil.isAllowedChatCharacter(event.codePoint) && charValidator.test(event.codePoint)) {
+        if (SharedConstants.isAllowedChatCharacter(event.codePoint) && charValidator.test(event.codePoint)) {
             this.insertText(Character.toString(event.codePoint));
         }
     }
@@ -1021,7 +1023,7 @@ public class TextField extends BindableUIElement<String> {
             if (lines.isEmpty()) {
                 formattedLineCache = new Tuple<>(FormattedCharSequence.EMPTY, 0f);
             } else {
-                formattedLineCache = lines.getFirst();
+                formattedLineCache = lines.get(0);
             }
         }
         return formattedLineCache;

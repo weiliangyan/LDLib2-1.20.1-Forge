@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib2.syncdata.holder;
 import com.lowdragmc.lowdraglib2.Platform;
 import com.lowdragmc.lowdraglib2.async.AsyncThreadData;
 import com.lowdragmc.lowdraglib2.async.IAsyncLogic;
+import com.lowdragmc.lowdraglib2.networking.LDLNetworking;
 import com.lowdragmc.lowdraglib2.syncdata.annotation.DescSynced;
 import com.lowdragmc.lowdraglib2.syncdata.annotation.LazyManaged;
 import com.lowdragmc.lowdraglib2.syncdata.ref.IRef;
@@ -14,8 +15,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.neoforged.neoforge.network.PacketDistributor;
+import com.lowdragmc.lowdraglib2.compat.network.custom.CustomPacketPayload;
 
 import java.util.BitSet;
 import java.util.concurrent.RejectedExecutionException;
@@ -63,7 +63,7 @@ public interface ISyncMangedHolder extends IManagedHolder, IAsyncLogic {
                     var extra = new CompoundTag();
                     writeCustomSyncData(serverLevel.registryAccess(), extra);
                     var packet = createSyncPacket(changed, data, extra);
-                    PacketDistributor.sendToPlayersTrackingChunk(serverLevel, this.getTrackingPos(), packet);
+                    LDLNetworking.sendToPlayersTrackingChunk(serverLevel, this.getTrackingPos(), packet);
                 });
             } catch (RejectedExecutionException ignored) {
                 // The server can begin shutting down between the safety check and task submission.
@@ -107,7 +107,7 @@ public interface ISyncMangedHolder extends IManagedHolder, IAsyncLogic {
 
         var list = new ListTag();
         var syncedFields = getRootStorage().getSyncFields();
-        var ctx = provider.createSerializationContext(NbtOps.INSTANCE);
+        var ctx = com.lowdragmc.lowdraglib2.Platform.registryOps(NbtOps.INSTANCE, provider);
         for (IRef<?> syncedField : syncedFields) {
             list.add(TagBuilder.compound().add("d", syncedField.readInitialSync(ctx)).build());
         }
@@ -129,7 +129,7 @@ public interface ISyncMangedHolder extends IManagedHolder, IAsyncLogic {
         if (syncedFields.length != list.size()) {
             throw new IllegalStateException("Synced fields count mismatch");
         }
-        var ctx = provider.createSerializationContext(NbtOps.INSTANCE);
+        var ctx = com.lowdragmc.lowdraglib2.Platform.registryOps(NbtOps.INSTANCE, provider);
         for (int i = 0; i < list.size(); i++) {
             var data = list.getCompound(i).get("d");
             syncedFields[i].writeInitialSync(ctx, data);

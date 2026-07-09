@@ -11,7 +11,6 @@ import com.lowdragmc.lowdraglib2.integration.xei.jei.handler.JEITargetsTypedHand
 import com.lowdragmc.lowdraglib2.test.xei.TestJEIPlugin;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
-import mezz.jei.api.gui.builder.IClickableIngredientFactory;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.RecipeIngredientRole;
@@ -108,7 +107,11 @@ public class LDLibJEIPlugin implements IModPlugin {
                 return Optional.empty();
             }
         }
-        return manager.createTypedIngredient(ingredientType, ingredient, normalize);
+        var typedIngredient = manager.createTypedIngredient(ingredientType, ingredient);
+        if (normalize) {
+            return typedIngredient.map(manager::normalizeTypedIngredient);
+        }
+        return typedIngredient;
     }
 
     @Override
@@ -162,10 +165,10 @@ public class LDLibJEIPlugin implements IModPlugin {
      */
     public static <T extends UIElement, I> void clickableIngredient(T element, Supplier<ITypedIngredient<I>> clickableBuilder) {
         element.addEventListener(JEIUIEvents.CLICKABLE_INGREDIENT, event -> {
-            if (element.isMouseOverElement(event.x, event.y) && event.customData instanceof IClickableIngredientFactory factory) {
+            if (element.isMouseOverElement(event.x, event.y)) {
                 var clickable = clickableBuilder.get();
                 if (clickable == null) return;
-                event.customData = factory.createBuilder(clickable).buildWithArea(LDLibJEIPlugin.getArea(element));
+                event.customData = Optional.of(new ModularUIJEIHandlers.SimpleClickableIngredient<>(clickable, LDLibJEIPlugin.getArea(element)));
                 event.stopPropagation();
             }
         });
@@ -190,7 +193,17 @@ public class LDLibJEIPlugin implements IModPlugin {
                                                                 Consumer<I> onPlace) {
         element.addEventListener(JEIUIEvents.GHOST_INGREDIENT, event -> {
             if (event.customData instanceof JEITargetsTypedHandler<?> targets) {
-                Optional.ofNullable(targets.ingredient.cast(type)).ifPresent(typedIngredient -> {
+                targets.ingredient.getIngredient(type).map(ingredient -> new ITypedIngredient<I>() {
+                    @Override
+                    public IIngredientType<I> getType() {
+                        return type;
+                    }
+
+                    @Override
+                    public I getIngredient() {
+                        return ingredient;
+                    }
+                }).ifPresent(typedIngredient -> {
                     if (mayPlace.test(typedIngredient)) {
                         targets.add(LDLibJEIPlugin.getArea(element, true), onPlace);
                     }

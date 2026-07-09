@@ -3,7 +3,7 @@ package com.lowdragmc.lowdraglib2.gui.ui.data;
 import com.mojang.serialization.Codec;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
+import com.lowdragmc.lowdraglib2.compat.network.chat.ComponentSerialization;
 
 import java.util.Arrays;
 import java.util.List;

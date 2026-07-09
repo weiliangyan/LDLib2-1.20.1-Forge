@@ -175,12 +175,13 @@ public class UIVisualLayer {
         );
 
         Tesselator tesselator = RenderSystem.renderThreadTesselator();
-        BufferBuilder bufferbuilder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+        BufferBuilder bufferbuilder = tesselator.getBuilder();
+        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
         var pose = guiContext.pose.last().pose();
-        bufferbuilder.addVertex(pose, x, y + height, 0);
-        bufferbuilder.addVertex(pose, x + width, y + height, 0);
-        bufferbuilder.addVertex(pose, x + width, y, 0);
-        bufferbuilder.addVertex(pose, x, y, 0);
-        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
+        bufferbuilder.vertex(pose, x, y + height, 0).endVertex();
+        bufferbuilder.vertex(pose, x + width, y + height, 0).endVertex();
+        bufferbuilder.vertex(pose, x + width, y, 0).endVertex();
+        bufferbuilder.vertex(pose, x, y, 0).endVertex();
+        BufferUploader.drawWithShader(bufferbuilder.end());
     }
 }

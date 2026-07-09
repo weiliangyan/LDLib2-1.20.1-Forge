@@ -3,7 +3,7 @@ package com.lowdragmc.lowdraglib2.syncdata.accessor;
 import com.lowdragmc.lowdraglib2.syncdata.field.ManagedKey;
 import com.lowdragmc.lowdraglib2.syncdata.ref.IRef;
 import com.mojang.serialization.DynamicOps;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import com.lowdragmc.lowdraglib2.compat.network.RegistryFriendlyByteBuf;
 
 import javax.annotation.Nonnull;
 import java.util.function.Predicate;

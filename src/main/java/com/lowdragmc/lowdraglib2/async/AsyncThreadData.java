@@ -5,7 +5,6 @@ import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.Platform;
 import lombok.Getter;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -30,7 +29,7 @@ public class AsyncThreadData extends SavedData {
     public final ServerLevel serverLevel;
 
     public static AsyncThreadData getOrCreate(ServerLevel serverLevel) {
-        return serverLevel.getDataStorage().computeIfAbsent(new SavedData.Factory<>(() -> new AsyncThreadData(serverLevel), (tag, provider) -> new AsyncThreadData(serverLevel, tag)), LDLib2.MOD_ID);
+        return serverLevel.getDataStorage().computeIfAbsent(tag -> new AsyncThreadData(serverLevel, tag), () -> new AsyncThreadData(serverLevel), LDLib2.MOD_ID);
     }
 
     private AsyncThreadData(ServerLevel serverLevel) {
@@ -42,7 +41,7 @@ public class AsyncThreadData extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag compoundTag, HolderLookup.Provider provider) {
+    public CompoundTag save(CompoundTag compoundTag) {
         return compoundTag;
     }
 

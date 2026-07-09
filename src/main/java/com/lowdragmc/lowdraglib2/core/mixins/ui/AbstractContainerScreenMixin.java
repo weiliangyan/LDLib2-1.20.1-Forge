@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(AbstractContainerScreen.class)
 public abstract class AbstractContainerScreenMixin<T extends AbstractContainerMenu> implements ContainerEventHandler {
 
-    @Shadow
+    @Shadow(aliases = "m_6262_")
     public abstract T getMenu();
 
     @Inject(method = "removed", at = @At(value = "RETURN"))
@@ -65,15 +65,6 @@ public abstract class AbstractContainerScreenMixin<T extends AbstractContainerMe
                 return;
             }
             cir.setReturnValue(false);
-        }
-    }
-
-    @Inject(method = "renderSlotHighlight(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/inventory/Slot;IIF)V", at = @At(value = "HEAD"), cancellable = true)
-    private void ldlib2$renderSlotHighlight(GuiGraphics guiGraphics, Slot slot, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
-        if (getMenu() instanceof IItemSlotHolderMenu menu) {
-            if (menu.isItemSlot(slot)) {
-                ci.cancel();
-            }
         }
     }
 

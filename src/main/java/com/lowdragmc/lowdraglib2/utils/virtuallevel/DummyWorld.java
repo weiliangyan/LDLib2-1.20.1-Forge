@@ -15,7 +15,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.profiling.InactiveProfiler;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.TickRateManager;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.level.ChunkPos;
@@ -23,10 +22,9 @@ import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.entity.*;
-import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.ticks.BlackholeTickAccess;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -53,6 +51,9 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.ticks.LevelTickAccess;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 
 import javax.annotation.Nonnull;
 
@@ -85,7 +86,6 @@ public class DummyWorld extends Level {
     @Getter
     protected final LongSet filledBlocks;
     protected final Holder<Biome> biome;
-    protected final TickRateManager tickRateManager;
     @Getter
     protected Supplier<ClientLevel> asClientWorld = Suppliers.memoize(() -> WrappedClientWorld.of(this));
     @Getter @Setter
@@ -114,7 +114,6 @@ public class DummyWorld extends Level {
         Arrays.fill(nibbles, (byte)-1);
         this.defaultDataLayer = new DataLayer(nibbles);
         this.biome = registryAccess.registryOrThrow(Registries.BIOME).getHolderOrThrow(Biomes.PLAINS);
-        this.tickRateManager = new TickRateManager();
         if (LDLib2.isClient()) {
             particleManager = new ParticleManager();
         }
@@ -247,7 +246,6 @@ public class DummyWorld extends Level {
         return this.biome;
     }
 
-    @Override
     public PotionBrewing potionBrewing() {
         return null;
     }
@@ -277,8 +275,8 @@ public class DummyWorld extends Level {
     }
 
     @Override
-    public MapId getFreeMapId() {
-        return new MapId(1);
+    public int getFreeMapId() {
+        return 1;
     }
 
     @Override
@@ -299,10 +297,10 @@ public class DummyWorld extends Level {
     }
 
     public void addEntity(Entity entity) {
-        if (net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.EntityJoinLevelEvent(entity, this)).isCanceled()) return;
+        if (MinecraftForge.EVENT_BUS.post(new EntityJoinLevelEvent(entity, this))) return;
         this.removeEntity(entity.getId(), Entity.RemovalReason.DISCARDED);
         this.entityStorage.addEntity(entity);
-        entity.onAddedToLevel();
+        entity.onAddedToWorld();
     }
 
     public void removeEntity(int entityId, Entity.RemovalReason reason) {
@@ -315,15 +313,17 @@ public class DummyWorld extends Level {
 
     /// tick
     public void tickWorld() {
+        ForgeEventFactory.onPreLevelTick(this, () -> true);
         tickEntities();
         if (LDLib2.isClient() && particleManager != null) {
             particleManager.tick();
         }
+        ForgeEventFactory.onPostLevelTick(this, () -> true);
     }
 
     public void tickEntities() {
         for (var entity : getEntities().getAll()) {
-            if (!entity.isRemoved() && !entity.isPassenger() && !this.tickRateManager.isEntityFrozen(entity)) {
+            if (!entity.isRemoved() && !entity.isPassenger()) {
                 tickNonPassenger(entity);
             }
         }
@@ -334,11 +334,7 @@ public class DummyWorld extends Level {
         pEntity.setOldPosAndRot();
         pEntity.tickCount++;
         this.getProfiler().push(() -> BuiltInRegistries.ENTITY_TYPE.getKey(pEntity.getType()).toString());
-        // Neo: Permit cancellation of Entity#tick via EntityTickEvent.Pre
-        if (!net.neoforged.neoforge.event.EventHooks.fireEntityTickPre(pEntity).isCanceled()) {
-            pEntity.tick();
-            net.neoforged.neoforge.event.EventHooks.fireEntityTickPost(pEntity);
-        }
+        pEntity.tick();
         this.getProfiler().pop();
 
         for (Entity entity : pEntity.getPassengers()) {
@@ -360,19 +356,14 @@ public class DummyWorld extends Level {
         }
     }
 
-    @Override
-    public TickRateManager tickRateManager() {
-        return tickRateManager;
-    }
-
     @Nullable
     @Override
-    public MapItemSavedData getMapData(MapId p_324234_) {
+    public MapItemSavedData getMapData(String mapName) {
         return null;
     }
 
     @Override
-    public void setMapData(MapId p_324009_, MapItemSavedData p_151534_) {
+    public void setMapData(String mapName, MapItemSavedData data) {
 
     }
 
@@ -397,7 +388,7 @@ public class DummyWorld extends Level {
     }
 
     @Override
-    public void gameEvent(Holder<GameEvent> p_316267_, Vec3 p_220405_, GameEvent.Context p_220406_) {
+    public void gameEvent(GameEvent gameEvent, Vec3 position, GameEvent.Context context) {
 
     }
 

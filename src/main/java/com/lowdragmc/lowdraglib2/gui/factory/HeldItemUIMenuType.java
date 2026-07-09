@@ -3,7 +3,9 @@ package com.lowdragmc.lowdraglib2.gui.factory;
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import com.lowdragmc.lowdraglib2.gui.holder.ModularUIContainerMenu;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
+import com.lowdragmc.lowdraglib2.compat.network.RegistryFriendlyByteBuf;
+import com.lowdragmc.lowdraglib2.compat.network.codec.ByteBufCodecs;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -12,6 +14,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -31,15 +34,17 @@ public class HeldItemUIMenuType {
         var heldItem = player.getItemInHand(hand);
         if (heldItem.getItem() instanceof HeldItemUI heldItemUI) {
             var holder = heldItemUI.createUIHolder(player, hand, heldItem);
-            return player.openMenu(holder).isPresent();
+            NetworkHooks.openScreen(player, holder, buffer -> holder.writeClientSideData(null, LDMenuTypes.wrapMenuDataBuffer(buffer)));
+            return true;
         }
         return false;
     }
 
-    public static ModularUIContainerMenu create(int windowId, Inventory inv, RegistryFriendlyByteBuf data) {
+    public static ModularUIContainerMenu create(int windowId, Inventory inv, FriendlyByteBuf data) {
+        RegistryFriendlyByteBuf registryData = LDMenuTypes.wrapMenuDataBuffer(data);
         var player = inv.player;
-        var hand = data.readEnum(InteractionHand.class);
-        var itemstack = ItemStack.OPTIONAL_STREAM_CODEC.decode(data);
+        var hand = registryData.readEnum(InteractionHand.class);
+        var itemstack = ByteBufCodecs.OPTIONAL_ITEM_STACK.decode(registryData);
         if (itemstack.getItem() instanceof HeldItemUI heldItemUI) {
             var holder = heldItemUI.createUIHolder(player, hand, itemstack);
             return new ModularUIContainerMenu(LDMenuTypes.HELD_ITEM_UI.get(), windowId, inv, holder);
@@ -120,10 +125,9 @@ public class HeldItemUIMenuType {
             return new ModularUIContainerMenu(LDMenuTypes.HELD_ITEM_UI.get(), containerId, playerInventory, this);
         }
 
-        @Override
         public void writeClientSideData(AbstractContainerMenu menu, RegistryFriendlyByteBuf buffer) {
             buffer.writeEnum(hand);
-            ItemStack.OPTIONAL_STREAM_CODEC.encode(buffer, itemStack);
+            ByteBufCodecs.OPTIONAL_ITEM_STACK.encode(buffer, itemStack);
         }
 
         @Override

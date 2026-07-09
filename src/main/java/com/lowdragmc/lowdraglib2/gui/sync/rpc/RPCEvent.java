@@ -1,7 +1,7 @@
 package com.lowdragmc.lowdraglib2.gui.sync.rpc;
 
 import com.lowdragmc.lowdraglib2.syncdata.SyncValueHolder;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import com.lowdragmc.lowdraglib2.compat.network.RegistryFriendlyByteBuf;
 
 import org.jetbrains.annotations.Nullable;
 import java.util.function.Function;

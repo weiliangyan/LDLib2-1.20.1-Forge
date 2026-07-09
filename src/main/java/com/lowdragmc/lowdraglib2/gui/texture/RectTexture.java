@@ -15,8 +15,8 @@ import com.mojang.blaze3d.vertex.*;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import net.minecraft.client.gui.GuiGraphics;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
@@ -245,9 +245,9 @@ public class RectTexture extends TransformTexture {
             int current = i * 2;
             int next = ((i + 1) % vertexCount) * 2;
 
-            buffer.addVertex(mat, outlineScratch[next], outlineScratch[next + 1], 0).setColor(r, g, b, a);
-            buffer.addVertex(mat, outlineScratch[current], outlineScratch[current + 1], 0).setColor(r, g, b, a);
-            buffer.addVertex(mat, centerX, centerY, 0).setColor(r, g, b, a);
+            buffer.vertex(mat, outlineScratch[next], outlineScratch[next + 1], 0).color(r, g, b, a).endVertex();
+            buffer.vertex(mat, outlineScratch[current], outlineScratch[current + 1], 0).color(r, g, b, a).endVertex();
+            buffer.vertex(mat, centerX, centerY, 0).color(r, g, b, a).endVertex();
         }
     }
 
@@ -298,13 +298,13 @@ public class RectTexture extends TransformTexture {
             int current = i * 2;
             int next = ((i + 1) % vertexCount) * 2;
 
-            buffer.addVertex(mat, outerScratch[current], outerScratch[current + 1], 0).setColor(r, g, b, a);
-            buffer.addVertex(mat, innerScratch[current], innerScratch[current + 1], 0).setColor(r, g, b, a);
-            buffer.addVertex(mat, outerScratch[next], outerScratch[next + 1], 0).setColor(r, g, b, a);
+            buffer.vertex(mat, outerScratch[current], outerScratch[current + 1], 0).color(r, g, b, a).endVertex();
+            buffer.vertex(mat, innerScratch[current], innerScratch[current + 1], 0).color(r, g, b, a).endVertex();
+            buffer.vertex(mat, outerScratch[next], outerScratch[next + 1], 0).color(r, g, b, a).endVertex();
 
-            buffer.addVertex(mat, outerScratch[next], outerScratch[next + 1], 0).setColor(r, g, b, a);
-            buffer.addVertex(mat, innerScratch[current], innerScratch[current + 1], 0).setColor(r, g, b, a);
-            buffer.addVertex(mat, innerScratch[next], innerScratch[next + 1], 0).setColor(r, g, b, a);
+            buffer.vertex(mat, outerScratch[next], outerScratch[next + 1], 0).color(r, g, b, a).endVertex();
+            buffer.vertex(mat, innerScratch[current], innerScratch[current + 1], 0).color(r, g, b, a).endVertex();
+            buffer.vertex(mat, innerScratch[next], innerScratch[next + 1], 0).color(r, g, b, a).endVertex();
         }
     }
 }

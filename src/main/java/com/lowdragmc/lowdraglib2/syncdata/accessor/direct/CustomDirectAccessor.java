@@ -8,12 +8,13 @@ import com.lowdragmc.lowdraglib2.syncdata.ref.MutableDirectRef;
 import com.lowdragmc.lowdraglib2.syncdata.ref.UniqueDirectRef;
 import com.lowdragmc.lowdraglib2.syncdata.var.FieldVar;
 import com.lowdragmc.lowdraglib2.syncdata.var.IVar;
+import com.lowdragmc.lowdraglib2.utils.LDLibExtraCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.JavaOps;
 import lombok.Getter;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.nbt.NbtOps;
+import com.lowdragmc.lowdraglib2.compat.network.RegistryFriendlyByteBuf;
+import com.lowdragmc.lowdraglib2.compat.network.codec.StreamCodec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,12 +56,12 @@ public class CustomDirectAccessor<TYPE> implements IDirectAccessor<TYPE>, IMarkF
 
     @Override
     public <T> T readDirectVar(DynamicOps<T> op, IVar<TYPE> var) {
-        return codec.encodeStart(op, var.value()).getOrThrow();
+        return LDLibExtraCodecs.getOrThrow(codec.encodeStart(op, var.value()));
     }
 
     @Override
     public <T> void writeDirectVar(DynamicOps<T> op, IVar<TYPE> var, T payload) {
-        var.set(codec.parse(op, payload).getOrThrow());
+        var.set(LDLibExtraCodecs.getOrThrow(codec.parse(op, payload)));
     }
 
     @Override
@@ -119,12 +120,12 @@ public class CustomDirectAccessor<TYPE> implements IDirectAccessor<TYPE>, IMarkF
         }
 
         /**
-         * Use the codec to mark the value. This will use the {@link JavaOps} to generate the mark.
+         * Use the codec to mark the value in NBT form.
          */
         public Builder<TYPE> codecMark() {
             this.markFunction = new IMarkFunction.Simple<>(
-                    value -> codec.encodeStart(Platform.getFrozenRegistry().createSerializationContext(JavaOps.INSTANCE), value).getOrThrow(),
-                    (mark, value) -> !Objects.equals(mark, codec.encodeStart(Platform.getFrozenRegistry().createSerializationContext(JavaOps.INSTANCE), value).getOrThrow()));
+                    value -> LDLibExtraCodecs.getOrThrow(codec.encodeStart(Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry()), value)),
+                    (mark, value) -> !Objects.equals(mark, LDLibExtraCodecs.getOrThrow(codec.encodeStart(Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry()), value))));
             return this;
         }
 

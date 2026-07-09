@@ -9,9 +9,9 @@ import com.lowdragmc.lowdraglib2.syncdata.utils.TypeFabricator;
 import com.lowdragmc.lowdraglib2.syncdata.var.ManagedHolderVar;
 import com.lowdragmc.lowdraglib2.utils.LDLibExtraCodecs;
 import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.JavaOps;
 import lombok.Getter;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.nbt.NbtOps;
+import com.lowdragmc.lowdraglib2.compat.network.RegistryFriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
@@ -64,7 +64,7 @@ public class MapAccessor<K, V> implements
 
     @Override
     public <T> void writeReadOnlyValue(DynamicOps<T> op, Map<K, V> value, T payload) {
-        var list = op.getStream(payload).getOrThrow().toList();
+        var list = LDLibExtraCodecs.getOrThrow(op.getStream(payload)).toList();
         if ((list.size() & 1) != 0) {
             throw new IllegalArgumentException(
                     "Map payload must contain an even number of [k,v] elements, got " + list.size());
@@ -263,7 +263,7 @@ public class MapAccessor<K, V> implements
 
     @Override
     public Object[] obtainManagedMark(@NotNull Map<K, V> value) {
-        var op = Platform.getFrozenRegistry().createSerializationContext(JavaOps.INSTANCE);
+        var op = com.lowdragmc.lowdraglib2.Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry());
         var marks = new Object[value.size() * 2];
         int i = 0;
         for (var entry : value.entrySet()) {
@@ -276,7 +276,7 @@ public class MapAccessor<K, V> implements
     @Override
     public boolean areDifferent(Object[] managedMark, @NotNull Map<K, V> value) {
         if (managedMark.length != value.size() * 2) return true;
-        var op = Platform.getFrozenRegistry().createSerializationContext(JavaOps.INSTANCE);
+        var op = com.lowdragmc.lowdraglib2.Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry());
         int i = 0;
         for (var entry : value.entrySet()) {
             if (childMarkDiffers(op, keyAccessor, managedMark[i++], entry.getKey())) return true;
@@ -363,24 +363,26 @@ public class MapAccessor<K, V> implements
 
     private Object obtainChildMark(DynamicOps<?> op, IAccessor<?> accessor, Object obj) {
         if (obj == null) return null;
-        return switch (accessor) {
-            case IMarkFunction markFunction -> markFunction.obtainManagedMark(obj);
-            case IDirectAccessor directAccessor -> directAccessor.readDirectVar((DynamicOps) op, ManagedHolderVar.of(obj));
-            case IReadOnlyAccessor readOnlyAccessor -> readOnlyAccessor.readReadOnlyValue((DynamicOps) op, obj);
-            case null, default -> throw new IllegalArgumentException("Unsupported child accessor: " + accessor);
-        };
+        if (accessor instanceof IMarkFunction markFunction) {
+            return markFunction.obtainManagedMark(obj);
+        } else if (accessor instanceof IDirectAccessor directAccessor) {
+            return directAccessor.readDirectVar((DynamicOps) op, ManagedHolderVar.of(obj));
+        } else if (accessor instanceof IReadOnlyAccessor readOnlyAccessor) {
+            return readOnlyAccessor.readReadOnlyValue((DynamicOps) op, obj);
+        }
+        throw new IllegalArgumentException("Unsupported child accessor: " + accessor);
     }
 
     private boolean childMarkDiffers(DynamicOps<?> op, IAccessor<?> accessor, Object mark, Object obj) {
         if (obj == null) return mark != null;
         if (mark == null) return true;
-        return switch (accessor) {
-            case IMarkFunction markFunction -> markFunction.areDifferent(mark, obj);
-            case IDirectAccessor directAccessor ->
-                    !directAccessor.readDirectVar((DynamicOps) op, ManagedHolderVar.of(obj)).equals(mark);
-            case IReadOnlyAccessor readOnlyAccessor ->
-                    !readOnlyAccessor.readReadOnlyValue((DynamicOps) op, obj).equals(mark);
-            case null, default -> throw new IllegalArgumentException("Unsupported child accessor: " + accessor);
-        };
+        if (accessor instanceof IMarkFunction markFunction) {
+            return markFunction.areDifferent(mark, obj);
+        } else if (accessor instanceof IDirectAccessor directAccessor) {
+            return !directAccessor.readDirectVar((DynamicOps) op, ManagedHolderVar.of(obj)).equals(mark);
+        } else if (accessor instanceof IReadOnlyAccessor readOnlyAccessor) {
+            return !readOnlyAccessor.readReadOnlyValue((DynamicOps) op, obj).equals(mark);
+        }
+        throw new IllegalArgumentException("Unsupported child accessor: " + accessor);
     }
 }

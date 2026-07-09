@@ -143,7 +143,7 @@ public final class FileResourceProvider<T> extends ResourceProvider<T>  {
                     if (!file.getParentFile().exists()) {
                         file.getParentFile().mkdirs();
                     }
-                    NbtIo.write(nbt, file.toPath());
+                    NbtIo.write(nbt, file);
                     resourcesLastModified.put(file, file.lastModified());
                     return super.addResource(path, content);
                 } else {
@@ -260,7 +260,7 @@ public final class FileResourceProvider<T> extends ResourceProvider<T>  {
     @Nullable
     private T readResourceFromFile(File file) {
         try {
-            var fileData = NbtIo.read(file.toPath());
+            var fileData = NbtIo.read(file);
             if (fileData != null) {
                 var data = deserializeNBT(fileData, Platform.getFrozenRegistry());
                 if (data != null) return data;

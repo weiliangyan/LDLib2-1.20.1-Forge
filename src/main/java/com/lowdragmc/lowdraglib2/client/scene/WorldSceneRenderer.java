@@ -12,10 +12,11 @@ import com.mojang.blaze3d.vertex.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.minecraft.client.particle.ParticleRenderType;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
@@ -32,11 +33,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
-import org.joml.Matrix4fStack;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
+import net.minecraftforge.client.model.data.ModelData;
 
 import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
@@ -291,8 +292,7 @@ public abstract class WorldSceneRenderer {
         // (its underlying ByteBuffer will be GC'd along with the state object).
         if (syncCompileState != null && syncCompileState.currentBuffer != null) {
             try {
-                MeshData leftover = syncCompileState.currentBuffer.build();
-                if (leftover != null) leftover.close();
+                syncCompileState.currentBuffer.discard();
             } catch (Throwable ignored) {
             }
         }
@@ -434,7 +434,7 @@ public abstract class WorldSceneRenderer {
 
         Minecraft mc = Minecraft.getInstance();
         float aspectRatio = width / (height * 1.0f);
-        camera.setup(world, cameraEntity, false, false, mc.getTimer().getGameTimeDeltaPartialTick(false));
+        camera.setup(world, cameraEntity, false, false, mc.getPartialTick());
         if (ortho) {
             RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(minX, maxX, minY / aspectRatio, maxY / aspectRatio, minZ, maxZ), VertexSorting.byDistance(camera.getPosition().toVector3f()));
         } else {
@@ -442,10 +442,10 @@ public abstract class WorldSceneRenderer {
         }
 
         //setup model view matrix
-        Matrix4fStack posesStack = RenderSystem.getModelViewStack();
-        posesStack.pushMatrix();
-        posesStack.identity();
-        posesStack.lookAt(eyePos.x(), eyePos.y(), eyePos.z(), lookAt.x(), lookAt.y(), lookAt.z(), worldUp.x(), worldUp.y(), worldUp.z());
+        PoseStack posesStack = RenderSystem.getModelViewStack();
+        posesStack.pushPose();
+        posesStack.setIdentity();
+        posesStack.mulPoseMatrix(new Matrix4f().lookAt(eyePos.x(), eyePos.y(), eyePos.z(), lookAt.x(), lookAt.y(), lookAt.z(), worldUp.x(), worldUp.y(), worldUp.z()));
         RenderSystem.applyModelViewMatrix();
 
         RenderSystem.activeTexture(org.lwjgl.opengl.GL13.GL_TEXTURE0);
@@ -470,8 +470,8 @@ public abstract class WorldSceneRenderer {
         RenderSystem.restoreProjectionMatrix();
 
         //reset modelview matrix
-        Matrix4fStack posesStack = RenderSystem.getModelViewStack();
-        posesStack.popMatrix();
+        PoseStack posesStack = RenderSystem.getModelViewStack();
+        posesStack.popPose();
         RenderSystem.applyModelViewMatrix();
 
 //        RenderSystem.depthMask(false);
@@ -487,7 +487,7 @@ public abstract class WorldSceneRenderer {
 
         Minecraft mc = Minecraft.getInstance();
 
-        float particleTicks = mc.getTimer().getGameTimeDeltaPartialTick(false);
+        float particleTicks = mc.getPartialTick();
         var buffers = mc.renderBuffers().bufferSource();
         if (useCache) {
             renderCacheBuffer(mc, buffers, particleTicks);
@@ -514,7 +514,7 @@ public abstract class WorldSceneRenderer {
                             poseStack.pushPose();
                             poseStack.setIdentity();
                             poseStack.translate(cameraEntity.getX(), cameraEntity.getY(), cameraEntity.getZ());
-                            particleManager.render(poseStack, camera, particleTicks, type -> !type.isTranslucent());
+                            particleManager.render(poseStack, camera, particleTicks, type -> !isTranslucentParticleRenderType(type));
                             poseStack.popPose();
                         }
                     }
@@ -551,7 +551,7 @@ public abstract class WorldSceneRenderer {
             @Nonnull PoseStack poseStack = new PoseStack();
             poseStack.setIdentity();
             poseStack.translate(cameraEntity.getX(), cameraEntity.getY(), cameraEntity.getZ());
-            particleManager.render(poseStack, camera, particleTicks, ParticleRenderType::isTranslucent);
+            particleManager.render(poseStack, camera, particleTicks, WorldSceneRenderer::isTranslucentParticleRenderType);
         }
 
         if (afterWorldRender != null) {
@@ -603,11 +603,12 @@ public abstract class WorldSceneRenderer {
                     if (Thread.interrupted())
                         return;
                     RenderType layer = layers.get(i);
-                    BufferBuilder buffer = new BufferBuilder(new ByteBufferBuilder(layer.bufferSize()), VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+                    BufferBuilder buffer = new BufferBuilder(layer.bufferSize());
+                    buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
                     renderedBlocksMap.forEach((key, entry) -> {
                         renderBlocks(matrixstack, blockrendererdispatcher, layer, new VertexConsumerWrapper(buffer), entry.snapshot(), randomSource, entry.hook(), 0);
                     });
-                    MeshData data = buffer.build();
+                    BufferBuilder.RenderedBuffer data = buffer.endOrDiscardIfEmpty();
                     if (data == null) {
                         vertexBuffersUsingMark[i] = false;
                         continue;
@@ -712,7 +713,8 @@ public abstract class WorldSceneRenderer {
         while (s.layerIndex < s.layers.size()) {
             RenderType layer = s.layers.get(s.layerIndex);
             if (s.currentBuffer == null) {
-                s.currentBuffer = new BufferBuilder(new ByteBufferBuilder(layer.bufferSize()), VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+                s.currentBuffer = new BufferBuilder(layer.bufferSize());
+                s.currentBuffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
                 s.entryIndex = 0;
                 s.blockIter = null;
             }
@@ -762,7 +764,7 @@ public abstract class WorldSceneRenderer {
     private void finalizeSyncLayer(SyncCompileState s) {
         if (s.currentBuffer == null) return;
         int idx = s.layerIndex;
-        MeshData data = s.currentBuffer.build();
+        BufferBuilder.RenderedBuffer data = s.currentBuffer.endOrDiscardIfEmpty();
         if (data == null) {
             vertexBuffersUsingMark[idx] = false;
             return;
@@ -774,7 +776,7 @@ public abstract class WorldSceneRenderer {
             vb.upload(data);
             VertexBuffer.unbind();
         } else {
-            data.close();
+            data.release();
         }
     }
 
@@ -795,7 +797,7 @@ public abstract class WorldSceneRenderer {
                     poseStack.pushPose();
                     poseStack.setIdentity();
                     poseStack.translate(cameraEntity.getX(), cameraEntity.getY(), cameraEntity.getZ());
-                    particleManager.render(poseStack, camera, particleTicks, type -> !type.isTranslucent());
+                    particleManager.render(poseStack, camera, particleTicks, type -> !isTranslucentParticleRenderType(type));
                     poseStack.popPose();
                 }
             }
@@ -893,10 +895,9 @@ public abstract class WorldSceneRenderer {
 
         if (block != Blocks.AIR && state.getRenderShape() != INVISIBLE) {
             var model = brd.getBlockModel(state);
-            var modelData = world.getModelData(pos);
+            var modelData = world instanceof ClientLevel clientLevel ? clientLevel.getModelDataManager().getAt(pos) : ModelData.EMPTY;
             modelData = model.getModelData(world, pos, state, modelData);
             randomSource.setSeed(state.getSeed(pos));
-            modelData = model.getModelData(world, pos, state, modelData);
             if (model.getRenderTypes(state, randomSource, modelData).contains(layer)) {
                 poseStack.pushPose();
                 poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
@@ -933,6 +934,10 @@ public abstract class WorldSceneRenderer {
                 poseStack.popPose();
             }
         }
+    }
+
+    private static boolean isTranslucentParticleRenderType(ParticleRenderType type) {
+        return type == ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
     }
 
     private void renderEntities(TrackedDummyWorld level, PoseStack poseStack, MultiBufferSource buffer, @Nullable ISceneEntityRenderHook hook, float partialTicks) {
@@ -1148,33 +1153,48 @@ public abstract class WorldSceneRenderer {
         }
 
         @Override
-        public VertexConsumer addVertex(float x, float y, float z) {
-            return builder.addVertex(x + offsetX, y + offsetY, z + offsetZ);
+        public VertexConsumer vertex(double x, double y, double z) {
+            return builder.vertex(x + offsetX, y + offsetY, z + offsetZ);
         }
 
         @Override
-        public VertexConsumer setColor(int red, int green, int blue, int alpha) {
-            return builder.setColor((int) (red * r), (int) (green * g), (int) (blue * b), (int) (alpha * a));
+        public VertexConsumer color(int red, int green, int blue, int alpha) {
+            return builder.color((int) (red * r), (int) (green * g), (int) (blue * b), (int) (alpha * a));
         }
 
         @Override
-        public VertexConsumer setUv(float u, float v) {
-            return builder.setUv(u, v);
+        public VertexConsumer uv(float u, float v) {
+            return builder.uv(u, v);
         }
 
         @Override
-        public VertexConsumer setUv1(int u, int v) {
-            return builder.setUv1(u, u);
+        public VertexConsumer overlayCoords(int u, int v) {
+            return builder.overlayCoords(u, v);
         }
 
         @Override
-        public VertexConsumer setUv2(int u, int v) {
-            return builder.setUv2(u, u);
+        public VertexConsumer uv2(int u, int v) {
+            return builder.uv2(u, v);
         }
 
         @Override
-        public VertexConsumer setNormal(float x, float y, float z) {
-            return builder.setNormal(x, y, z);
+        public VertexConsumer normal(float x, float y, float z) {
+            return builder.normal(x, y, z);
+        }
+
+        @Override
+        public void endVertex() {
+            builder.endVertex();
+        }
+
+        @Override
+        public void defaultColor(int red, int green, int blue, int alpha) {
+            builder.defaultColor((int) (red * r), (int) (green * g), (int) (blue * b), (int) (alpha * a));
+        }
+
+        @Override
+        public void unsetDefaultColor() {
+            builder.unsetDefaultColor();
         }
     }
 }

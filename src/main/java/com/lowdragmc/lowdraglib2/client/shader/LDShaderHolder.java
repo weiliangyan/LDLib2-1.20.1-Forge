@@ -12,6 +12,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Dialog;
 import com.lowdragmc.lowdraglib2.gui.ui.style.StyleOrigin;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
+import com.lowdragmc.lowdraglib2.syncdata.IProviderAwareNBTSerializable;
 import com.lowdragmc.lowdraglib2.utils.ColorUtils;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.shaders.AbstractUniform;
@@ -31,7 +32,6 @@ import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.common.util.INBTSerializable;
 import org.appliedenergistics.yoga.YogaEdge;
 import org.jetbrains.annotations.UnknownNullability;
 import org.joml.*;
@@ -47,7 +47,7 @@ import java.util.stream.Stream;
 
 import static com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_TEX_COLOR;
 
-public class LDShaderHolder implements IConfigurable, INBTSerializable<CompoundTag>, AutoCloseable {
+public class LDShaderHolder implements IConfigurable, IProviderAwareNBTSerializable<CompoundTag>, AutoCloseable {
     public final static String SHADER_UID_DEFINE = "LD_SHADER_%d";
     private final static AtomicInteger SHADER_ID = new AtomicInteger();
 
@@ -93,8 +93,9 @@ public class LDShaderHolder implements IConfigurable, INBTSerializable<CompoundT
         if (defines.isEmpty()) return baseInstance;
         return shadersWithDefines.computeIfAbsent(defines.stream().collect(Collectors.toUnmodifiableSet()),
                 definesKey -> {
-                    var defineWithUid = new LinkedHashSet<>(definesKey);
-                    defineWithUid.addFirst(shaderUid);
+                    var defineWithUid = new LinkedHashSet<String>();
+                    defineWithUid.add(shaderUid);
+                    defineWithUid.addAll(definesKey);
                     try {
                         var shader = LDShaderInstance.create(baseInstance.shaderLocation, baseInstance.getVertexFormat(), defineWithUid);
                         if (shader == null) return baseInstance;
@@ -316,14 +317,16 @@ public class LDShaderHolder implements IConfigurable, INBTSerializable<CompoundT
             float imageWidth = 1;
             float imageHeight = 1;
             var mat = graphics.pose().last().pose();
-            var buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, POSITION_TEX_COLOR);
+            var tesselator = Tesselator.getInstance();
+            var buffer = tesselator.getBuilder();
+            buffer.begin(VertexFormat.Mode.QUADS, POSITION_TEX_COLOR);
             RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
             RenderSystem.setShaderTexture(0, getSamplerID(name));
-            buffer.addVertex(mat, x, y + height, 0).setUv(imageU, imageV + imageHeight).setColor(-1);
-            buffer.addVertex(mat, x + width, y + height, 0).setUv(imageU + imageWidth, imageV + imageHeight).setColor(-1);
-            buffer.addVertex(mat, x + width, y, 0).setUv(imageU + imageWidth, imageV).setColor(-1);
-            buffer.addVertex(mat, x, y, 0).setUv(imageU, imageV).setColor(-1);
-            BufferUploader.drawWithShader(buffer.buildOrThrow());
+            buffer.vertex(mat, x, y + height, 0).uv(imageU, imageV + imageHeight).color(-1).endVertex();
+            buffer.vertex(mat, x + width, y + height, 0).uv(imageU + imageWidth, imageV + imageHeight).color(-1).endVertex();
+            buffer.vertex(mat, x + width, y, 0).uv(imageU + imageWidth, imageV).color(-1).endVertex();
+            buffer.vertex(mat, x, y, 0).uv(imageU, imageV).color(-1).endVertex();
+            BufferUploader.drawWithShader(buffer.end());
         };
     }
 

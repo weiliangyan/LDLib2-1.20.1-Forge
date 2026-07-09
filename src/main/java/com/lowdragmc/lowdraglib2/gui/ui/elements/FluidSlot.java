@@ -41,17 +41,18 @@ import lombok.experimental.Accessors;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import mezz.jei.api.neoforge.NeoForgeTypes;
+import mezz.jei.api.forge.ForgeTypes;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidUtil;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidUtil;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.w3c.dom.Element;
 
 import org.jetbrains.annotations.Nullable;
@@ -305,7 +306,7 @@ public class FluidSlot extends BindableUIElement<FluidStack> {
         var menu = mui.getMenu();
         var carried = menu.getCarried();
         var handler = FluidUtil.getFluidHandler(carried);
-        if (handler.isEmpty()) return;
+        if (!handler.isPresent()) return;
         int maxAttempts = isShiftKeyDown ? carried.getCount() : 1;
         var initialFluid = boundHandler.getFluidInTank(tankIndex);
         if (allowClickFilled && initialFluid.getAmount() > 0) {
@@ -407,7 +408,7 @@ public class FluidSlot extends BindableUIElement<FluidStack> {
     @Override
     public FluidSlot setValue(@Nullable FluidStack value, boolean notify) {
         if (value == null) value = FluidStack.EMPTY;
-        if (FluidStack.matches(value, fluid)) return this;
+        if (value.isFluidStackIdentical(fluid)) return this;
         this.fluid = value;
         if (notify) notifyListeners();
         return this;
@@ -530,13 +531,13 @@ public class FluidSlot extends BindableUIElement<FluidStack> {
                 if (!fluidSlot.allowXEILookup) return null;
                 var current = fluidSlot.getValue();
                 if (current.isEmpty()) return null;
-                return LDLibJEIPlugin.createTypedIngredient(NeoForgeTypes.FLUID_STACK, current)
+                return LDLibJEIPlugin.createTypedIngredient(ForgeTypes.FLUID_STACK, current)
                         .orElse(null);
             });
         }
 
         public static void ghostIngredient(FluidSlot fluidSlot) {
-            LDLibJEIPlugin.ghostIngredient(fluidSlot, NeoForgeTypes.FLUID_STACK,
+            LDLibJEIPlugin.ghostIngredient(fluidSlot, ForgeTypes.FLUID_STACK,
                     ingredient -> true,
                     fluidSlot::setValue);
         }
@@ -547,7 +548,7 @@ public class FluidSlot extends BindableUIElement<FluidStack> {
 
         public static void recipeIngredient(FluidSlot fluidSlot, IngredientIO io, Supplier<Stream<FluidStack>> allPossibleFluids) {
             LDLibJEIPlugin.recipeIngredient(fluidSlot, io, () -> allPossibleFluids.get()
-                    .map(fluidStack -> LDLibJEIPlugin.createTypedIngredient(NeoForgeTypes.FLUID_STACK, fluidStack))
+                    .map(fluidStack -> LDLibJEIPlugin.createTypedIngredient(ForgeTypes.FLUID_STACK, fluidStack))
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .collect(Collectors.toList()));
@@ -561,9 +562,9 @@ public class FluidSlot extends BindableUIElement<FluidStack> {
             LDLibJEIPlugin.recipeSlot(fluidSlot, () -> {
                 var fluid = fluidSlot.getValue();
                 return fluid.isEmpty() ? null : LDLibJEIPlugin
-                        .createTypedIngredient(NeoForgeTypes.FLUID_STACK, fluidSlot.getFluid())
+                        .createTypedIngredient(ForgeTypes.FLUID_STACK, fluidSlot.getFluid())
                         .orElse(null);
-            }, () -> allPossibleFluids.get().map(fluid -> LDLibJEIPlugin.createTypedIngredient(NeoForgeTypes.FLUID_STACK, fluid).orElseThrow()).collect(Collectors.toList()));
+            }, () -> allPossibleFluids.get().map(fluid -> LDLibJEIPlugin.createTypedIngredient(ForgeTypes.FLUID_STACK, fluid).orElseThrow()).collect(Collectors.toList()));
         }
     }
 
@@ -618,7 +619,7 @@ public class FluidSlot extends BindableUIElement<FluidStack> {
                 if (!fluidSlot.allowXEILookup) return null;
                 var fluid = fluidSlot.getValue();
                 if (fluid.isEmpty()) return null;
-                return new EmiStackInteraction(EmiStack.of(fluid.getFluid(), fluid.getComponentsPatch(), fluid.getAmount()), null, false);
+                return new EmiStackInteraction(toEmiStack(fluid), null, false);
             });
         }
 
@@ -632,9 +633,9 @@ public class FluidSlot extends BindableUIElement<FluidStack> {
                     dragged -> {
                         if (dragged instanceof FluidEmiStack fluid) {
                             var fluidStack = new FluidStack(
-                                    ((Fluid) fluid.getKey()).builtInRegistryHolder(),
+                                    (Fluid) fluid.getKey(),
                                     Math.max(1000, (int) fluid.getAmount()),
-                                    fluid.getComponentChanges());
+                                    copyTag(fluid.getNbt()));
                             fluidSlot.setValue(fluidStack);
                         }
                     });
@@ -646,7 +647,7 @@ public class FluidSlot extends BindableUIElement<FluidStack> {
 
         public static void recipeIngredient(FluidSlot fluidSlot, IngredientIO io, Supplier<Stream<FluidStack>> allPossibleFluids) {
             LDLibEMIPlugin.recipeIngredient(fluidSlot, io, () -> allPossibleFluids.get()
-                    .map(fluid -> EmiStack.of(fluid.getFluid(), fluid.getComponentsPatch(), fluid.getAmount()))
+                    .map(EMISupport::toEmiStack)
                     .collect(Collectors.toList())
             );
         }
@@ -654,16 +655,24 @@ public class FluidSlot extends BindableUIElement<FluidStack> {
         public static void recipeSlot(FluidSlot fluidSlot, float chance) {
             LDLibEMIPlugin.recipeSlot(fluidSlot, () -> {
                 var fluid = fluidSlot.getValue();
-                return EmiStack.of(fluid.getFluid(), fluid.getComponentsPatch(), fluid.getAmount()).setChance(chance);
+                return toEmiStack(fluid).setChance(chance);
             });
         }
 
         public static void recipeSlot(FluidSlot fluidSlot, Supplier<Float> chance, IntSupplier amount, Supplier<Stream<FluidStack>> allPossibleFluids) {
             LDLibEMIPlugin.recipeSlot(fluidSlot, () ->
                     new ListEmiIngredient(
-                            allPossibleFluids.get().map(fluid -> EmiStack.of(fluid.getFluid(), fluid.getComponentsPatch(), fluid.getAmount()))
+                            allPossibleFluids.get().map(EMISupport::toEmiStack)
                                     .map(e -> e.setChance(chance.get())).collect(Collectors.toList()), amount.getAsInt())
                             .setChance(chance.get()));
+        }
+
+        private static EmiStack toEmiStack(FluidStack fluid) {
+            return EmiStack.of(fluid.getFluid(), copyTag(fluid.getTag()), fluid.getAmount());
+        }
+
+        private static CompoundTag copyTag(CompoundTag tag) {
+            return tag == null ? null : tag.copy();
         }
     }
     // endregion

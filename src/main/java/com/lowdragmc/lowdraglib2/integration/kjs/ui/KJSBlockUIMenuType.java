@@ -1,18 +1,21 @@
 package com.lowdragmc.lowdraglib2.integration.kjs.ui;
 
 import com.lowdragmc.lowdraglib2.gui.factory.BlockUIMenuType;
+import com.lowdragmc.lowdraglib2.gui.factory.LDMenuTypes;
 import com.lowdragmc.lowdraglib2.gui.holder.ModularUIContainerMenu;
 import dev.latvian.mods.kubejs.script.ScriptType;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
+import com.lowdragmc.lowdraglib2.compat.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -21,14 +24,16 @@ public class KJSBlockUIMenuType {
         var blockstate = player.level().getBlockState(pos);
         var event = new BlockUIEventJS(player, pos, blockstate, id);
         UIEvents.BLOCK.post(ScriptType.SERVER, id, event);
-        return player.openMenu(event).isPresent();
+        NetworkHooks.openScreen(player, event, buffer -> event.writeClientSideData(null, LDMenuTypes.wrapMenuDataBuffer(buffer)));
+        return true;
     }
 
-    public static ModularUIContainerMenu create(int windowId, Inventory inv, RegistryFriendlyByteBuf data) {
+    public static ModularUIContainerMenu create(int windowId, Inventory inv, FriendlyByteBuf data) {
+        RegistryFriendlyByteBuf registryData = LDMenuTypes.wrapMenuDataBuffer(data);
         var player = inv.player;
-        var pos = data.readBlockPos();
-        var blockstate = BlockUIMenuType.BLOCK_STATE_STREAM_CODEC.decode(data);
-        var id = data.readUtf();
+        var pos = registryData.readBlockPos();
+        var blockstate = BlockUIMenuType.BLOCK_STATE_STREAM_CODEC.decode(registryData);
+        var id = registryData.readUtf();
         var event = new BlockUIEventJS(player, pos, blockstate, id);
         UIEvents.BLOCK.post(ScriptType.CLIENT, id, event);
         return event.createMenu(windowId, inv, player);
@@ -55,7 +60,6 @@ public class KJSBlockUIMenuType {
             return LDKJSMenuTypes.BLOCK_UI.get();
         }
 
-        @Override
         @HideFromJS
         public void writeClientSideData(AbstractContainerMenu menu, RegistryFriendlyByteBuf buffer) {
             buffer.writeBlockPos(pos);

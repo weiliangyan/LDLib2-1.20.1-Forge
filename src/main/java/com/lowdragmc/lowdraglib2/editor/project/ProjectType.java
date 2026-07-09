@@ -66,7 +66,7 @@ public class ProjectType {
      * @throws Exception If any error occurs during file reading, data deserialization, or object creation.
      */
     public IProject loadProjectFromFile(File file) throws Exception {
-        var data = NbtIo.read(file.toPath());
+        var data = NbtIo.read(file);
         var project = getProjectCreator().get();
         project.deserializeNBT(Platform.getFrozenRegistry(), Objects.requireNonNull(data));
         return project;
@@ -84,7 +84,7 @@ public class ProjectType {
      */
     public void saveProjectToFile(IProject project, File file) throws Exception {
         var fileData = project.serializeNBT(Platform.getFrozenRegistry());
-        NbtIo.write(fileData, file.toPath());
+        NbtIo.write(fileData, file);
     }
 
     /**
@@ -100,7 +100,7 @@ public class ProjectType {
      */
     public boolean isProjectDirty(IProject project, File file) throws Exception {
         var data = project.serializeNBT(Platform.getFrozenRegistry());
-        var fileData = NbtIo.read(file.toPath());
+        var fileData = NbtIo.read(file);
         return !data.equals(fileData);
     }
 

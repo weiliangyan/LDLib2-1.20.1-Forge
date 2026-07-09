@@ -1,18 +1,18 @@
 package com.lowdragmc.lowdraglib2.math.curve;
 
+import com.lowdragmc.lowdraglib2.syncdata.IProviderAwareNBTSerializable;
 import com.lowdragmc.lowdraglib2.math.Interpolations;
 import lombok.EqualsAndHashCode;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
-import net.neoforged.neoforge.common.util.INBTSerializable;
 import org.jetbrains.annotations.UnknownNullability;
 import org.joml.Vector3f;
 
 import javax.annotation.Nonnull;
 
 @EqualsAndHashCode(callSuper = false)
-public class CubicBezierCurve3 extends Curve<Vector3f> implements INBTSerializable<ListTag> {
+public class CubicBezierCurve3 extends Curve<Vector3f> implements IProviderAwareNBTSerializable<ListTag> {
     public Vector3f p0, c0, c1, p1;
 
     public CubicBezierCurve3(Vector3f start, Vector3f control1, Vector3f control2, Vector3f end) {

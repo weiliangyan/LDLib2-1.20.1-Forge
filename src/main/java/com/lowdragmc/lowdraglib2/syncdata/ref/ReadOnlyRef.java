@@ -5,7 +5,7 @@ import com.lowdragmc.lowdraglib2.syncdata.accessor.readonly.IReadOnlyAccessor;
 import com.lowdragmc.lowdraglib2.syncdata.field.ManagedKey;
 import com.lowdragmc.lowdraglib2.syncdata.accessor.IMarkFunction;
 import com.lowdragmc.lowdraglib2.syncdata.var.ReadOnlyVar;
-import com.mojang.serialization.JavaOps;
+import net.minecraft.nbt.NbtOps;
 
 import java.util.Objects;
 
@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
  *  <br>
  *  It will store the old value mark to compare with the new value mark every update.
  *  Please implement {@link IMarkFunction} for the accessor.
- *  If the {@link IMarkFunction} is not implemented, it will use codec to store the mark in a type of {@link com.mojang.serialization.JavaOps}
+ *  If the {@link IMarkFunction} is not implemented, it will use codec to store the mark in NBT form.
  */
 @SuppressWarnings("unchecked")
 public class ReadOnlyRef<TYPE> extends ReadOnlyManagedRef<TYPE> {
@@ -47,7 +47,7 @@ public class ReadOnlyRef<TYPE> extends ReadOnlyManagedRef<TYPE> {
     private static <T> Object obtainValueMark(IReadOnlyAccessor<T> accessor, T value) {
         return accessor instanceof IMarkFunction markFunction ?
                 markFunction.obtainManagedMark(value) :
-                accessor.readReadOnlyValue(Platform.getFrozenRegistry().createSerializationContext(JavaOps.INSTANCE), value);
+                accessor.readReadOnlyValue(Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry()), value);
     }
 
     public IReadOnlyAccessor<TYPE> getAccessor() {
@@ -78,7 +78,7 @@ public class ReadOnlyRef<TYPE> extends ReadOnlyManagedRef<TYPE> {
                 markAsDirty();
             }
         } else {
-            var newValueMark = accessor.readReadOnlyValue(Platform.getFrozenRegistry().createSerializationContext(JavaOps.INSTANCE), value);
+            var newValueMark = accessor.readReadOnlyValue(Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry()), value);
             if (!oldValueMark.equals(newValueMark)) {
                 oldValueMark = newValueMark;
                 markAsDirty();

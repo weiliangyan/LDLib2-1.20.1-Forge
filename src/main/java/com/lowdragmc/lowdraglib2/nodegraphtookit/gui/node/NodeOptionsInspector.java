@@ -67,7 +67,8 @@ public class NodeOptionsInspector extends ModelElement {
                     nodeOption.getPortModel().getDataTypeHandle(),
                     nodeOption.isShowInInspectorOnly())
             );
-            if (nodeOption.getPortModel() instanceof IFieldValueConfigurable configurable) {
+            IFieldValueConfigurable configurable = nodeOption.getPortModel();
+            if (configurable != null) {
                 var inspector = new FieldValueInspector();
                 inspector.setFieldName(nodeOption.getPortModel().getDisplayName());
                 if (getGraphView() != null) inspector.setHistoryStack(getGraphView().getHistoryStack());

@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib2.test.ui
 
+import com.lowdragmc.lowdraglib2.LDLib2
 import com.lowdragmc.lowdraglib2.gui.slot.ItemHandlerSlot
 import com.lowdragmc.lowdraglib2.gui.sync.rpc.rpcEvent
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI
@@ -18,9 +19,9 @@ import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.material.Fluids
-import net.neoforged.neoforge.fluids.FluidStack
-import net.neoforged.neoforge.fluids.capability.templates.FluidTank
-import net.neoforged.neoforge.items.ItemStackHandler
+import net.minecraftforge.fluids.FluidStack
+import net.minecraftforge.fluids.capability.templates.FluidTank
+import net.minecraftforge.items.ItemStackHandler
 
 
 @LDLRegister(name = "dsl_sync", registry = "ldlib2:menu_test")
@@ -31,57 +32,73 @@ class TestMenuDSL : IMenuTest {
     private var number = 0.5f
 
     override fun createUI(player: Player): ModularUI {
+        return try {
+            createSyncUI(player)
+        } catch (throwable: Throwable) {
+            LDLib2.LOGGER.error("Failed to create LDLib2 dsl_sync test UI on {}", if (player.level().isClientSide) "client" else "server", throwable)
+            createFallbackUI(player, throwable)
+        }
+    }
+
+    private fun createSyncUI(player: Player): ModularUI {
         val itemHandler = ItemStackHandler(2)
         val fluidTank = FluidTank(2000)
-        // create a root element
         val root = element({
             cls = { +"panel_bg" }
         }) {
-            // add a label to display text
-            label({text("Data Between Screen and Menu")})
-            row ({
+            label({ text("Data Between Screen and Menu") })
+            row({
                 layout = { gap { all(2.px) } }
             }) {
-                itemSlot({bind(itemHandler, 0)})
-                itemSlot({bind(ItemHandlerSlot(itemHandler, 1).setCanTake({false}))})
-                fluidSlot({bind(fluidTank, 0)})
+                itemSlot({ bind(itemHandler, 0) })
+                itemSlot({ bind(ItemHandlerSlot(itemHandler, 1).setCanTake { false }) })
+                fluidSlot({ bind(fluidTank, 0) })
             }
-            // bind value to the components
-            element ({
+            element({
                 layout = { gap { all(2.px) } }
             }) {
                 switch { bind(::bool) }
                 textField { bind(::string) }
-                scrollerHorizontal({layout = {width(100.pct)}}) { bind(::number) }
-                // read-only (s->c), always get data from the server and display on the client
-                label { bindS2C({ Component.literal("s->c only: ")
+                scrollerHorizontal({ layout = { width(100.pct) } }) { bind(::number) }
+                label {
+                    bindS2C({
+                        Component.literal("s->c only: ")
                         .append(Component.literal(bool.toString()).withStyle(ChatFormatting.AQUA)).append(" ")
                         .append(Component.literal(string).withStyle(ChatFormatting.RED)).append(" ")
-                        .append(Component.literal("%.2f".format(number)).withStyle(ChatFormatting.YELLOW))}) }
-                // trigger ui events on the server side
+                        .append(Component.literal("%.2f".format(number)).withStyle(ChatFormatting.YELLOW))
+                    })
+                }
                 button {
                     serverEvents {
                         UIEvents.MOUSE_DOWN += {
-                            if (fluidTank.getFluid().fluid === Fluids.WATER) {
-                                fluidTank.setFluid(FluidStack(Fluids.LAVA, 1000))
+                            if (fluidTank.fluid.fluid === Fluids.WATER) {
+                                fluidTank.fluid = FluidStack(Fluids.LAVA, 1000)
                             } else {
-                                fluidTank.setFluid(FluidStack(Fluids.WATER, 1000))
+                                fluidTank.fluid = FluidStack(Fluids.WATER, 1000)
                             }
                         }
                     }
-                    // define a rpc event
                     val rpcEvent = element.rpcEvent { clickValue: String -> string = clickValue }
                     events {
                         UIEvents.MOUSE_DOWN += {
-                            rpcEvent.send( "rpc")
+                            rpcEvent.send("rpc")
                         }
                     }
                 }
-                // you could also use button.setOnServerClick(e -> { ... })
                 inventorySlots()
             }
         }
-        return ModularUI(UI.of(root, StylesheetManager.MODERN), player)
+        return ModularUI(UI.of(root, StylesheetManager.INSTANCE.getStylesheetSafe(StylesheetManager.MODERN)), player)
+    }
+
+    private fun createFallbackUI(player: Player, throwable: Throwable): ModularUI {
+        val root = com.lowdragmc.lowdraglib2.gui.ui.UIElement()
+        root.addChildren(
+            Label().setText("dsl_sync failed to create UI"),
+            Label().setText(throwable.javaClass.name),
+            Label().setText(throwable.message ?: "no message")
+        ).addClass("panel_bg")
+        return ModularUI(UI.of(root, StylesheetManager.INSTANCE.getStylesheetSafe(StylesheetManager.MODERN)), player)
     }
 
 }

@@ -21,7 +21,9 @@ import dev.vfyjxf.taffy.style.FlexDirection;
 import dev.vfyjxf.taffy.style.TaffyDimension;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
@@ -62,9 +64,9 @@ public class ItemStackAccessor extends TypesAccessor<ItemStack> {
         group.inlineContainer.getLayout().flexDirection(FlexDirection.ROW);
         group.inlineContainer.addChildren(slot, new UIElement().layout(l -> l.flex(1)), inventoryButton);
         var defaultValue = defaultValue(field);
-        var componentsConfigurator = new DataComponentConfigurator(supplier.get().getItem().components(),
-                () -> supplier.get().getComponentsPatch(),
-                patch -> updater.accept(new ItemStack(supplier.get().getItem().builtInRegistryHolder(), supplier.get().getCount(), patch)), forceUpdate);
+        var componentsConfigurator = new DataComponentConfigurator(supplier.get().getTag(),
+                () -> supplier.get().getTag(),
+                tag -> updater.accept(withTag(supplier.get().getItem(), supplier.get().getCount(), tag)), forceUpdate);
         inventoryButton.setOnClick(event -> {
             // open player inventory to select item
             if (!LDLib2.isClient()) return;
@@ -101,7 +103,7 @@ public class ItemStackAccessor extends TypesAccessor<ItemStack> {
             dialog.addButton(new Button()
                     .setOnClick(e -> {
                         updater.accept(selectedStack[0].copy());
-                        componentsConfigurator.setPrototype(selectedStack[0].getItem().components());
+                        componentsConfigurator.setPrototype(selectedStack[0].getTag());
                         group.notifyChanges();
                         dialog.close();
                     })
@@ -117,10 +119,8 @@ public class ItemStackAccessor extends TypesAccessor<ItemStack> {
         var itemConfigurator = new RegistrySearchComponent.Item("configurator.item",
                 () -> supplier.get().getItem(),
                 item -> {
-                    updater.accept(new ItemStack(item.builtInRegistryHolder(),
-                            Math.max(supplier.get().getCount(), 1),
-                            supplier.get().getComponentsPatch()));
-                    componentsConfigurator.setPrototype(item.components());
+                    updater.accept(withTag(item, Math.max(supplier.get().getCount(), 1), supplier.get().getTag()));
+                    componentsConfigurator.setPrototype(supplier.get().getTag());
                 },
                 defaultValue.getItem(), forceUpdate);
         var countConfigurator = new NumberConfigurator("ldlib.gui.editor.configurator.count",
@@ -133,25 +133,31 @@ public class ItemStackAccessor extends TypesAccessor<ItemStack> {
         if (LDLib2.isJeiLoaded()) {
             RegistrySearchComponent.JEISupport.ghostItem(group, Predicates.alwaysTrue(), itemStack -> {
                 updater.accept(itemStack);
-                componentsConfigurator.setPrototype(itemStack.getItem().components());
+                componentsConfigurator.setPrototype(itemStack.getTag());
                 group.notifyChanges();
             });
         }
         if (LDLib2.isReiLoaded()) {
             RegistrySearchComponent.REISupport.ghostItem(group, Predicates.alwaysTrue(), itemStack -> {
                 updater.accept(itemStack);
-                componentsConfigurator.setPrototype(itemStack.getItem().components());
+                componentsConfigurator.setPrototype(itemStack.getTag());
                 group.notifyChanges();
             });
         }
         if (LDLib2.isEmiLoaded()) {
             RegistrySearchComponent.EMISupport.ghostItem(group, Predicates.alwaysTrue(), itemStack -> {
                 updater.accept(itemStack);
-                componentsConfigurator.setPrototype(itemStack.getItem().components());
+                componentsConfigurator.setPrototype(itemStack.getTag());
                 group.notifyChanges();
             });
         }
         return group;
+    }
+
+    private static ItemStack withTag(Item item, int count, @Nullable CompoundTag tag) {
+        var stack = new ItemStack(item, count);
+        stack.setTag(tag == null ? null : tag.copy());
+        return stack;
     }
 
     private static ItemSlot createPickerSlot(ItemStack stack, ItemSlot[] selected, ItemStack[] selectedStack) {

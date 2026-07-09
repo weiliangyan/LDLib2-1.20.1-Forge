@@ -1,10 +1,9 @@
 package com.lowdragmc.lowdraglib2.configurator;
 
-import com.lowdragmc.lowdraglib2.Platform;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.nbt.Tag;
-import net.neoforged.neoforge.common.util.INBTSerializable;
+import net.minecraftforge.common.util.INBTSerializable;
 
 import org.jetbrains.annotations.Nullable;
 import java.util.function.Consumer;
@@ -23,7 +22,7 @@ public class SerializableRecordAction<T extends INBTSerializable<?>> implements 
 
     private SerializableRecordAction(T serializable) {
         this.serializable = serializable;
-        this.snapshot = serializable.serializeNBT(Platform.getFrozenRegistry());
+        this.snapshot = serializable.serializeNBT();
     }
 
     public static <T extends INBTSerializable<?>> SerializableRecordAction<T> of(T serializable) {
@@ -37,12 +36,12 @@ public class SerializableRecordAction<T extends INBTSerializable<?>> implements 
     }
 
     public void updateSnapshot() {
-        snapshot = serializable.serializeNBT(Platform.getFrozenRegistry());
+        snapshot = serializable.serializeNBT();
     }
 
     @Override
     public void execute() {
-        ((INBTSerializable)serializable).deserializeNBT(Platform.getFrozenRegistry(), snapshot);
+        ((INBTSerializable)serializable).deserializeNBT(snapshot);
         if (onExecute != null) {
             onExecute.accept(serializable);
         }
@@ -50,7 +49,7 @@ public class SerializableRecordAction<T extends INBTSerializable<?>> implements 
 
     @Override
     public void undo() {
-        ((INBTSerializable)serializable).deserializeNBT(Platform.getFrozenRegistry(), snapshot);
+        ((INBTSerializable)serializable).deserializeNBT(snapshot);
         if (onUndo != null) {
             onUndo.accept(serializable);
         }

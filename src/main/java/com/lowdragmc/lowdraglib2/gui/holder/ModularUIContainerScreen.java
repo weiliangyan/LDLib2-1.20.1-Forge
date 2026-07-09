@@ -1,12 +1,13 @@
 package com.lowdragmc.lowdraglib2.gui.holder;
 
+import com.lowdragmc.lowdraglib2.LDLib2;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -21,12 +22,14 @@ public class ModularUIContainerScreen extends AbstractContainerScreen<ModularUIC
 
     @Override
     public void init() {
-        // the modular widget has already added + init by events
-        this.imageWidth = (int) getMenu().getModularUI().getWidth();
-        this.imageHeight = (int) getMenu().getModularUI().getHeight();
+        var modularUI = getMenu().getModularUI();
+        modularUI.setScreenAndInit(this);
+        this.imageWidth = (int) modularUI.getWidth();
+        this.imageHeight = (int) modularUI.getHeight();
         super.init();
-        // initial focus
-        setFocused(getMenu().modularUI.getWidget());
+        this.addRenderableWidget(modularUI.getWidget());
+        setFocused(modularUI.getWidget());
+        LDLib2.LOGGER.info("Initialized LDLib2 container UI screen: {}x{}", this.imageWidth, this.imageHeight);
     }
 
     @Override

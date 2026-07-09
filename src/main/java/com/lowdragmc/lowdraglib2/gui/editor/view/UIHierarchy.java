@@ -27,7 +27,7 @@ import net.minecraft.nbt.NbtOps;
 
 import javax.annotation.Nonnull;
 
-import org.apache.commons.lang3.function.Consumers;
+import com.lowdragmc.lowdraglib2.utils.function.LDConsumers;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
 
@@ -43,7 +43,7 @@ public class UIHierarchy extends UIElement {
 
     // runtime
     @Setter
-    protected Consumer<Set<UITreeNode>> onSelectedChanged = Consumers.nop();
+    protected Consumer<Set<UITreeNode>> onSelectedChanged = LDConsumers.nop();
 
     @Getter @Nullable
     private UI ui;
@@ -102,7 +102,7 @@ public class UIHierarchy extends UIElement {
                         lastClickTime = 0;
                     });
                     nodeUI.addEventListener(UIEvents.DRAG_ENTER, e -> {
-                        if (e.dragHandler.getDraggingObject() instanceof DraggingUINode(var dragged) && dragged != node) {
+                        if (e.dragHandler.getDraggingObject() instanceof DraggingUINode draggingUINode && draggingUINode.draggedNode() != node) {
                             var mode = TreeList.isMouseOverNodeAbove(e) ? 0 : TreeList.isMouseOverNodeCenter(e) ? 1 : TreeList.isMouseOverNodeBelow(e) ? 2 : -1;
                             e.currentElement.style(style -> style.overlayTexture(TreeList.createDraggingOverlay(mode)));
                         }
@@ -114,7 +114,7 @@ public class UIHierarchy extends UIElement {
                         e.currentElement.style(style -> style.overlayTexture(IGuiTexture.EMPTY));
                     });
                     nodeUI.addEventListener(UIEvents.DRAG_UPDATE, e -> {
-                        if (e.dragHandler.getDraggingObject() instanceof DraggingUINode(var dragged) && dragged != node) {
+                        if (e.dragHandler.getDraggingObject() instanceof DraggingUINode draggingUINode && draggingUINode.draggedNode() != node) {
                             var mode = TreeList.isMouseOverNodeAbove(e) ? 0 : TreeList.isMouseOverNodeCenter(e) ? 1 : TreeList.isMouseOverNodeBelow(e) ? 2 : -1;
                             e.currentElement.style(style -> style.overlayTexture(TreeList.createDraggingOverlay(mode)));
                         } else {
@@ -123,7 +123,8 @@ public class UIHierarchy extends UIElement {
                     });
                     nodeUI.addEventListener(UIEvents.DRAG_PERFORM, e -> {
                         e.currentElement.style(style -> style.overlayTexture(IGuiTexture.EMPTY));
-                        if (e.dragHandler.getDraggingObject() instanceof DraggingUINode(var dragged) && dragged != node) {
+                        if (e.dragHandler.getDraggingObject() instanceof DraggingUINode draggingUINode && draggingUINode.draggedNode() != node) {
+                            var dragged = draggingUINode.draggedNode();
                             var target = node.getKey();
                             var toMoved = dragged.getKey();
                             if (toMoved.isAncestorOf(target)) return;
@@ -327,7 +328,7 @@ public class UIHierarchy extends UIElement {
         if (!isSelectedNodeValid(nodes)) return;
         var tags = nodes.stream()
                 .sorted(Comparator.comparingInt(node -> node.getKey().getSiblingIndex()))
-                .map(node -> CODEC.encodeStart(Platform.getFrozenRegistry().createSerializationContext(NbtOps.INSTANCE), node.key)
+                .map(node -> CODEC.encodeStart(Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry()), node.key)
                         .result().orElse(null))
                 .filter(Objects::nonNull)
                 .filter(CompoundTag.class::isInstance)
@@ -342,9 +343,10 @@ public class UIHierarchy extends UIElement {
         var nodes = treeList.getSelected();
         if (nodes.size() != 1) return;
         var parent = nodes.iterator().next().getKey();
-        if (ClipboardManager.INSTANCE.paste() instanceof NodeCopy(List<CompoundTag> copiedNodes)) {
+        if (ClipboardManager.INSTANCE.paste() instanceof NodeCopy nodeCopy) {
+            var copiedNodes = nodeCopy.copiedNodes();
             copiedNodes.forEach(tag -> {
-                CODEC.parse(Platform.getFrozenRegistry().createSerializationContext(NbtOps.INSTANCE), tag).result().ifPresent(element -> {
+                CODEC.parse(Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry()), tag).result().ifPresent(element -> {
                     parent.addEditorChild(element, -1);
                 });
             });

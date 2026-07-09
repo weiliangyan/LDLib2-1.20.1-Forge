@@ -238,7 +238,7 @@ public final class NodeCommands {
                             elementsToSelect.add(newWire);
                         }
                     }
-                    case ConnectionsToMake.INSERT_ON_WIRE -> {
+                    case INSERT_ON_WIRE -> {
                         if (portNodeModel instanceof InputOutputPortsNodeModel newModelToConnect) {
                             var wireInput = nodeData.wireToInsertOn.getToPort();
                             var wireOutput = nodeData.wireToInsertOn.getFromPort();
@@ -255,7 +255,7 @@ public final class NodeCommands {
                             var outputWire = outputPortModel == null ? null : graphModel.createWire(wireInput, outputPortModel);
                         }
                     }
-                    case ConnectionsToMake.EXISTING_WIRES -> {
+                    case EXISTING_WIRES -> {
                         for (var wire : nodeData.wiresToConnect) {
                             var wireModel = wire.left();
                             var wireSide = wire.right();

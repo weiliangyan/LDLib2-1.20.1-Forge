@@ -33,7 +33,7 @@ public class VerticalPortContainerElement extends PortContainerElement {
         // node is collapsed OR there are no vertical ports of this direction. Driving it here — not
         // from the parent node element — avoids the parent/child IMPORTANT-origin overwrite (parts
         // update after their owner).
-        boolean collapsed = portNodeModel instanceof AbstractNodeModel anm && anm.isCollapsed();
+        boolean collapsed = portNodeModel instanceof AbstractNodeModel && portNodeModel.isCollapsed();
         boolean empty = portContainer == null || portContainer.getPortElements().isEmpty();
         Style.importantPipeline(getLayout(), l -> l.display(collapsed || empty ? TaffyDisplay.NONE : TaffyDisplay.FLEX));
     }

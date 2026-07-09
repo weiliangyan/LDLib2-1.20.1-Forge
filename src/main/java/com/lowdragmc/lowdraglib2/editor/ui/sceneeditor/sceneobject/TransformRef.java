@@ -4,9 +4,8 @@ import com.lowdragmc.lowdraglib2.math.Transform;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.StringTag;
-import net.neoforged.neoforge.common.util.INBTSerializable;
+import net.minecraftforge.common.util.INBTSerializable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import org.jetbrains.annotations.Nullable;
@@ -46,13 +45,13 @@ public class TransformRef implements INBTSerializable<StringTag> {
     }
 
     @Override
-    public @UnknownNullability StringTag serializeNBT(HolderLookup.Provider provider) {
+    public @UnknownNullability StringTag serializeNBT() {
         if (transformId == null) return StringTag.valueOf("");
         return StringTag.valueOf(transformId.toString());
     }
 
     @Override
-    public void deserializeNBT(HolderLookup.Provider provider, StringTag nbt) {
+    public void deserializeNBT(StringTag nbt) {
         if (nbt.getAsString().isEmpty()) {
             transformId = null;
         } else {

@@ -45,20 +45,17 @@ public class TransformRefConfigurator extends ValueConfigurator<TransformRef> {
 
     @Override
     protected void onDropObject(@NotNull Object object) {
-        switch (object) {
-            case Transform transform -> {
-                onValueUpdatePassively(new TransformRef(transform));
-                updateValue();
-            }
-            case UUID uuid -> {
-                onValueUpdatePassively(new TransformRef(uuid));
-                updateValue();
-            }
-            case ISceneObject sceneObject -> {
-                onValueUpdatePassively(new TransformRef(sceneObject.id()));
-                updateValue();
-            }
-            default -> super.onDropObject(object);
+        if (object instanceof Transform transform) {
+            onValueUpdatePassively(new TransformRef(transform));
+            updateValue();
+        } else if (object instanceof UUID uuid) {
+            onValueUpdatePassively(new TransformRef(uuid));
+            updateValue();
+        } else if (object instanceof ISceneObject sceneObject) {
+            onValueUpdatePassively(new TransformRef(sceneObject.id()));
+            updateValue();
+        } else {
+            super.onDropObject(object);
         }
     }
 

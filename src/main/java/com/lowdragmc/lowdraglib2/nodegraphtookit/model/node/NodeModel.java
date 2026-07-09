@@ -529,7 +529,8 @@ public abstract class NodeModel extends InputOutputPortsNodeModel implements INo
 
         // Now constants for NodeOptions have NodeOption.k_OptionIdPrefix in their id. We need to migrate constants with no prefix to the new id.
         if (!isNodeOptionConstantsMigrated() && !inputConstantsById.containsKey(portId)) {
-            if (inputConstantsById.remove(optionId) instanceof Constant oldConstant) {
+            Constant oldConstant = inputConstantsById.remove(optionId);
+            if (oldConstant != null) {
                 inputConstantsById.put(portId, oldConstant);
             }
         }
@@ -570,7 +571,8 @@ public abstract class NodeModel extends InputOutputPortsNodeModel implements INo
         }
 
         Constant newConstant = null;
-        if (inputConstantsById.get(id) instanceof Constant existingConstant) {
+        Constant existingConstant = inputConstantsById.get(id);
+        if (existingConstant != null) {
             if (graphModel != null) {
                 newConstant = graphModel.createConstantValue(inputPort.dataTypeHandle);
             }
@@ -654,7 +656,8 @@ public abstract class NodeModel extends InputOutputPortsNodeModel implements INo
         PortModel portModel = null;
         if (graphModel != null && graphModel.getModel(uid) instanceof PortModel found) {
             portModel = found;
-        } else if (ports != null && ports.get(PortModel.computeUniqueName(portId, parentPort == null ? null : parentPort.getUniqueName())) instanceof PortModel found) {
+        } else if (ports != null) {
+            PortModel found = ports.get(PortModel.computeUniqueName(portId, parentPort == null ? null : parentPort.getUniqueName()));
             portModel = found;
         }
         if (portModel != null) {
@@ -733,18 +736,21 @@ public abstract class NodeModel extends InputOutputPortsNodeModel implements INo
     public void onPortUniqueNameChanged(PortModel portModel, String oldUniqueName, String newUniqueName) {
         if (portModel.getDirection() == PortDirection.INPUT) {
             inputPortInfos.portsById.changePortName(portModel, oldUniqueName);
-            if (inputConstantsById.remove(oldUniqueName) instanceof Constant constant) {
+            Constant constant = inputConstantsById.remove(oldUniqueName);
+            if (constant != null) {
                 if (!inputConstantsById.containsKey(newUniqueName)) {
                     inputConstantsById.put(newUniqueName, constant);
                 }
             }
-            if (inputPortInfos.expandedPortsById.remove(oldUniqueName) instanceof PortModel expandedPort) {
+            PortModel expandedPort = inputPortInfos.expandedPortsById.remove(oldUniqueName);
+            if (expandedPort != null) {
                 inputPortInfos.expandedPortsById.putIfAbsent(newUniqueName, expandedPort);
             }
         } else {
             outputPortInfos.portsById.changePortName(portModel, oldUniqueName);
 
-            if (outputPortInfos.expandedPortsById.remove(oldUniqueName) instanceof PortModel expandedPort) {
+            PortModel expandedPort = outputPortInfos.expandedPortsById.remove(oldUniqueName);
+            if (expandedPort != null) {
                 outputPortInfos.expandedPortsById.put(newUniqueName, expandedPort);
             }
         }

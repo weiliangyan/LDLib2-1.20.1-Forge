@@ -5,9 +5,11 @@ import com.lowdragmc.lowdraglib2.gui.sync.bindings.IDataProvider;
 import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.IPausable;
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
+import com.lowdragmc.lowdraglib2.integration.xei.jei.handler.JEIRecipeWidgetHandler;
 import lombok.Getter;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.gui.inputs.IJeiGuiEventListener;
+import mezz.jei.api.gui.widgets.ISlottedRecipeWidget;
 import mezz.jei.api.gui.widgets.IRecipeWidget;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
@@ -19,18 +21,26 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public class ModularUIJEIWidget implements IRecipeWidget, IJeiGuiEventListener {
+public class ModularUIJEIWidget implements IRecipeWidget, ISlottedRecipeWidget, IJeiGuiEventListener {
     public static final ScreenPosition ZERO = new ScreenPosition(0, 0);
     public final ModularUI modularUI;
     // runtime
     @Getter
     private Matrix4f localToWorld = new Matrix4f();
+    private final List<JEIRecipeWidgetHandler.RecipeSlotProvider> recipeSlotProviders = new ArrayList<>();
 
     public ModularUIJEIWidget(ModularUI modularUI) {
         this.modularUI = modularUI;
+    }
+
+    public void addRecipeSlotProvider(JEIRecipeWidgetHandler.RecipeSlotProvider provider) {
+        recipeSlotProviders.add(provider);
     }
 
     /// IRecipeWidget
@@ -40,9 +50,9 @@ public class ModularUIJEIWidget implements IRecipeWidget, IJeiGuiEventListener {
     }
 
     @Override
-    public void drawWidget(GuiGraphics guiGraphics, double mouseX, double mouseY) {
+    public void draw(GuiGraphics guiGraphics, double mouseX, double mouseY) {
         guiGraphics.flush();
-        var partialTick = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+        var partialTick = Minecraft.getInstance().getPartialTick();
         // get real mouse
         localToWorld = guiGraphics.pose().last().pose().invert(new Matrix4f());
         var realMouse = getWorldMouse((float) mouseX, (float) mouseY);
@@ -64,11 +74,14 @@ public class ModularUIJEIWidget implements IRecipeWidget, IJeiGuiEventListener {
     }
 
     @Override
-    public void getTooltip(ITooltipBuilder tooltipBuilder, double mouseX, double mouseY) {
-        if (!modularUI.getDragHandler().isDragging() && modularUI.getTooltipTexts() != null && !modularUI.getTooltipTexts().isEmpty()) {
-            tooltipBuilder.addAll(modularUI.getTooltipTexts());
-            if (modularUI.getTooltipComponent() != null) tooltipBuilder.add(modularUI.getTooltipComponent());
+    public Optional<mezz.jei.api.gui.inputs.RecipeSlotUnderMouse> getSlotUnderMouse(double mouseX, double mouseY) {
+        for (var provider : recipeSlotProviders) {
+            var slot = provider.getRecipeSlots(mouseX, mouseY);
+            if (slot != null) {
+                return Optional.of(slot);
+            }
         }
+        return Optional.empty();
     }
 
     @Override
@@ -108,9 +121,9 @@ public class ModularUIJEIWidget implements IRecipeWidget, IJeiGuiEventListener {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
         var realMouse = getWorldMouse((float) mouseX, (float) mouseY);
-        return modularUI.getWidget().mouseScrolled(realMouse.x, realMouse.y, scrollX, scrollY);
+        return modularUI.getWidget().mouseScrolled(realMouse.x, realMouse.y, scrollY);
     }
 
     @Override

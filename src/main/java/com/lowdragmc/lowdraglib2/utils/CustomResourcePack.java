@@ -3,18 +3,14 @@ package com.lowdragmc.lowdraglib2.utils;
 import com.google.common.base.Charsets;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.SharedConstants;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.PathPackResources;
-import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.IoSupplier;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.*;
-import java.util.Optional;
 
 /**
  * @author KilaBash
@@ -28,7 +24,7 @@ public class CustomResourcePack extends PathPackResources {
     private final String namespace;
 
     public CustomResourcePack(File location, String namespace, PackType type) {
-        super(new PackLocationInfo(namespace, Component.literal(namespace), PackSource.DEFAULT, Optional.empty()), location.toPath());
+        super(namespace, location.toPath(), false);
         this.namespace = namespace;
         this.type = type;
     }

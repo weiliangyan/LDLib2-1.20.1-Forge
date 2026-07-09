@@ -32,7 +32,7 @@ public final class EditorLayoutStore {
 
     public static void save(String projectTypeName, EditorLayout layout) {
         try {
-            NbtIo.write(layout.serialize(), getFile(projectTypeName).toPath());
+            NbtIo.write(layout.serialize(), getFile(projectTypeName));
         } catch (Exception ignored) {}
     }
 
@@ -40,7 +40,7 @@ public final class EditorLayoutStore {
         var file = getFile(projectTypeName);
         if (!file.exists()) return Optional.empty();
         try {
-            var tag = NbtIo.read(file.toPath());
+            var tag = NbtIo.read(file);
             if (tag == null) return Optional.empty();
             return Optional.of(EditorLayout.deserialize(tag));
         } catch (Exception e) {

@@ -21,7 +21,7 @@ import java.util.Queue;
 @Mixin(ParticleEngine.class)
 public abstract class ParticleEngineMixin {
 
-    @Shadow @Final private Map<ParticleRenderType, Queue<Particle>> particles;
+    @Shadow(aliases = "f_107289_") @Final private Map<ParticleRenderType, Queue<Particle>> particles;
 
     @Inject(method = "tick", at = @At("TAIL"))
     public void injectTick(CallbackInfo ci) {

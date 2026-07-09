@@ -194,7 +194,7 @@ public final class StyleBag {
     public <T> StyleSlot<T> computeCandidateSlot(Property<T> p) {
         List<StyleSlot<?>> list = candidates.get(p);
         if (list != null && !list.isEmpty()) {
-            var best = list.getFirst();
+            var best = list.get(0);
             for (int i = 1; i < list.size(); i++) {
                 StyleSlot<?> cur = list.get(i);
                 if (StyleSlot.compare(best, cur) < 0) {

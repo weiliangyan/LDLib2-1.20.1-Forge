@@ -11,11 +11,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.utils.IModularUIProvider;
 import com.lowdragmc.lowdraglib2.integration.xei.jei.handler.JEIRecipeIngredientHandler;
 import com.lowdragmc.lowdraglib2.integration.xei.jei.handler.JEIRecipeWidgetHandler;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
-import mezz.jei.api.gui.inputs.RecipeSlotUnderMouse;
-import mezz.jei.api.gui.placement.HorizontalAlignment;
-import mezz.jei.api.gui.placement.VerticalAlignment;
 import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
-import mezz.jei.api.gui.widgets.ISlottedRecipeWidget;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.IFocusGroup;
@@ -28,7 +24,6 @@ import net.minecraft.world.item.TooltipFlag;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @MethodsReturnNonnullByDefault
@@ -83,13 +78,13 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
         UIEventDispatcher.dispatchAllChildren(event);
         var ingredientIndex = 0;
         // reversed to keep correct order
-        for (var focus : ingredientFocus.focuses.reversed()) {
+        for (int i = ingredientFocus.focuses.size() - 1; i >= 0; i--) {
+            var focus = ingredientFocus.focuses.get(i);
 //            builder.addInvisibleIngredients(focus.getA()).addTypedIngredients(focus.getB());
             var area = focus.area();
-            var slotBuilder = builder.addSlot(focus.role())
+            var slotBuilder = builder.addSlot(focus.role(), area.getX(), area.getY())
                     .addTypedIngredients(focus.ingredients())
-                    .setSlotName(SLOT_PREFIX + ingredientIndex)
-                    .setPosition(area.getX(), area.getY());
+                    .setSlotName(SLOT_PREFIX + ingredientIndex);
             for (ITypedIngredient<?> ingredient : focus.ingredients()) {
                 var type = ingredient.getType();
                 slotBuilder.setCustomRenderer(type, new IIngredientRenderer() {
@@ -132,43 +127,7 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
         UIEventDispatcher.dispatchAllChildren(event);
 
         for (var slot : recipeSlot.slots) {
-            builder.addSlottedWidget(new ISlottedRecipeWidget() {
-                @Override
-                public Optional<RecipeSlotUnderMouse> getSlotUnderMouse(double mouseX, double mouseY) {
-                    return Optional.ofNullable(slot.getRecipeSlots(mouseX, mouseY));
-                }
-
-                @Override
-                public ScreenPosition getPosition() {
-                    return ModularUIJEIWidget.ZERO;
-                }
-            }, List.of());
-        }
-
-        var ingredientFocus = new JEIRecipeIngredientHandler();
-        event = UIEvent.create(JEIUIEvents.RECIPE_INGREDIENT);
-        event.target = mui.ui.rootElement;
-        event.customData = ingredientFocus;
-        UIEventDispatcher.dispatchAllChildren(event);
-        var ingredientIndex = 0;
-        // let's hide all recipe slots
-        while (true) {
-            var found = builder.getRecipeSlots().findSlotByName(SLOT_PREFIX + ingredientIndex);
-            if (found.isEmpty()) break;
-            found.ifPresent(slot -> {
-                builder.addSlottedWidget(new ISlottedRecipeWidget() {
-                    @Override
-                    public Optional<RecipeSlotUnderMouse> getSlotUnderMouse(double mouseX, double mouseY) {
-                        return Optional.empty();
-                    }
-
-                    @Override
-                    public ScreenPosition getPosition() {
-                        return ModularUIJEIWidget.ZERO;
-                    }
-                }, List.of(slot));
-            });
-            ingredientIndex++;
+            widget.addRecipeSlotProvider(slot);
         }
     }
 }

@@ -26,9 +26,9 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.chat.Component;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import org.apache.commons.lang3.function.Consumers;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import com.lowdragmc.lowdraglib2.utils.function.LDConsumers;
 import org.appliedenergistics.yoga.*;
 
 import org.jetbrains.annotations.Nullable;
@@ -113,9 +113,9 @@ public class TreeList<NODE extends ITreeNode<?, ?>> extends UIElement {
     protected UIElementProvider<NODE> nodeUISupplier = textTemplate(value -> Component.translatable(value.toString()));
     protected BiConsumer<NODE, UIElement> onNodeUICreated = (node, ui) -> {};
     @Setter
-    protected Consumer<Set<NODE>> onSelectedChanged = Consumers.nop();
+    protected Consumer<Set<NODE>> onSelectedChanged = LDConsumers.nop();
     @Setter
-    protected Consumer<NODE> onDoubleClickNode = Consumers.nop();
+    protected Consumer<NODE> onDoubleClickNode = LDConsumers.nop();
     @Setter
     protected Predicate<NODE> selectableNodeFilter = Predicates.alwaysTrue();
     @Setter
@@ -302,7 +302,7 @@ public class TreeList<NODE extends ITreeNode<?, ?>> extends UIElement {
                 var children = node.getChildren();
                 for (int i = children.size() - 1; i >= 0; i--) {
                     var childNode = (NODE) children.get(i);
-                    displayedChildren.computeIfAbsent(node, n -> new ArrayList<>()).addFirst(childNode);
+                    displayedChildren.computeIfAbsent(node, n -> new ArrayList<>()).add(0, childNode);
                     addNodeUI(childNode, nodeIndex + 1);
                 }
             }
@@ -384,7 +384,7 @@ public class TreeList<NODE extends ITreeNode<?, ?>> extends UIElement {
             var children = node.getChildren();
             for (int i = children.size() - 1; i >= 0; i--) {
                 var childNode = (NODE) children.get(i);
-                displayedChildren.computeIfAbsent(node, n -> new ArrayList<>()).addFirst(childNode);
+                displayedChildren.computeIfAbsent(node, n -> new ArrayList<>()).add(0, childNode);
                 addNodeUI(childNode, index + 1);
             }
         }
@@ -408,7 +408,7 @@ public class TreeList<NODE extends ITreeNode<?, ?>> extends UIElement {
             var index = getChildren().indexOf(nodeUIs.get(node));
             for (int i = currentChildren.size() - 1; i >= 0; i--) {
                 var childNode = currentChildren.get(i);
-                this.displayedChildren.computeIfAbsent(node, n -> new ArrayList<>()).addFirst(childNode);
+                this.displayedChildren.computeIfAbsent(node, n -> new ArrayList<>()).add(0, childNode);
                 addNodeUI(childNode, index + 1);
             }
             if (!selected.equals(getSelected())) {

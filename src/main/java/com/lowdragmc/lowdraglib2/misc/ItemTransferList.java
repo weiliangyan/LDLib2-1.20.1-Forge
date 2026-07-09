@@ -1,14 +1,15 @@
 package com.lowdragmc.lowdraglib2.misc;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
+import com.lowdragmc.lowdraglib2.Platform;
 import lombok.Setter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.util.INBTSerializable;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.IItemHandlerModifiable;
+import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -118,13 +119,12 @@ public class ItemTransferList implements IItemHandlerModifiable, INBTSerializabl
         return false;
     }
 
-    @Override
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         var tag = new CompoundTag();
         var list = new ListTag();
         for (var transfer : transfers) {
             if (transfer instanceof INBTSerializable<?> serializable) {
-                list.add(serializable.serializeNBT(provider));
+                list.add(serializable.serializeNBT());
             } else {
                 LDLib2.LOGGER.warn("[ItemTransferList] internal container doesn't support serialization");
             }
@@ -135,14 +135,23 @@ public class ItemTransferList implements IItemHandlerModifiable, INBTSerializabl
     }
 
     @Override
+    public CompoundTag serializeNBT() {
+        return serializeNBT(Platform.getFrozenRegistry());
+    }
+
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         var list = nbt.getList("slots", nbt.getByte("type"));
         for (int i = 0; i < list.size(); i++) {
             if (transfers[i] instanceof INBTSerializable serializable) {
-                serializable.deserializeNBT(provider, list.get(i));
+                serializable.deserializeNBT(list.get(i));
             } else {
                 LDLib2.LOGGER.warn("[ItemTransferList] internal container doesn't support serialization");
             }
         }
+    }
+
+    @Override
+    public void deserializeNBT(CompoundTag nbt) {
+        deserializeNBT(Platform.getFrozenRegistry(), nbt);
     }
 }

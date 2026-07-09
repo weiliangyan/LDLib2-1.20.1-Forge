@@ -7,12 +7,13 @@ import com.lowdragmc.lowdraglib2.gui.ui.style.values.TextureValue;
 import com.lowdragmc.lowdraglib2.math.Position;
 import com.lowdragmc.lowdraglib2.math.Size;
 import com.lowdragmc.lowdraglib2.utils.ReflectionUtils;
-import dev.latvian.mods.kubejs.event.EventGroupRegistry;
-import dev.latvian.mods.kubejs.plugin.ClassFilter;
-import dev.latvian.mods.kubejs.plugin.KubeJSPlugin;
-import dev.latvian.mods.kubejs.script.BindingRegistry;
+import dev.latvian.mods.kubejs.KubeJSPlugin;
 import com.lowdragmc.lowdraglib2.integration.kjs.ui.UIEvents;
-import dev.latvian.mods.kubejs.script.TypeWrapperRegistry;
+import dev.latvian.mods.kubejs.script.BindingsEvent;
+import dev.latvian.mods.kubejs.script.ScriptType;
+import dev.latvian.mods.kubejs.util.ClassFilter;
+import dev.latvian.mods.rhino.Context;
+import dev.latvian.mods.rhino.util.wrap.TypeWrappers;
 import org.joml.Vector3f;
 
 /**
@@ -20,20 +21,20 @@ import org.joml.Vector3f;
  * @date 2023/3/26
  * @implNote GregTechKubeJSPlugin
  */
-public class LDLibKubeJSPlugin implements KubeJSPlugin {
+public class LDLibKubeJSPlugin extends KubeJSPlugin {
 
     @Override
-    public void registerClasses(ClassFilter filter) {
+    public void registerEvents() {
+        UIEvents.INSTANCE.register();
+    }
+
+    @Override
+    public void registerClasses(ScriptType type, ClassFilter filter) {
         filter.allow("com.lowdragmc.lowdraglib2");
     }
 
     @Override
-    public void registerEvents(EventGroupRegistry registry) {
-        registry.register(UIEvents.INSTANCE);
-    }
-
-    @Override
-    public void registerBindings(BindingRegistry event) {
+    public void registerBindings(BindingsEvent event) {
         // LDLib2 Auto Bindings
         ReflectionUtils.findAnnotationClasses(KJSBindings.class, data -> {
             var isClientOnly = (boolean) data.getOrDefault("clientOnly", false);
@@ -67,19 +68,19 @@ public class LDLibKubeJSPlugin implements KubeJSPlugin {
     }
 
     @Override
-    public void registerTypeWrappers(TypeWrapperRegistry registry) {
-        KubeJSPlugin.super.registerTypeWrappers(registry);
-        registry.register(IResourcePath.class, obj -> {
+    public void registerTypeWrappers(ScriptType type, TypeWrappers registry) {
+        super.registerTypeWrappers(type, registry);
+        registry.register(IResourcePath.class, (Context cx, Object obj) -> {
             if (obj instanceof IResourcePath path) {
                 return path;
             }
             return obj == null ? null : IResourcePath.parse(obj.toString());
         });
-        registry.register(IGuiTexture.class, obj -> {
+        registry.register(IGuiTexture.class, (Context cx, Object obj) -> {
             if (obj instanceof IGuiTexture texture) {
                 return texture;
             }
-            var result = obj == null ? null : TextureValue.parseTexture(obj.toString());
+            IGuiTexture result = obj == null ? null : TextureValue.parseTexture(obj.toString());
             return result == null ? IGuiTexture.EMPTY : result;
         });
     }

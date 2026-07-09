@@ -30,7 +30,7 @@ public class TestBlockA extends BlockNode {
     @Override
     public void onDefinePorts(IPortDefinitionContext context) {
         super.onDefinePorts(context);
-        Optional.ofNullable(getNodeOptionById("inputs")).ifPresent(o -> o.tryGetValue(Integer.class).ifSuccess(inputs -> {
+        Optional.ofNullable(getNodeOptionById("inputs")).ifPresent(o -> o.tryGetValue(Integer.class).result().ifPresent(inputs -> {
             if (inputs instanceof Integer num) {
                 for (var i = 0; i < num; i++) {
                     context.addInputPort("in" + (i + 1), String.class);

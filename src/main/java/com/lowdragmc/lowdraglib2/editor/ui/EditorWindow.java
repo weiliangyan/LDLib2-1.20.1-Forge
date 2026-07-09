@@ -67,7 +67,7 @@ public class EditorWindow extends UIElement {
         var editorWindow = MINIMIZED_WINDOWS.remove(windowID);
         if (editorWindow != null && LDLib2.isClient()) {
             Minecraft.getInstance().getToasts().addToast(new SystemToast(
-                    new SystemToast.SystemToastId(1000L),
+                    SystemToast.SystemToastIds.PERIODIC_NOTIFICATION,
                     Component.translatable("editor.minimized.title"),
                     Component.translatable("editor.minimized.tips")
             ));
@@ -231,7 +231,13 @@ public class EditorWindow extends UIElement {
             currentEditor = null;
             closeScreen();
         } else {
-            showEditor(editors.lastEntry().getKey());
+            Editor lastEditor = null;
+            for (var editorEntry : editors.keySet()) {
+                lastEditor = editorEntry;
+            }
+            if (lastEditor != null) {
+                showEditor(lastEditor);
+            }
         }
     }
 

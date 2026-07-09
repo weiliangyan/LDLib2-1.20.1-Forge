@@ -6,8 +6,8 @@ import net.minecraft.Util;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.OptionalDouble;
 import java.util.function.Function;
@@ -45,6 +45,8 @@ public class LDLibRenderTypes extends RenderType {
                     DefaultVertexFormat.POSITION_TEX_COLOR,
                     VertexFormat.Mode.QUADS,
                     1536,
+                    false,
+                    false,
                     CompositeState.builder()
                             .setShaderState(GUI_TEXTURE_SHADER)
                             .setTextureState(new TextureStateShard(texture, false, false))

@@ -1,10 +1,10 @@
 package com.lowdragmc.lowdraglib2.core.mixins;
 
+import com.lowdragmc.lowdraglib2.Platform;
 import com.lowdragmc.lowdraglib2.syncdata.holder.IManagedHolder;
 import com.lowdragmc.lowdraglib2.syncdata.holder.IPersistManagedHolder;
 import com.lowdragmc.lowdraglib2.syncdata.holder.ISyncMangedHolder;
 import com.lowdragmc.lowdraglib2.syncdata.holder.blockentity.*;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -26,27 +26,28 @@ import org.jetbrains.annotations.Nullable;
 @Mixin(BlockEntity.class)
 public abstract class BlockEntityMixin {
 
-    @Shadow
+    @Shadow(aliases = "m_58904_")
     @Nullable
     public abstract Level getLevel();
 
     @Inject(method = "getUpdateTag", at = @At(value = "RETURN"))
-    private void injectGetUpdateTag(HolderLookup.Provider provider, CallbackInfoReturnable<CompoundTag> cir) {
+    private void injectGetUpdateTag(CallbackInfoReturnable<CompoundTag> cir) {
         if (this instanceof ISyncMangedHolder syncMangedHolder) {
             var tag = cir.getReturnValue();
-            tag.put(syncMangedHolder.getSyncTag(), syncMangedHolder.serializeInitialData(provider));
+            tag.put(syncMangedHolder.getSyncTag(), syncMangedHolder.serializeInitialData(Platform.getFrozenRegistry()));
         }
     }
 
     @Inject(method = "saveAdditional", at = @At(value = "RETURN"))
-    private void injectSaveAdditional(CompoundTag pTag, HolderLookup.Provider provider, CallbackInfo ci) {
+    private void injectSaveAdditional(CompoundTag pTag, CallbackInfo ci) {
         if (this instanceof IPersistManagedHolder persistManagedHolder) {
-            persistManagedHolder.saveManagedPersistentData(provider, pTag, false);
+            persistManagedHolder.saveManagedPersistentData(Platform.getFrozenRegistry(), pTag, false);
         }
     }
 
-    @Inject(method = "loadAdditional", at = @At(value = "RETURN"))
-    private void injectLoad(CompoundTag pTag, HolderLookup.Provider provider, CallbackInfo ci) {
+    @Inject(method = "load", at = @At(value = "RETURN"))
+    private void injectLoad(CompoundTag pTag, CallbackInfo ci) {
+        var provider = Platform.getFrozenRegistry();
         if (this instanceof ISyncMangedHolder syncMangedHolder && pTag.get(syncMangedHolder.getSyncTag()) instanceof CompoundTag tag) {
             syncMangedHolder.deserializeInitialData(provider, tag);
         } else if (this instanceof IPersistManagedHolder persistManagedHolder) {

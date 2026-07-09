@@ -116,8 +116,9 @@ public class ArrayConfiguratorGroup<T> extends ConfiguratorGroup {
                     .collect(Collectors.toList());
             // remove overflow
             while (items.size() > current.size()) {
-                removeConfigurator(items.getLast());
-                if (selected == items.removeLast()) {
+                var last = items.remove(items.size() - 1);
+                removeConfigurator(last);
+                if (selected == last) {
                     setSelected(null);
                 }
             }

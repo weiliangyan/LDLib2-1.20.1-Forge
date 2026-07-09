@@ -11,6 +11,7 @@ import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
@@ -31,10 +32,13 @@ public class TestJEIPlugin {
     private static class TestModularUIRecipeCategory extends ModularUIRecipeCategory<TestRecipe> {
         @Getter
         private final IDrawable icon;
+        @Getter
+        private final IDrawable background;
 
         public TestModularUIRecipeCategory(IJeiHelpers helpers) {
             super(TestRecipe::createModularUI);
-            this.icon = helpers.getGuiHelper().createDrawableItemLike(TestItem.ITEM);
+            this.icon = helpers.getGuiHelper().createDrawableItemStack(new ItemStack(TestItem.ITEM));
+            this.background = helpers.getGuiHelper().createBlankDrawable(TestRecipe.WIDTH, TestRecipe.HEIGHT);
         }
 
         @Override

@@ -1,7 +1,7 @@
 package com.lowdragmc.lowdraglib2.editor.resource;
 
-import net.neoforged.bus.api.Event;
-import net.neoforged.fml.event.IModBusEvent;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.fml.event.IModBusEvent;
 
 public abstract class EditorResourceEvent extends Event implements IModBusEvent {
     public final ResourceInstance<?> resourceInstance;

@@ -13,8 +13,8 @@ import com.lowdragmc.lowdraglib2.registry.LDLRegistry;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
 import com.lowdragmc.lowdraglib2.test.ui.IMenuTest;
 import com.lowdragmc.lowdraglib2.test.ui.IScreenTest;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.function.Supplier;
 
@@ -52,15 +52,13 @@ public class LDLib2Registries {
                 SCREEN_TESTS = AutoRegistry.LDLibRegisterClient.create(LDLib2.id("screen_test"), IScreenTest.class, AutoRegistry::noArgsCreator);
             }
         }
-        if (Platform.isDevEnv()) {
-            MENU_TESTS = AutoRegistry.LDLibRegister.create(LDLib2.id("menu_test"), IMenuTest.class, AutoRegistry::noArgsCreator);
-            for (var menuTest : MENU_TESTS) {
-                PlayerUIMenuType.register(LDLib2.id(menuTest.annotation().name()), player -> {
-                    var test = menuTest.value().get();
-                    test.init(player);
-                    return test;
-                });
-            }
+        MENU_TESTS = AutoRegistry.LDLibRegister.create(LDLib2.id("menu_test"), IMenuTest.class, AutoRegistry::noArgsCreator);
+        for (var menuTest : MENU_TESTS) {
+            PlayerUIMenuType.register(LDLib2.id(menuTest.annotation().name()), player -> {
+                var test = menuTest.value().get();
+                test.init(player);
+                return test;
+            });
         }
     }
 

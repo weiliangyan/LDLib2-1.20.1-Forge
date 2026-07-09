@@ -12,22 +12,22 @@ import com.lowdragmc.lowdraglib2.plugin.LDLibPlugin;
 import com.lowdragmc.lowdraglib2.syncdata.AccessorRegistries;
 import com.lowdragmc.lowdraglib2.test.*;
 import com.lowdragmc.lowdraglib2.utils.ReflectionUtils;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 
 public class CommonProxy {
-    private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(BuiltInRegistries.BLOCK, LDLib2.MOD_ID);
-    private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, LDLib2.MOD_ID);
-    private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, LDLib2.MOD_ID);
+    private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, LDLib2.MOD_ID);
+    private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, LDLib2.MOD_ID);
+    private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, LDLib2.MOD_ID);
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TestBlockEntity>> TEST_BE_TYPE;
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<RendererBlockEntity>> RENDERER_BE_TYPE;
+    public static final RegistryObject<BlockEntityType<TestBlockEntity>> TEST_BE_TYPE;
+    public static final RegistryObject<BlockEntityType<RendererBlockEntity>> RENDERER_BE_TYPE;
 
     static {
         TEST_BE_TYPE = Platform.isDevEnv() ? BLOCK_ENTITY_TYPES.register("test", () -> BlockEntityType.Builder.of(TestBlockEntity::new, TestBlock.BLOCK).build(null)) : null;
@@ -43,8 +43,6 @@ public class CommonProxy {
         }
         BLOCKS.register("renderer_block", () -> RendererBlock.BLOCK);
 
-        // used for forge events (ClientProxy + CommonProxy)
-        eventBus.addListener(LDLNetworking::registerPayloads);
         // init common features
         CommonProxy.init(eventBus);
         // load ldlib2 plugin
@@ -61,6 +59,7 @@ public class CommonProxy {
 
     public static void init(IEventBus eventBus) {
         LDLib2Registries.init();
+        LDLNetworking.init();
         AccessorRegistries.init();
         RPCPacketDistributor.init();
         PropertyRegistry.init();

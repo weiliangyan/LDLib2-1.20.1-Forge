@@ -37,8 +37,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.common.util.INBTSerializable;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.items.ItemStackHandler;
 import org.appliedenergistics.yoga.YogaFlexDirection;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -90,7 +90,7 @@ public class TestSerialization implements IScreenTest {
 
         public TestData() {
             itemStack = new ItemStack(Items.DIAMOND_PICKAXE);
-            itemStack.enchant(Platform.getFrozenRegistry().lookup(Registries.ENCHANTMENT).get().get(Enchantments.POWER).orElseThrow(), 1);
+            itemStack.enchant(Enchantments.POWER_ARROWS, 1);
         }
 
         public Configurator buildTestGroupConfigurator(Supplier<TestGroup> getter, Consumer<TestGroup> setter) {

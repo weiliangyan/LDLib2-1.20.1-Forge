@@ -37,7 +37,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
@@ -118,6 +118,9 @@ public class TestConfigurators implements IMenuTest, IConfigurable, IPersistedSe
 
     @Override
     public ModularUI createUI(Player entityPlayer) {
+        if (!entityPlayer.level().isClientSide) {
+            return new ModularUI(UI.empty(), entityPlayer);
+        }
         var root = new ScrollerView();
         root.layout(layout -> {
             layout.width(250);
@@ -129,7 +132,7 @@ public class TestConfigurators implements IMenuTest, IConfigurable, IPersistedSe
         group.setTips("Test tip 0", "Test tip 1", "Test tip 2");
         buildConfigurator(group);
 
-        return new ModularUI(UI.of(root.addScrollViewChild(group)));
+        return new ModularUI(UI.of(root.addScrollViewChild(group)), entityPlayer);
     }
 
     private Configurator buildTestGroupConfigurator(Supplier<TestGroup> getter, Consumer<TestGroup> setter) {

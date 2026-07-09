@@ -60,7 +60,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.chat.Component;
-import org.apache.commons.lang3.function.Consumers;
+import com.lowdragmc.lowdraglib2.utils.function.LDConsumers;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
@@ -188,7 +188,7 @@ public class GraphView extends UIElement {
         addEventListener(UIEvents.VALIDATE_COMMAND, this::onValidateCommand);
         addEventListener(UIEvents.EXECUTE_COMMAND, this::onExecuteCommand);
 
-        setEnforceFocus(Consumers.nop());
+        setEnforceFocus(LDConsumers.nop());
 
         // ItemLibrary is hidden until explicitly shown — popup visibility is state-driven.
         Style.importantPipeline(itemLibrary.getLayout(), l -> l.display(TaffyDisplay.NONE));
@@ -466,7 +466,7 @@ public class GraphView extends UIElement {
             return;
         }
 
-        var first = graphLogEntries.getFirst();
+        var first = graphLogEntries.get(0);
         graphLogSummary.setText(formatGraphLogEntry(first));
         Style.importantPipeline(graphLogSummary.getTextStyle(), s -> s.textColor(graphLogLevelColor(first.level())));
         graphLogCount.setText(graphLogEntries.size() > 1
@@ -594,15 +594,13 @@ public class GraphView extends UIElement {
         graphModel.getCurrentGraphChangeDescription().clear();
         // placeholders
         for (var placeholder : graphModel.getPlaceholders()) {
-            switch (placeholder) {
-                case DeclarationModel declarationModel: continue;
-                case WirePlaceHolder wirePlaceHolder:
-                    createWireUI(wirePlaceHolder);
-                    continue;
-                case NodePlaceholder nodePlaceholder:
-                    createAndAddModelElement(nodePlaceholder);
-                    break;
-                default: break;
+            if (placeholder instanceof DeclarationModel) {
+                continue;
+            } else if (placeholder instanceof WirePlaceHolder wirePlaceHolder) {
+                createWireUI(wirePlaceHolder);
+                continue;
+            } else if (placeholder instanceof NodePlaceholder nodePlaceholder) {
+                createAndAddModelElement(nodePlaceholder);
             }
         }
 
@@ -1083,7 +1081,10 @@ public class GraphView extends UIElement {
     }
 
     protected void onDragEnd(UIEvent event) {
-        if (event.dragHandler.draggingObject instanceof DragMove(var targetWasSelected, var target, var movables)) {
+        if (event.dragHandler.draggingObject instanceof DragMove dragMove) {
+            var targetWasSelected = dragMove.targetWasSelected();
+            var target = dragMove.target();
+            var movables = dragMove.movables();
             var offset = new Vector2f(event.x - event.dragStartX, event.y - event.dragStartY);
             if (offset.lengthSquared() < 1f) {
                 // too less drag, back to click
@@ -1193,7 +1194,8 @@ public class GraphView extends UIElement {
     }
 
     protected void onGraphViewDragSourceUpdate(UIEvent event) {
-        if (event.dragHandler.getDraggingObject() instanceof DragRegionSelection(var selectionRect)) {
+        if (event.dragHandler.getDraggingObject() instanceof DragRegionSelection dragSelection) {
+            var selectionRect = dragSelection.selectionRect();
             var minX = Math.min(event.dragStartX, event.x);
             var minY = Math.min(event.dragStartY, event.y);
             var localMouse = graphView.getLocalMouse(minX, minY);
@@ -1215,15 +1217,16 @@ public class GraphView extends UIElement {
     }
 
     protected void onGraphViewDragEnd(UIEvent event) {
-        if (event.dragHandler.getDraggingObject() instanceof DragRegionSelection(var selectionRect)) {
+        if (event.dragHandler.getDraggingObject() instanceof DragRegionSelection dragSelection) {
+            var selectionRect = dragSelection.selectionRect();
             selectionRect.removeSelf();
-            if (dragRegionSelection != null) {
+            if (this.dragRegionSelection != null) {
                 batchSelection(() -> {
                     // select all
                     for (var entry : modelElements.entrySet()) {
                         var model = entry.getKey();
                         var element = entry.getValue();
-                        if (element.isSelectable() && element.canBeRegionSelected(dragRegionSelection)) {
+                        if (element.isSelectable() && element.canBeRegionSelected(this.dragRegionSelection)) {
                             addSelected(model);
                         }
                     }
@@ -1583,7 +1586,8 @@ public class GraphView extends UIElement {
             var allModels = new ArrayList<>(changeset.getNewModels());
             allModels.addAll(changeset.getDeletedModels());
             for (var uid : allModels) {
-                if (graphModel.getModel(uid) instanceof GraphElementModel model && model.getContainer() instanceof GraphElementModel container) {
+                var model = graphModel.getModel(uid);
+                if (model != null && model.getContainer() instanceof GraphElementModel container) {
                     // Whatever change hint was there is superseded by Unspecified.
                     changedModels.put(container.getUid(), ChangeHintList.UNSPECIFIED);
                 }

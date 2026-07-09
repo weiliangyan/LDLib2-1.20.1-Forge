@@ -1,6 +1,5 @@
 package com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor;
 
-import com.lowdragmc.lowdraglib2.gui.LDLibFonts;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.TextArea;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor.language.*;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvent;
@@ -17,8 +16,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -47,7 +46,9 @@ public class CodeEditor extends TextArea {
     private final List<StyledLine> styledLines = new ArrayList<>();
 
     public CodeEditor() {
-        getTextAreaStyle().setDefault(PropertyRegistry.FONT, LDLibFonts.JETBRAINS_MONO_BOLD);
+        // The bundled mono font does not include CJK glyphs. Use Minecraft's default
+        // font here so Chinese text entered in XML/JSON code views remains readable.
+        getTextAreaStyle().setDefault(PropertyRegistry.FONT, Style.DEFAULT_FONT);
         internalSetup();
     }
 
@@ -256,7 +257,7 @@ public class CodeEditor extends TextArea {
         }
 
         // Draw placeholder if empty
-        if (styledLines.isEmpty() || (styledLines.size() == 1 && styledLines.getFirst().text().isEmpty())) {
+        if (styledLines.isEmpty() || (styledLines.size() == 1 && styledLines.get(0).text().isEmpty())) {
             drawPlaceHolder(guiContext, font, scale, x, y);
         }
     }

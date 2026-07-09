@@ -788,7 +788,7 @@ public class StructuredTagEditor extends BindableUIElement<Tag> {
     }
 
     private static TagKind listElementKind(ListTag listTag) {
-        return listTag.isEmpty() ? TagKind.END : kindOf(listTag.getFirst());
+        return listTag.isEmpty() ? TagKind.END : kindOf(listTag.get(0));
     }
 
     public static ListTag changeListElementType(ListTag listTag, TagKind kind) {

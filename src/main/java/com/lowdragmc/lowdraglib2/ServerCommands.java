@@ -3,8 +3,9 @@ package com.lowdragmc.lowdraglib2;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.lowdragmc.lowdraglib2.gui.editor.UIEditor;
 import com.lowdragmc.lowdraglib2.gui.factory.PlayerUIMenuType;
+import com.lowdragmc.lowdraglib2.networking.LDLNetworking;
+import com.lowdragmc.lowdraglib2.networking.s2c.SPacketOpenUIEditor;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import net.minecraft.ChatFormatting;
@@ -17,6 +18,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
  * @author KilaBash
@@ -27,6 +29,20 @@ public class ServerCommands {
 	public static List<LiteralArgumentBuilder<CommandSourceStack>> createServerCommands() {
         var commands = new ArrayList<LiteralArgumentBuilder<CommandSourceStack>>();
         commands.addAll(List.of(
+                Commands.literal("ldlib2_ui_editor")
+                        .requires(source -> source.hasPermission(2) || source.getServer().isSingleplayer())
+                        .executes(context -> {
+                            ServerPlayer player;
+                            try {
+                                player = context.getSource().getPlayerOrException();
+                            } catch (Exception ignored) {
+                                context.getSource().sendFailure(Component.literal("LDLib2 UI editor can only be opened by a player"));
+                                return 0;
+                            }
+                            LDLNetworking.sendToPlayer(player, new SPacketOpenUIEditor());
+                            context.getSource().sendSuccess(() -> Component.literal("Opening LDLib2 UI editor"), false);
+                            return 1;
+                        }),
                 Commands.literal("ldlib2_utils")
 						.then(Commands.literal("copy_block_tag")
 								.then(Commands.argument("pos", BlockPosArgument.blockPos())
@@ -35,7 +51,7 @@ public class ServerCommands {
 											var world = context.getSource().getLevel();
 											var blockEntity = world.getBlockEntity(pos);
 											if (blockEntity != null) {
-												var tag = blockEntity.saveWithoutMetadata(context.getSource().registryAccess());
+													var tag = blockEntity.saveWithoutMetadata();
 												var value = NbtUtils.structureToSnbt(tag);
 												context.getSource().sendSuccess(() -> Component
 														.literal("[Copy to clipboard]")
@@ -64,17 +80,7 @@ public class ServerCommands {
 																	ClickEvent.Action.COPY_TO_CLIPBOARD, value)))
 													.append(NbtUtils.toPrettyComponent(tag)), true);
 											return 1;
-										}))),
-                Commands.literal("ldlib2_ui_editor").requires(s -> s.getServer().isSingleplayer())
-                        .executes(context -> {
-                    if (!context.getSource().getServer().isSingleplayer()) {
-                        context.getSource().sendFailure(Component.literal("This command can only be used in singleplayer"));
-                        return 0;
-                    }
-                    if (context.getSource().getPlayer() == null) return 0;
-                    PlayerUIMenuType.openUI(context.getSource().getPlayer(), UIEditor.WINDOW_ID);
-                    return 1;
-                })
+										})))
         ));
         if (LDLib2Registries.MENU_TESTS != null && !LDLib2Registries.MENU_TESTS.values().isEmpty()) {
             commands.add(createMenuTestCommands());
@@ -83,15 +89,26 @@ public class ServerCommands {
 	}
 
     private static LiteralArgumentBuilder<CommandSourceStack> createMenuTestCommands() {
-        var builder = Commands.literal("ldlib2_menu_test");
+        var builder = Commands.literal("ldlib2_menu_test")
+                .requires(source -> source.hasPermission(2) || source.getServer().isSingleplayer());
         if (LDLib2Registries.MENU_TESTS == null) {
             return builder;
         }
         for (var uiTest : LDLib2Registries.MENU_TESTS) {
             builder = builder.then(Commands.literal(uiTest.annotation().name())
                     .executes(context -> {
-                        var player = context.getSource().getPlayer();
-                        PlayerUIMenuType.openUI(player, LDLib2.id(uiTest.annotation().name()));
+                        ServerPlayer player;
+                        try {
+                            player = context.getSource().getPlayerOrException();
+                        } catch (Exception ignored) {
+                            context.getSource().sendFailure(Component.literal("LDLib2 menu tests can only be opened by a player"));
+                            return 0;
+                        }
+                        if (!PlayerUIMenuType.openUI(player, LDLib2.id(uiTest.annotation().name()))) {
+                            context.getSource().sendFailure(Component.literal("Failed to open LDLib2 menu test: " + uiTest.annotation().name()));
+                            return 0;
+                        }
+                        context.getSource().sendSuccess(() -> Component.literal("Opening LDLib2 menu test: " + uiTest.annotation().name()), false);
                         return 1;
                     }));
         }

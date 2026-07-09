@@ -95,6 +95,6 @@ public abstract class InputOutputPortsNodeModel extends PortNodeModel {
         var requiredDirection = portModel.getDirection().getOpposite();
         var candidates = requiredDirection == PortDirection.INPUT ? getInputsByDisplayOrder() : getOutputsByDisplayOrder();
         var compatiblePorts = graphModel.getCompatiblePorts(candidates, portModel);
-        return !compatiblePorts.isEmpty() ? compatiblePorts.getFirst() : null;
+        return !compatiblePorts.isEmpty() ? compatiblePorts.get(0) : null;
     }
 }

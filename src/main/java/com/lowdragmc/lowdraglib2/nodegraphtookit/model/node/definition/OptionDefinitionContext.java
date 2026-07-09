@@ -24,7 +24,7 @@ public class OptionDefinitionContext implements IOptionDefinitionContext {
         if (pool.isEmpty()) {
             builder = new OptionBuilder();
         } else {
-            builder = pool.removeLast();
+            builder = pool.remove(pool.size() - 1);
         }
         active.add(builder);
         return builder;
@@ -44,7 +44,7 @@ public class OptionDefinitionContext implements IOptionDefinitionContext {
 
     public void finish() {
         while (!active.isEmpty()) {
-            active.getFirst().build();
+            active.get(0).build();
         }
     }
 }

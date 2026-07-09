@@ -57,8 +57,8 @@ import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.appliedenergistics.yoga.*;
 import org.appliedenergistics.yoga.numeric.FloatOptional;
 import org.jetbrains.annotations.NotNull;
@@ -100,7 +100,7 @@ public class UIElement implements IConfigurable, IPersistedSerializable, ILDLReg
                                     opt -> opt.orElseGet(holder.value()),
                                     Optional::ofNullable
                             ))
-                    .orElseGet(() -> MapCodec.unit(UIElement::new)));
+                    .orElseGet(() -> MapCodec.unit(UIElement::new)).codec());
 
     public static final Layout EMPTY_LAYOUT = new Layout();
 
@@ -1424,9 +1424,9 @@ public class UIElement implements IConfigurable, IPersistedSerializable, ILDLReg
      */
     public UIElement addEventListener(String eventType, UIEventListener listener, boolean useCapture) {
         if (useCapture) {
-            captureListeners.computeIfAbsent(eventType, k -> new ArrayList<>()).addFirst(listener);
+            captureListeners.computeIfAbsent(eventType, k -> new ArrayList<>()).add(0, listener);
         } else {
-            bubbleListeners.computeIfAbsent(eventType, k -> new ArrayList<>()).addFirst(listener);
+            bubbleListeners.computeIfAbsent(eventType, k -> new ArrayList<>()).add(0, listener);
         }
         return this;
     }
@@ -1916,8 +1916,8 @@ public class UIElement implements IConfigurable, IPersistedSerializable, ILDLReg
     public List<Component> getDebugInfo() {
         var info = new ArrayList<Component>();
         info.add(Component.literal("[type: %s, pos: (%.1f %.1f), size: (%.1f, %.1f), children: %d]".formatted(
-                getElementName(), getPositionX(), getPositionY(), getSizeWidth(), getSizeHeight(), children.size())).withColor(0xFFFF00FF));
-        info.add(Component.literal("[id: %s, class: \"%s\"]".formatted(getId().isEmpty() ? "empty" : getId(), String.join(" ", classes))).withColor(0xFF00FFFF));
+                getElementName(), getPositionX(), getPositionY(), getSizeWidth(), getSizeHeight(), children.size())).withStyle(style -> style.withColor(0xFFFF00FF)));
+        info.add(Component.literal("[id: %s, class: \"%s\"]".formatted(getId().isEmpty() ? "empty" : getId(), String.join(" ", classes))).withStyle(style -> style.withColor(0xFF00FFFF)));
 //        var path = getStructurePath();
 //        for (int i = 0; i < path.size(); i++) {
 //            var element = path.get(i);
@@ -1961,7 +1961,7 @@ public class UIElement implements IConfigurable, IPersistedSerializable, ILDLReg
     public Component getEditorName() {
         var name = Component.literal(getElementName());
         if (!id.isEmpty()) {
-            name = name.append(Component.literal("#").append(Component.literal(id).withColor(0xFF00FFFF)));
+            name = name.append(Component.literal("#").append(Component.literal(id).withStyle(style -> style.withColor(0xFF00FFFF))));
         }
         if (!isDisplayed()) {
             name.withStyle(style -> style.withStrikethrough(true));
@@ -2050,9 +2050,9 @@ public class UIElement implements IConfigurable, IPersistedSerializable, ILDLReg
 
     // region Serialization
     public UIElement copy() {
-        return CODEC.encodeStart(Platform.getFrozenRegistry().createSerializationContext(NbtOps.INSTANCE), this)
+        return CODEC.encodeStart(Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry()), this)
                 .result()
-                .map(tag -> CODEC.parse(Platform.getFrozenRegistry().createSerializationContext(NbtOps.INSTANCE), tag)
+                .map(tag -> CODEC.parse(Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry()), tag)
                         .result().orElseGet(UIElement::new))
                 .orElseGet(UIElement::new);
     }
@@ -2172,7 +2172,7 @@ public class UIElement implements IConfigurable, IPersistedSerializable, ILDLReg
             for (var i = 0; i < externalTag.size(); i++) {
                 var childTag = externalTag.getCompound(i);
                 var index = childTag.getInt("index");
-                var result = CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), childTag).result();
+                var result = CODEC.parse(com.lowdragmc.lowdraglib2.Platform.registryOps(NbtOps.INSTANCE, provider), childTag).result();
                 if (result.isEmpty()) {
                     LDLib2.LOGGER.error("Failed to deserialize UI Element {}: {}", this, tag);
                 }

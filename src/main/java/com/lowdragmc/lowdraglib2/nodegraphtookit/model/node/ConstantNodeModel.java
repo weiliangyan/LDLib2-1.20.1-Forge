@@ -35,7 +35,7 @@ public class ConstantNodeModel extends NodeModel implements ISingleOutputPortNod
 
     @Override
     public PortModel getOutputPort() {
-        return getOutputPortInfos().portsById.values().getFirst();
+        return getOutputPortInfos().portsById.values().get(0);
     }
 
     public void setConstant(@Nullable Constant constant) {

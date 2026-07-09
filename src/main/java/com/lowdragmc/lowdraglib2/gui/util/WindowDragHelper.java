@@ -52,7 +52,9 @@ public class WindowDragHelper {
             }
         });
         element.addEventListener(UIEvents.DRAG_SOURCE_UPDATE, e -> {
-            if (e.dragHandler.draggingObject instanceof DragMove(var sx, var sy)) {
+            if (e.dragHandler.draggingObject instanceof DragMove dragMove) {
+                var sx = dragMove.startX();
+                var sy = dragMove.startY();
                 var normalPosOffset = element.getLocalMouseNormal(e.x - e.dragStartX, e.y - e.dragStartY);
                 target.getLayout()
                         .left(sx + normalPosOffset.x)
@@ -91,14 +93,17 @@ public class WindowDragHelper {
         });
 
         element.addEventListener(UIEvents.DRAG_SOURCE_UPDATE, e -> {
-            if (!(e.dragHandler.draggingObject instanceof DragResize(
-                    float startX, float startY, float startW, float startH, ResizeHandle handle
-            ))) return;
+            if (!(e.dragHandler.draggingObject instanceof DragResize dragResize)) return;
 
             if (dragResizePredicate != null && !dragResizePredicate.test(e, (DragResize) e.dragHandler.draggingObject)) return;
             var d = element.getLocalMouseNormal(e.x - e.dragStartX, e.y - e.dragStartY);
             float dx = d.x;
             float dy = d.y;
+            float startX = dragResize.startX();
+            float startY = dragResize.startY();
+            float startW = dragResize.startW();
+            float startH = dragResize.startH();
+            ResizeHandle handle = dragResize.handle();
             float x = startX;
             float y = startY;
             float w = startW;

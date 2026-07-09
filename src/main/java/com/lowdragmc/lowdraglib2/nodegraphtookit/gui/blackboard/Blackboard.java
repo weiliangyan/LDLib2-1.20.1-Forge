@@ -219,7 +219,7 @@ public class Blackboard extends BlackboardElement implements IGraphTool {
             lastClickTime = 0;
         });
         nodeUI.addEventListener(UIEvents.DRAG_ENTER, e -> {
-            if (e.dragHandler.getDraggingObject() instanceof DraggingUINode(var dragged) && dragged != node) {
+            if (e.dragHandler.getDraggingObject() instanceof DraggingUINode draggingUINode && draggingUINode.node() != node) {
                 var mode = TreeList.isMouseOverNodeAbove(e) ? 0 : TreeList.isMouseOverNodeCenter(e) ? 1 : TreeList.isMouseOverNodeBelow(e) ? 2 : -1;
                 Style.importantPipeline(e.currentElement.getStyle(), s -> s.overlayTexture(TreeList.createDraggingOverlay(mode)));
             }
@@ -229,7 +229,8 @@ public class Blackboard extends BlackboardElement implements IGraphTool {
         }, true);
         nodeUI.addEventListener(UIEvents.DRAG_END, e -> {
             Style.importantPipeline(e.currentElement.getStyle(), s -> s.overlayTexture(IGuiTexture.EMPTY));
-            if (e.dragHandler.getDraggingObject() instanceof DraggingUINode(var dragged) && graphView != null && graphView.graphView.isSelfOrChildHover()) {
+            if (e.dragHandler.getDraggingObject() instanceof DraggingUINode draggingUINode && graphView != null && graphView.graphView.isSelfOrChildHover()) {
+                var dragged = draggingUINode.node();
                 // drag into graph view
                 if (dragged.getKey() instanceof VariableDeclarationModelBase variableModel) {
                     onDragVariablesIntoGraph(e, List.of(variableModel));
@@ -237,7 +238,7 @@ public class Blackboard extends BlackboardElement implements IGraphTool {
             }
         });
         nodeUI.addEventListener(UIEvents.DRAG_UPDATE, e -> {
-            if (e.dragHandler.getDraggingObject() instanceof DraggingUINode(var dragged) && dragged != node) {
+            if (e.dragHandler.getDraggingObject() instanceof DraggingUINode draggingUINode && draggingUINode.node() != node) {
                 var mode = TreeList.isMouseOverNodeAbove(e) ? 0 : TreeList.isMouseOverNodeCenter(e) ? 1 : TreeList.isMouseOverNodeBelow(e) ? 2 : -1;
                 Style.importantPipeline(e.currentElement.getStyle(), s -> s.overlayTexture(TreeList.createDraggingOverlay(mode)));
             } else {
@@ -246,8 +247,8 @@ public class Blackboard extends BlackboardElement implements IGraphTool {
         });
         nodeUI.addEventListener(UIEvents.DRAG_PERFORM, e -> {
             Style.importantPipeline(e.currentElement.getStyle(), s -> s.overlayTexture(IGuiTexture.EMPTY));
-            if (e.dragHandler.getDraggingObject() instanceof DraggingUINode(var dragged) && dragged != node) {
-                performGroupItemDrop(dragged, node, e);
+            if (e.dragHandler.getDraggingObject() instanceof DraggingUINode draggingUINode && draggingUINode.node() != node) {
+                performGroupItemDrop(draggingUINode.node(), node, e);
             }
         });
     }
@@ -399,7 +400,7 @@ public class Blackboard extends BlackboardElement implements IGraphTool {
         if (!supportedTypes.isEmpty()
                 && !typeHandle.isCustomTypeHandle()
                 && !supportedTypes.contains(typeHandle)) {
-            typeHandle = supportedTypes.getFirst();
+            typeHandle = supportedTypes.get(0);
         }
 
         graphView.dispatchCommand(new VariableDeclarationCommands.CreateGraphVariableDeclarationCommand(

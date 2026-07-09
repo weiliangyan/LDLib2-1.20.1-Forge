@@ -42,7 +42,7 @@ class GraphLoggerTest {
 
         logger.error(Component.literal("error"), context);
 
-        assertEquals(context, logger.getSortedEntries().getFirst().context());
+        assertEquals(context, logger.getSortedEntries().get(0).context());
     }
 
     @Test

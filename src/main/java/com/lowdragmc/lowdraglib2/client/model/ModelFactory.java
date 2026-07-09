@@ -4,8 +4,8 @@ import com.google.gson.JsonParseException;
 import com.lowdragmc.lowdraglib2.core.mixins.accessor.ModelBakeryAccessor;
 import com.mojang.datafixers.util.Either;
 import com.mojang.math.Transformation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BlockModel;
@@ -46,6 +46,20 @@ public class ModelFactory {
         return vanilla;
     }
 
+    public static ModelResourceLocation standalone(ResourceLocation location) {
+        return new ModelResourceLocation(location, "standalone");
+    }
+
+    public static @Nullable BakedModel bakeUncached(ModelBaker baker, UnbakedModel unbakedModel, ModelState modelState, Function<Material, TextureAtlasSprite> sprites, ResourceLocation modelLocation) {
+        if (unbakedModel instanceof BlockModel blockmodel) {
+            if (blockmodel.getRootModel() == ModelBakery.GENERATION_MARKER) {
+                return ITEM_MODEL_GENERATOR.generateBlockModel(sprites, blockmodel)
+                        .bake(baker, blockmodel, sprites, modelState, modelLocation, false);
+            }
+        }
+        return unbakedModel.bake(baker, sprites, modelState, modelLocation);
+    }
+
     public static ModelBaker getModelBaker() {
         return new ModelBaker() {
             @Override
@@ -54,29 +68,8 @@ public class ModelFactory {
             }
 
             @Override
-            public @Nullable UnbakedModel getTopLevelModel(ModelResourceLocation modelResourceLocation) {
-                return ModelFactory.getTopLevelModel(modelResourceLocation);
-            }
-
-            @Override
             public @Nullable BakedModel bake(ResourceLocation location, ModelState state, Function<Material, TextureAtlasSprite> sprites) {
-                UnbakedModel unbakedmodel = this.getModel(location);
-                if (unbakedmodel instanceof BlockModel blockmodel) {
-                    if (blockmodel.getRootModel() == ModelBakery.GENERATION_MARKER) {
-                        return ITEM_MODEL_GENERATOR.generateBlockModel(Material::sprite, blockmodel).bake(this, blockmodel, Material::sprite, state, false);
-                    }
-                }
-                return unbakedmodel.bake(this, Material::sprite, state);
-            }
-
-            @Override
-            public @Nullable BakedModel bakeUncached(UnbakedModel unbakedModel, ModelState modelState, Function<Material, TextureAtlasSprite> function) {
-                if (unbakedModel instanceof BlockModel blockmodel) {
-                    if (blockmodel.getRootModel() == ModelBakery.GENERATION_MARKER) {
-                        return ITEM_MODEL_GENERATOR.generateBlockModel(Material::sprite, blockmodel).bake(this, blockmodel, Material::sprite, modelState, false);
-                    }
-                }
-                return unbakedModel.bake(this, Material::sprite, modelState);
+                return ModelFactory.bakeUncached(this, this.getModel(location), state, sprites, location);
             }
 
             @Override
@@ -99,9 +92,9 @@ public class ModelFactory {
         return new ModelBaker() {
             @Override
             public UnbakedModel getModel(ResourceLocation location) {
-                var model = getTopLevelModel(ModelResourceLocation.standalone(location));
+                var model = getTopLevelModel(location);
                 if (model != null) return model;
-                var missing = getTopLevelModel(ModelBakery.MISSING_MODEL_VARIANT);
+                var missing = getTopLevelModel(ModelBakery.MISSING_MODEL_LOCATION);
                 if (missing == null) {
                     throw new IllegalStateException("Missing model is not registered");
                 }
@@ -109,29 +102,8 @@ public class ModelFactory {
             }
 
             @Override
-            public @Nullable UnbakedModel getTopLevelModel(ModelResourceLocation modelResourceLocation) {
-                return ModelFactory.getTopLevelModel(modelResourceLocation);
-            }
-
-            @Override
             public @Nullable BakedModel bake(ResourceLocation location, ModelState state, Function<Material, TextureAtlasSprite> sprites) {
-                UnbakedModel unbakedmodel = this.getModel(location);
-                if (unbakedmodel instanceof BlockModel blockmodel) {
-                    if (blockmodel.getRootModel() == ModelBakery.GENERATION_MARKER) {
-                        return ITEM_MODEL_GENERATOR.generateBlockModel(sprites, blockmodel).bake(this, blockmodel, sprites, state, false);
-                    }
-                }
-                return unbakedmodel.bake(this, sprites, state);
-            }
-
-            @Override
-            public @Nullable BakedModel bakeUncached(UnbakedModel unbakedModel, ModelState modelState, Function<Material, TextureAtlasSprite> function) {
-                if (unbakedModel instanceof BlockModel blockmodel) {
-                    if (blockmodel.getRootModel() == ModelBakery.GENERATION_MARKER) {
-                        return ITEM_MODEL_GENERATOR.generateBlockModel(function, blockmodel).bake(this, blockmodel, function, modelState, false);
-                    }
-                }
-                return unbakedModel.bake(this, function, modelState);
+                return ModelFactory.bakeUncached(this, this.getModel(location), state, sprites, location);
             }
 
             @Override
@@ -157,11 +129,16 @@ public class ModelFactory {
                 return ((ModelBakeryAccessor) modelBakery).invokeGetModel(modelLocation);
             }
         } catch (Throwable ignored) {
-            return ((ModelBakeryAccessor) modelBakery).getMissingModel();
+            return getMissingModel((ModelBakeryAccessor) modelBakery);
         }
     }
 
-    public static @Nullable UnbakedModel getTopLevelModel(ModelResourceLocation modelLocation) {
+    public static UnbakedModel getMissingModel(ModelBakeryAccessor accessor) {
+        var missingModel = accessor.getTopLevelModels().get(ModelBakery.MISSING_MODEL_LOCATION);
+        return missingModel == null ? accessor.invokeGetModel(ModelBakery.MISSING_MODEL_LOCATION) : missingModel;
+    }
+
+    public static @Nullable UnbakedModel getTopLevelModel(ResourceLocation modelLocation) {
         return ((ModelBakeryAccessor)getModelBakery()).getTopLevelModels().get(modelLocation);
     }
 
@@ -190,7 +167,7 @@ public class ModelFactory {
                 model.resolveParents(accessor::invokeGetModel);
                 return model;
             } catch (Throwable ignored) {
-                return accessor.getMissingModel();
+                return getMissingModel(accessor);
             }
         }
     }
@@ -202,7 +179,7 @@ public class ModelFactory {
                 return ((ModelBakeryAccessor) modelBakery).getUnbakedCache().get(modelLocation);
             }
         } catch (Throwable ignored) {
-            return ((ModelBakeryAccessor) modelBakery).getMissingModel();
+            return getMissingModel((ModelBakeryAccessor) modelBakery);
         }
     }
 

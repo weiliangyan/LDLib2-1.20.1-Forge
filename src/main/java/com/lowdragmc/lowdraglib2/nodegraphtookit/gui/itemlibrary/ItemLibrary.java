@@ -176,7 +176,8 @@ public class ItemLibrary extends UIElement {
                     .setDragTexture(- width / 2f, -height / 2f, width, height);
         });
         resizeButton.addEventListener(UIEvents.DRAG_SOURCE_UPDATE, e -> {
-            if (e.dragHandler.draggingObject instanceof DragResize(var oSize)) {
+            if (e.dragHandler.draggingObject instanceof DragResize dragResize) {
+                var oSize = dragResize.originalSize();
                 var normalSizeOffset = getLocalMouseNormal(e.x - e.dragStartX, e.y - e.dragStartY);
                 // Live resize — width/height are data-driven and must outrank stylesheet defaults.
                 Style.importantPipeline(getLayout(), l -> l
@@ -440,7 +441,7 @@ public class ItemLibrary extends UIElement {
     protected void prepareSelectedItemData(ItemLibraryItem item) {
         if (item == null || this.graphModel == null) return;
         if (portModels == null || portModels.isEmpty()) return;
-        var sourcePort = portModels.getFirst();
+        var sourcePort = portModels.get(0);
         var testData = GraphNodeCreationData.ofOrphan(this.graphModel);
         if (item instanceof NodeModelLibraryItem nodeItem) {
             if (nodeItem.createNode(testData) instanceof NodeModel nodeModel) {
@@ -448,7 +449,7 @@ public class ItemLibrary extends UIElement {
                     nodeModel.getOutputsByDisplayOrder() : nodeModel.getInputsByDisplayOrder();
                 var compatiblePorts = graphModel.getCompatiblePorts(ports, sourcePort);
                 if (compatiblePorts.isEmpty()) return;
-                nodeItem.setData(new NodeItemLibraryData(nodeModel.getClass(), compatiblePorts.getFirst()));
+                nodeItem.setData(new NodeItemLibraryData(nodeModel.getClass(), compatiblePorts.get(0)));
                 for (var portToAdd : compatiblePorts) {
                     // todo sub port items
                 }
@@ -558,8 +559,8 @@ public class ItemLibrary extends UIElement {
     public void showWithNodesFitPort(float mouseX, float mouseY, List<PortModel> portModels, Consumer<@Nullable ItemLibraryItem> onFinished) {
         if (portModels.isEmpty()) return;
         this.portModels = portModels;
-        title.setText(Component.translatable("graph.library.choose", Component.translatable(portModels.getFirst().getDataTypeHandle().getFriendlyName())));
-        setPortRecommendation(portModels.getFirst());
+        title.setText(Component.translatable("graph.library.choose", Component.translatable(portModels.get(0).getDataTypeHandle().getFriendlyName())));
+        setPortRecommendation(portModels.get(0));
         show(mouseX, mouseY, onFinished);
     }
 

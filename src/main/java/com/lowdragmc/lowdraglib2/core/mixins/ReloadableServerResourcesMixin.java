@@ -2,8 +2,7 @@ package com.lowdragmc.lowdraglib2.core.mixins;
 
 import com.lowdragmc.lowdraglib2.Platform;
 import net.minecraft.commands.Commands;
-import net.minecraft.core.LayeredRegistryAccess;
-import net.minecraft.server.RegistryLayer;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.flag.FeatureFlagSet;
@@ -18,10 +17,10 @@ import java.util.concurrent.Executor;
 @Mixin(value = ReloadableServerResources.class, priority = 100)
 public abstract class ReloadableServerResourcesMixin {
 	@Inject(method = "loadResources", at = @At("HEAD"))
-	private static void ldlib2$captureEarlyRegistries(ResourceManager resourceManager, LayeredRegistryAccess<RegistryLayer> access,
+	private static void ldlib2$captureEarlyRegistries(ResourceManager resourceManager, RegistryAccess.Frozen access,
                              FeatureFlagSet flags, Commands.CommandSelection commands, int functionCompilationLevel,
                              Executor gameExecutor, Executor backgroundExecutor,
                              CallbackInfoReturnable<CompletableFuture<ReloadableServerResources>> cir) {
-		Platform.SERVER_REGISTRY_ACCESS = access.compositeAccess();
+		Platform.SERVER_REGISTRY_ACCESS = access;
 	}
 }

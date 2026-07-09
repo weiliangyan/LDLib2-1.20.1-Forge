@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib2.client;
 import com.lowdragmc.lowdraglib2.CommonProxy;
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.Platform;
+import com.lowdragmc.lowdraglib2.client.model.ModelFactory;
 import com.lowdragmc.lowdraglib2.client.model.forge.LDLRendererModel;
 import com.lowdragmc.lowdraglib2.client.renderer.ATESRRendererProvider;
 import com.lowdragmc.lowdraglib2.client.renderer.IRenderer;
@@ -22,30 +23,20 @@ import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.client.resources.model.*;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
-import net.neoforged.neoforge.client.event.*;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.client.event.*;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientProxy {
 
     public ClientProxy(IEventBus eventBus) {
         eventBus.register(this);
-    }
-
-    @SubscribeEvent
-    public void onRegisterMenuScreensEvent(final RegisterMenuScreensEvent event) {
-        event.register(LDMenuTypes.PLAYER_UI.get(), ModularUIContainerScreen::new);
-        event.register(LDMenuTypes.HELD_ITEM_UI.get(), ModularUIContainerScreen::new);
-        event.register(LDMenuTypes.BLOCK_UI.get(), ModularUIContainerScreen::new);
-        if (LDLib2.isKubejsLoaded()) {
-            LDKJSMenuTypes.onRegisterMenuScreensEvent(event);
-        }
     }
 
     @SubscribeEvent
@@ -64,13 +55,19 @@ public class ClientProxy {
     @SubscribeEvent
     public void clientSetup(final FMLClientSetupEvent e) {
         e.enqueueWork(() -> {
+            MenuScreens.register(LDMenuTypes.PLAYER_UI.get(), ModularUIContainerScreen::new);
+            MenuScreens.register(LDMenuTypes.HELD_ITEM_UI.get(), ModularUIContainerScreen::new);
+            MenuScreens.register(LDMenuTypes.BLOCK_UI.get(), ModularUIContainerScreen::new);
+            if (LDLib2.isKubejsLoaded()) {
+                LDKJSMenuTypes.registerMenuScreens();
+            }
             LDLibShaders.init();
         });
     }
 
     @SubscribeEvent
     public void modelRegistry(final ModelEvent.RegisterGeometryLoaders e) {
-        e.register(LDLib2.id("renderer"), LDLRendererModel.Loader.INSTANCE);
+        e.register("renderer", LDLRendererModel.Loader.INSTANCE);
     }
 
     @SubscribeEvent
@@ -95,7 +92,7 @@ public class ClientProxy {
                         entry.getKey().getPath()
                                 .replace("models/", "")
                                 .replace(".json", ""));
-                event.register(ModelResourceLocation.standalone(modelLocation));
+                event.register(modelLocation);
             }
         }
         IRendererResource.INSTANCE.onAdditionalModel(event::register);

@@ -22,6 +22,9 @@ import org.joml.Vector2f;
 public class TestGraphToolkit implements IMenuTest {
     @Override
     public ModularUI createUI(@NotNull Player entityPlayer) {
+        if (!entityPlayer.level().isClientSide) {
+            return new ModularUI(UI.empty(), entityPlayer);
+        }
         var root = new UIElement();
         root.layout(layout -> {
             layout.widthPercent(75);

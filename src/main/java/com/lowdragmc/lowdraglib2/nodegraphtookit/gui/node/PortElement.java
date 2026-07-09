@@ -200,14 +200,12 @@ public class PortElement extends GraphElement<PortModel> {
 
     public boolean canAcceptDrop(GraphElementModel droppedElement) {
         // The elements that can be dropped: a variable declaration from the Blackboard and any node with a single input or output (eg.: variable and constant nodes).
-        return switch (droppedElement) {
-            case VariableDeclarationModelBase variableDeclaration -> canAcceptDroppedVariable(variableDeclaration);
-            case ISingleInputPortNodeModel ignored ->
-                    droppedElement instanceof PortNodeModel portNodeModel && (portNodeModel.getPortFitToConnectTo(getModel()) != null);
-            case ISingleOutputPortNodeModel ignored ->
-                    droppedElement instanceof PortNodeModel portNodeModel && (portNodeModel.getPortFitToConnectTo(getModel()) != null);
-            default -> false;
-        };
+        if (droppedElement instanceof VariableDeclarationModelBase variableDeclaration) {
+            return canAcceptDroppedVariable(variableDeclaration);
+        } else if (droppedElement instanceof ISingleInputPortNodeModel || droppedElement instanceof ISingleOutputPortNodeModel) {
+            return droppedElement instanceof PortNodeModel portNodeModel && (portNodeModel.getPortFitToConnectTo(getModel()) != null);
+        }
+        return false;
     }
 
     protected boolean canAcceptDroppedVariable(VariableDeclarationModelBase variableDeclaration) {

@@ -18,7 +18,6 @@ import com.lowdragmc.lowdraglib2.utils.virtuallevel.TrackedDummyWorld;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -119,7 +118,7 @@ public class IRendererResource extends Resource<IRenderer> {
         }
     }
 
-    public void onAdditionalModel(Consumer<ModelResourceLocation> registry) {
+    public void onAdditionalModel(Consumer<ResourceLocation> registry) {
         for (var renderer : getLoadedResourceRenderers()) {
             renderer.onAdditionalModel(registry);
         }

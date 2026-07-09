@@ -19,8 +19,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.client.gui.GuiGraphics;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Vector4f;
 
 import static com.mojang.blaze3d.vertex.DefaultVertexFormat.*;
@@ -135,8 +135,8 @@ public class SDFRectTexture extends TransformTexture {
         var mat = pose.last().pose();
 
         var modelView = RenderSystem.getModelViewStack();
-        modelView.pushMatrix();
-        modelView.mul(mat);
+        modelView.pushPose();
+        modelView.mulPoseMatrix(mat);
         RenderSystem.applyModelViewMatrix();
 
         RenderSystem.enableBlend();
@@ -160,15 +160,17 @@ public class SDFRectTexture extends TransformTexture {
             shader.safeGetUniform("BorderColor").set(borderVec);
         }
 
-        var buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, POSITION);
+        var tesselator = Tesselator.getInstance();
+        var buffer = tesselator.getBuilder();
+        buffer.begin(VertexFormat.Mode.QUADS, POSITION);
 
-        buffer.addVertex(-halfWidth, halfHeight, 0);
-        buffer.addVertex(halfWidth, halfHeight, 0);
-        buffer.addVertex(halfWidth, -halfHeight, 0);
-        buffer.addVertex(-halfWidth, -halfHeight, 0);
-        BufferUploader.drawWithShader(buffer.buildOrThrow());
+        buffer.vertex(-halfWidth, halfHeight, 0).endVertex();
+        buffer.vertex(halfWidth, halfHeight, 0).endVertex();
+        buffer.vertex(halfWidth, -halfHeight, 0).endVertex();
+        buffer.vertex(-halfWidth, -halfHeight, 0).endVertex();
+        BufferUploader.drawWithShader(buffer.end());
 
-        modelView.popMatrix();
+        modelView.popPose();
         RenderSystem.applyModelViewMatrix();
         pose.popPose();
     }

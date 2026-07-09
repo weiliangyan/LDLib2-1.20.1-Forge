@@ -9,8 +9,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 
 import java.util.function.Consumer;
@@ -85,7 +85,7 @@ public class ShaderManager {
 			Minecraft mc = Minecraft.getInstance();
 			float time;
 			if (mc.player != null) {
-				time = (mc.player.tickCount + mc.getTimer().getGameTimeDeltaPartialTick(false)) / 20;
+				time = (mc.player.tickCount + mc.getPartialTick()) / 20;
 			} else {
 				time = System.currentTimeMillis() / 1000f;
 			}
@@ -97,12 +97,13 @@ public class ShaderManager {
 		});
 
 		Tesselator tessellator = Tesselator.getInstance();
-		BufferBuilder buffer = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-		buffer.addVertex(-1, 1, 0);
-		buffer.addVertex(-1, -1, 0);
-		buffer.addVertex(1, -1, 0);
-		buffer.addVertex(1, 1, 0);
-		BufferUploader.draw(buffer.buildOrThrow());
+		BufferBuilder buffer = tessellator.getBuilder();
+		buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+		buffer.vertex(-1, 1, 0).endVertex();
+		buffer.vertex(-1, -1, 0).endVertex();
+		buffer.vertex(1, -1, 0).endVertex();
+		buffer.vertex(1, 1, 0).endVertex();
+		BufferUploader.draw(buffer.end());
 
 		program.release();
 

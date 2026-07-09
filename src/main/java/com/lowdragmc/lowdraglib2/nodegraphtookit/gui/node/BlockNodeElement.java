@@ -69,14 +69,14 @@ public class BlockNodeElement extends CollapsibleInOutNodeElement {
         // Highlight insertion point — top half of target = insert before, bottom half = insert after.
         // Drag-overlay feedback must outrank stylesheet to remain visible during drag, hence IMPORTANT.
         addEventListener(UIEvents.DRAG_ENTER, e -> {
-            if (e.dragHandler.getDraggingObject() instanceof DraggingBlock(var dragged)
-                    && isSameContextSibling(dragged)) {
+            if (e.dragHandler.getDraggingObject() instanceof DraggingBlock draggingBlock
+                    && isSameContextSibling(draggingBlock.block())) {
                 Style.importantPipeline(e.currentElement.getStyle(), s -> s.overlayTexture(TreeList.createDraggingOverlay(insertMode(e))));
             }
         }, true);
         addEventListener(UIEvents.DRAG_UPDATE, e -> {
-            if (e.dragHandler.getDraggingObject() instanceof DraggingBlock(var dragged)
-                    && isSameContextSibling(dragged)) {
+            if (e.dragHandler.getDraggingObject() instanceof DraggingBlock draggingBlock
+                    && isSameContextSibling(draggingBlock.block())) {
                 Style.importantPipeline(e.currentElement.getStyle(), s -> s.overlayTexture(TreeList.createDraggingOverlay(insertMode(e))));
             } else {
                 Style.importantPipeline(e.currentElement.getStyle(), s -> s.overlayTexture(IGuiTexture.EMPTY));
@@ -89,7 +89,8 @@ public class BlockNodeElement extends CollapsibleInOutNodeElement {
 
         addEventListener(UIEvents.DRAG_PERFORM, e -> {
             Style.importantPipeline(e.currentElement.getStyle(), s -> s.overlayTexture(IGuiTexture.EMPTY));
-            if (!(e.dragHandler.getDraggingObject() instanceof DraggingBlock(var dragged))) return;
+            if (!(e.dragHandler.getDraggingObject() instanceof DraggingBlock draggingBlock)) return;
+            var dragged = draggingBlock.block();
             var target = getModel();
             var parent = target.getContextNodeModel();
             if (parent == null || dragged == target || dragged.getContextNodeModel() != parent) return;

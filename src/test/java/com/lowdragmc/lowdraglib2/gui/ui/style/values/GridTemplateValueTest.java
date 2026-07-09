@@ -29,8 +29,8 @@ class GridTemplateValueTest {
         assertEquals(2, template.simples().size());
         assertEquals(2, template.repeats().size());
         assertEquals(3, template.names().size());
-        assertEquals("start", template.names().getFirst().getName());
-        assertEquals(0, template.names().getFirst().getIndex());
+        assertEquals("start", template.names().get(0).getName());
+        assertEquals(0, template.names().get(0).getIndex());
         assertEquals("middle", template.names().get(1).getName());
         assertEquals(1, template.names().get(1).getIndex());
         assertEquals("end", template.names().get(2).getName());
@@ -48,7 +48,7 @@ class GridTemplateValueTest {
         assertNotNull(template);
         assertEquals(0, template.simples().size());
         assertEquals(1, template.repeats().size());
-        assertTrue(template.repeats().getFirst().isRepeat());
+        assertTrue(template.repeats().get(0).isRepeat());
 
         // Verify round-trip
         String serialized = GridTemplateValue.toString(template);
@@ -75,7 +75,7 @@ class GridTemplateValueTest {
         GridTemplate template = GridTemplateValue.parse("repeat(auto-fill, minmax(100px, 1fr))");
         assertNotNull(template);
         assertEquals(1, template.repeats().size());
-        assertTrue(template.repeats().getFirst().isRepeat());
+        assertTrue(template.repeats().get(0).isRepeat());
 
         // Verify round-trip
         String serialized = GridTemplateValue.toString(template);
@@ -88,7 +88,7 @@ class GridTemplateValueTest {
         GridTemplate template = GridTemplateValue.parse("repeat(auto-fit, 200px)");
         assertNotNull(template);
         assertEquals(1, template.repeats().size());
-        assertTrue(template.repeats().getFirst().isRepeat());
+        assertTrue(template.repeats().get(0).isRepeat());
 
         // Verify round-trip
         String serialized = GridTemplateValue.toString(template);
