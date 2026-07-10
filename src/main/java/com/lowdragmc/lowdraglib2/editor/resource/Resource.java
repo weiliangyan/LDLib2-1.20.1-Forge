@@ -8,7 +8,6 @@ import lombok.Setter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.Tag;
 
-import net.minecraftforge.fml.ModLoader;
 import org.jetbrains.annotations.Nullable;
 import java.io.File;
 
@@ -65,7 +64,7 @@ public abstract class Resource<T> {
 
         // send an Event to register built resources
         var event = new EditorResourceEvent.LoadBuiltin(resourceInstance);
-        ModLoader.get().postEvent(event);
+        MinecraftForge.EVENT_BUS.post(event);
     }
 
     /**

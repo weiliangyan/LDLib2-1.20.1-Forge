@@ -22,6 +22,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import org.appliedenergistics.yoga.*;
+import org.joml.Vector2f;
 
 import javax.annotation.Nonnull;
 import org.jetbrains.annotations.Nullable;
@@ -124,6 +125,7 @@ public class Menu<K, T> extends UIElement {
     protected ITreeNode<K, T> openedNode;
     @Nullable
     protected Menu<K, T> opened;
+    protected boolean rootPopup;
 
     public Menu(ITreeNode<K, T> root) {
         this(root, (key) -> new TextElement().setText(key.toString()));
@@ -139,6 +141,7 @@ public class Menu<K, T> extends UIElement {
         getLayout().minWidth(120);
         getStyle().backgroundTexture(Sprites.RECT_SOLID);
         getStyle().zIndex(100);
+        setOverflowVisible(true);
         setFocusable(true);
         addEventListener(UIEvents.BLUR, this::onBlur, true);
 
@@ -152,22 +155,22 @@ public class Menu<K, T> extends UIElement {
     }
 
     protected void onBlur(UIEvent event) {
-        if (event.relatedTarget != null && this.isAncestorOf(event.relatedTarget)) { // focus on children
+        if (event.relatedTarget != null && isInMenuTree(event.relatedTarget)) { // focus on children or opened submenus
             return;
         }
 
         if (event.target == this) { // lose focus
-            if (isSelfOrChildHover() && event.relatedTarget == null) {
+            if (isSelfOrOpenedMenuHover() && event.relatedTarget == null) {
                 focus();
             } else {
-                if (parentMenu != null && getParent() != null && getParent().isSelfOrChildHover()) {
+                if (parentMenu != null && parentMenu.isSelfOrOpenedMenuHover()) {
                     focus();
                 } else if(autoClose) {
                     close();
                 }
             }
         } else { // child lose focus
-            if (event.relatedTarget == null && isSelfOrChildHover()) {
+            if (event.relatedTarget == null && isSelfOrOpenedMenuHover()) {
                 focus();
             } else {
                 if(autoClose) {
@@ -198,7 +201,7 @@ public class Menu<K, T> extends UIElement {
             if (x < 0) {
                 layout(layout -> layout.left(getLayoutX() - x));
             } else if (x + width > screenWidth) {
-                if (x > width && parentMenu != null) {
+                if (x > width && parentMenu != null && !rootPopup) {
                     // move to the left first
                     layout(layout -> layout.left(0 - width));
                 } else {
@@ -211,9 +214,24 @@ public class Menu<K, T> extends UIElement {
     @Override
     protected void onAdded() {
         var mui = getModularUI();
-        if (mui != null) {
+        if (mui != null && !rootPopup) {
             mui.requestFocus(this);
         }
+    }
+
+    protected boolean isInMenuTree(@Nullable UIElement element) {
+        if (element == null) {
+            return false;
+        }
+        if (this == element || this.isAncestorOf(element)) {
+            return true;
+        }
+        return opened != null && opened.isInMenuTree(element);
+    }
+
+    protected boolean isSelfOrOpenedMenuHover() {
+        var mui = getModularUI();
+        return mui != null && isInMenuTree(mui.getLastHoveredElement());
     }
 
     public Menu<K, T> setUiProvider(UIElementProvider<K> uiProvider) {
@@ -229,6 +247,11 @@ public class Menu<K, T> extends UIElement {
     }
 
     public void close(){
+        if (opened != null) {
+            opened.close();
+            opened = null;
+            openedNode = null;
+        }
         if (this.getParent() != null) {
             this.getParent().removeChild(this);
         }
@@ -241,7 +264,8 @@ public class Menu<K, T> extends UIElement {
                 var container = new UIElement().layout(layout -> {
                     layout.flexDirection(FlexDirection.ROW);
                     layout.alignItems(AlignItems.CENTER);
-                }).style(style -> style.backgroundTexture(textureProvider.apply(child)))
+                }).setOverflowVisible(true)
+                        .style(style -> style.backgroundTexture(textureProvider.apply(child)))
                         .addChild(new UIElement().layout(layout -> {
                             layout.flex(1);
                         }).addChild(uiProvider.apply(child.getKey())))
@@ -254,34 +278,15 @@ public class Menu<K, T> extends UIElement {
                                     if (autoClose) {
                                         close();
                                     }
+                                } else {
+                                    openChildMenu(e.currentElement, child);
+                                    e.stopPropagation();
                                 }
                             }
                         }).addEventListener(UIEvents.MOUSE_ENTER, e -> {
                             e.currentElement.style(style -> style.backgroundTexture(hoverTextureProvider.apply(child)));
                             if (!child.isLeaf()) { // open a new menu
-                                if (opened != null) {
-                                    if (openedNode == child) return;
-                                    opened.close();
-                                }
-                                openedNode = child;
-                                opened = new Menu<>(child, uiProvider);
-                                opened.parentMenu = this;
-                                opened.setAutoClose(autoClose);
-                                opened.getMenuStyle().copyFrom(menuStyle);
-                                opened.setTextureProvider(textureProvider);
-                                opened.setHoverTextureProvider(hoverTextureProvider);
-                                opened.getStyle().copyFrom(this.getStyle());
-                                opened.getLayout().alignSelf(AlignItems.FLEX_START);
-                                opened.getLayout().left(e.currentElement.getSizeWidth());
-                                opened.setOnNodeClicked(node -> {
-                                    if (onNodeClicked != null) {
-                                        onNodeClicked.accept(node);
-                                    }
-                                    if (autoClose){
-                                        close();
-                                    }
-                                });
-                                e.currentElement.addChild(opened);
+                                openChildMenu(e.currentElement, child);
                             } else {
                                 if (opened != null) {
                                     opened.close();
@@ -306,6 +311,51 @@ public class Menu<K, T> extends UIElement {
                 nodeUIs.put(child, container);
                 addChild(container);
             }
+        }
+    }
+
+    protected void openChildMenu(UIElement anchor, ITreeNode<K, T> child) {
+        if (opened != null) {
+            if (openedNode == child) return;
+            opened.close();
+        }
+        openedNode = child;
+        opened = new Menu<>(child, uiProvider);
+        opened.parentMenu = this;
+        opened.rootPopup = true;
+        opened.setAutoClose(autoClose);
+        opened.getMenuStyle().copyFrom(menuStyle);
+        opened.setTextureProvider(textureProvider);
+        opened.setHoverTextureProvider(hoverTextureProvider);
+        opened.getStyle().copyFrom(this.getStyle());
+        opened.getStyle().zIndex(this.getStyle().zIndex() + 100);
+        var mui = getModularUI();
+        if (mui != null) {
+            var root = mui.ui.rootElement;
+            var worldPos = anchor.localToWorld(new Vector2f(
+                    anchor.getPositionX() + anchor.getSizeWidth(),
+                    anchor.getPositionY()
+            ));
+            var pos = root.worldToLocalLayoutOffset(worldPos);
+            opened.getLayout().left(pos.x);
+            opened.getLayout().top(pos.y);
+        } else {
+            opened.rootPopup = false;
+            opened.getLayout().alignSelf(AlignItems.FLEX_START);
+            opened.getLayout().left(anchor.getSizeWidth());
+        }
+        opened.setOnNodeClicked(node -> {
+            if (onNodeClicked != null) {
+                onNodeClicked.accept(node);
+            }
+            if (autoClose){
+                close();
+            }
+        });
+        if (mui != null) {
+            mui.ui.rootElement.addChild(opened);
+        } else {
+            anchor.addChild(opened);
         }
     }
 

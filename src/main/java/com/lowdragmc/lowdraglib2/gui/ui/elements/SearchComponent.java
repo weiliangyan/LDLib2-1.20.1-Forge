@@ -250,6 +250,8 @@ public class SearchComponent<T> extends BindableUIElement<T> {
         this.searchUI = searchUI;
         this.searchEngine.dispose();
         this.searchEngine = new SearchEngine<>(searchUI, this::onResultFound);
+        candidates.clear();
+        isCandidatesDirty.set(true);
         return this;
     }
 
@@ -374,7 +376,7 @@ public class SearchComponent<T> extends BindableUIElement<T> {
             var candidateUI = candidateUIProvider.apply(value);
             this.preview.addChild(candidateUI);
         }
-        textField.setText(value == null ? "" : searchUI.resultText(value));
+        textField.setText(value == null ? "" : searchUI.resultText(value), false);
 
         // notify
         if (notify) {
@@ -453,6 +455,8 @@ public class SearchComponent<T> extends BindableUIElement<T> {
             return;
         }
         delayedHideGeneration++;
+        onSearchWordChanged(textField.getText());
+        updateCandidatesUI();
         var mui = getModularUI();
         if (mui != null) {
             var root = mui.ui.rootElement;

@@ -31,7 +31,6 @@ button.__disabled__ .__button_text__ {
 
 text, label {
   text-shadow: false;
-  font: ldlib2:jetbrains_mono_bold;
 }
 
 // text-field
@@ -42,7 +41,6 @@ text-field:host,
   focus-overlay: sdf(#00000000, 4, 1, #71a4f4);
   // height: 14;
   padding-all: 2;
-  font: ldlib2:jetbrains_mono_bold;
 }
 
 // search-component
@@ -85,7 +83,6 @@ progress-bar:host {
 
 progress-bar:host label {
   font-size: 6;
-  font: ldlib2:jetbrains_mono_bold;
 }
 
 .__progress-bar_bar-container__ {
@@ -114,7 +111,6 @@ color-selector:host text-field {
   focus-overlay: sdf(#00000000, 4, 1, #71a4f4);
   // height: 16;
   padding-all: 2;
-  font: ldlib2:jetbrains_mono_bold;
 }
 
 color-selector:host button {
@@ -164,7 +160,6 @@ toggle:host {
 // text-area
 text-area {
   scroller-view-margin: 8;
-  font: ldlib2:jetbrains_mono_bold;
 }
 
 text-area:host {

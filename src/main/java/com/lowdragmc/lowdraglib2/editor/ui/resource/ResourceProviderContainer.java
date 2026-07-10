@@ -7,7 +7,6 @@ import com.lowdragmc.lowdraglib2.editor.resource.IResourcePath;
 import com.lowdragmc.lowdraglib2.editor.resource.IResourceProvider;
 import com.lowdragmc.lowdraglib2.editor.resource.Resource;
 import com.lowdragmc.lowdraglib2.editor.ui.Editor;
-import com.lowdragmc.lowdraglib2.gui.LDLibFonts;
 import com.lowdragmc.lowdraglib2.gui.texture.Icons;
 import com.lowdragmc.lowdraglib2.gui.ColorPattern;
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
@@ -135,7 +134,6 @@ public class ResourceProviderContainer<T> extends UIElement {
                     layout.alignItems(AlignItems.CENTER);
                     layout.justifyContent(AlignContent.CENTER);
         }).addChild(uiSupplier.apply(key)), new Label().textStyle(style -> {
-            style.font(LDLibFonts.JETBRAINS_MONO_BOLD);
             if (resourceProvider.getResourceInstance().getDisplayMode() == Resource.DisplayMode.LIST) {
                 style.textAlignHorizontal(Horizontal.LEFT).textAlignVertical(Vertical.CENTER).textWrap(TextWrap.HOVER_ROLL);
                 style.fontSize(9);

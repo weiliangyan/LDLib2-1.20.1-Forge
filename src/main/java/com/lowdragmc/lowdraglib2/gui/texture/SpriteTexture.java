@@ -21,6 +21,7 @@ import com.lowdragmc.lowdraglib2.math.Position;
 import com.lowdragmc.lowdraglib2.math.Size;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
 import com.lowdragmc.lowdraglib2.utils.ColorUtils;
+import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import dev.latvian.mods.rhino.util.HideFromJS;
@@ -179,10 +180,31 @@ public class SpriteTexture extends TransformTexture {
     @OnlyIn(Dist.CLIENT)
     public Size getImageSize() {
         if (imageSizeCache == null) {
+            var minecraft = Minecraft.getInstance();
             try {
-                imageSizeCache = Minecraft.getInstance().getTextureManager().getTexture(imageLocation) instanceof ITextureSize textureSize ?
-                        Size.of(textureSize.ldlib2$getImageWidth(), textureSize.ldlib2$getImageHeight()) : Size.of(1, 1);
-            } catch (Exception e) {
+                if (minecraft.getTextureManager().getTexture(imageLocation) instanceof ITextureSize textureSize) {
+                    int width = textureSize.ldlib2$getImageWidth();
+                    int height = textureSize.ldlib2$getImageHeight();
+                    if (width > 0 && height > 0) {
+                        imageSizeCache = Size.of(width, height);
+                    }
+                }
+            } catch (Exception ignored) {
+                // Fall through to the resource-reader path below.
+            }
+            if (imageSizeCache == null) {
+                try {
+                    var resource = minecraft.getResourceManager().getResource(imageLocation);
+                    if (resource.isPresent()) {
+                        try (var stream = resource.get().open(); var image = NativeImage.read(stream)) {
+                            imageSizeCache = Size.of(image.getWidth(), image.getHeight());
+                        }
+                    }
+                } catch (Exception ignored) {
+                    // Use a non-zero fallback so UV math stays finite for missing resources.
+                }
+            }
+            if (imageSizeCache == null || imageSizeCache.getWidth() <= 0 || imageSizeCache.getHeight() <= 0) {
                 imageSizeCache = Size.of(1, 1);
             }
         }
@@ -312,7 +334,10 @@ public class SpriteTexture extends TransformTexture {
                         uCenterStart, vCenterStart, u1, v1, color);
 
                 // draw border first
-                BufferUploader.drawWithShader(buffer2.end());
+                var bufferData = buffer2.end();
+                if (bufferData != null) {
+                    BufferUploader.drawWithShader(bufferData);
+                }
             }
         }
     }

@@ -29,6 +29,8 @@ import org.jetbrains.annotations.Nullable;
 import javax.annotation.Nonnull;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
 
 public class AppearanceSettings implements Settings {
     public static final ResourceLocation ID = LDLib2.id("appearance");
@@ -121,12 +123,24 @@ public class AppearanceSettings implements Settings {
             @Override
             public void search(String word, IResultHandler<ResourceLocation> searchHandler) {
                 var lowerWord = word.toLowerCase();
+                if (stylesheet != null && lowerWord.equals(stylesheet.toString().toLowerCase())) {
+                    lowerWord = "";
+                }
+                var candidates = new LinkedHashSet<ResourceLocation>(List.of(
+                        StylesheetManager.GDP_MERGED,
+                        StylesheetManager.MC_MERGED,
+                        StylesheetManager.MODERN_MERGED,
+                        StylesheetManager.ORE_MERGED
+                ));
                 for (var key : StylesheetManager.INSTANCE.getAllPackStylesheets()) {
+                    if (key.getPath().endsWith(".lss")) {
+                        key = key.withPath(key.getPath().substring(0, key.getPath().length() - ".lss".length()));
+                    }
+                    candidates.add(key);
+                }
+                for (var key : candidates) {
                     if (Thread.currentThread().isInterrupted()) return;
                     if (key.toString().toLowerCase().contains(lowerWord)) {
-                        if (key.getPath().endsWith(StylesheetManager.PATH)) {
-                            key = key.withPath(key.getPath().substring(0, key.getPath().length() - StylesheetManager.PATH.length() - 1));
-                        }
                         searchHandler.acceptResult(key);
                     }
                 }

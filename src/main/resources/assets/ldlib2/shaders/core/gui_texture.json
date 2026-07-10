@@ -1,6 +1,11 @@
 {
     "vertex": "ldlib2:gui_texture",
     "fragment": "ldlib2:gui_texture",
+    "attributes": [
+        "Position",
+        "UV0",
+        "Color"
+    ],
     "samplers": [
         { "name": "Sampler0" }
     ],

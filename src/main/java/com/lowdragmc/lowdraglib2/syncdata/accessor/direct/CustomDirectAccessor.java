@@ -119,6 +119,11 @@ public class CustomDirectAccessor<TYPE> implements IDirectAccessor<TYPE>, IMarkF
             return this;
         }
 
+        public Builder<TYPE> streamCodec(com.lowdragmc.lowdraglib2.utils.codec.StreamCodec<? super RegistryFriendlyByteBuf, TYPE> streamCodec) {
+            this.streamCodec = streamCodec;
+            return this;
+        }
+
         /**
          * Use the codec to mark the value in NBT form.
          */

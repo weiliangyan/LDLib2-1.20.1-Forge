@@ -18,7 +18,7 @@ import lombok.experimental.UtilityClass;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.*;
 import com.lowdragmc.lowdraglib2.compat.network.RegistryFriendlyByteBuf;
-import com.lowdragmc.lowdraglib2.compat.network.codec.StreamCodec;
+import com.lowdragmc.lowdraglib2.utils.codec.StreamCodec;
 import net.minecraft.resources.RegistryOps;
 import net.minecraftforge.common.util.INBTSerializable;
 import com.lowdragmc.lowdraglib2.compat.network.ConnectionType;

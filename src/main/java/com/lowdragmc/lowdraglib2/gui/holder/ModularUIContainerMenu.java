@@ -35,6 +35,15 @@ public class ModularUIContainerMenu extends AbstractContainerMenu {
         return (IModularUIHolderMenu) this;
     }
 
+    public void syncModularSlotPositions() {
+        for (var slot : this.slots) {
+            var itemSlot = asModularUIHolderMenu().getItemSlot(slot);
+            if (itemSlot != null) {
+                itemSlot.updateSlotPosition();
+            }
+        }
+    }
+
     @Override
     public ItemStack quickMoveStack(Player player, int idx) {
         if (player.level().isClientSide) {
