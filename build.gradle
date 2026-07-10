@@ -63,6 +63,10 @@ repositories {
         url = "https://maven.blamejared.com/"
     }
     maven {
+        name = "Kotlin for Forge"
+        url = "https://thedarkcolour.github.io/KotlinForForge/"
+    }
+    maven {
         name = "ModMaven"
         url = "https://modmaven.dev"
     }
@@ -187,13 +191,7 @@ tasks.named('sourcesJar') {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    libraries("org.jetbrains.kotlin:kotlin-stdlib:${kotlin_stdlib_version}") {
-        exclude group: "org.jetbrains", module: "annotations"
-    }
-    jarJar("org.jetbrains.kotlin:kotlin-stdlib:${kotlin_stdlib_version}") {
-        jarJar.ranged(it, "[${kotlin_stdlib_version},)")
-        exclude group: "org.jetbrains", module: "annotations"
-    }
+    localImplementation fg.deobf("thedarkcolour:kotlinforforge:${kotlin_for_forge_version}")
 
     // JEI
     compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}") { transitive = false }
@@ -245,7 +243,7 @@ dependencies {
     annotationProcessor("com.google.guava:guava:31.1-jre")
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:${mixinextras_version}"))
     implementation("io.github.llamalad7:mixinextras-forge:${mixinextras_version}")
-    jarJar("io.github.llamalad7:mixinextras-common:${mixinextras_version}") {
+    jarJar("io.github.llamalad7:mixinextras-forge:${mixinextras_version}") {
         jarJar.ranged(it, "[${mixinextras_version},)")
     }
 
@@ -267,6 +265,7 @@ tasks.withType(ProcessResources).configureEach {
             "loader_version"     : loader_version,
             "forge_version"      : forge_version.split("\\.")[0],
             "minecraft_version"  : minecraft_version,
+            "kotlin_for_forge_version": kotlin_for_forge_version,
             "mod_license"        : mod_license,
             "mod_name"           : mod_name,
             "mod_description"    : mod_description,

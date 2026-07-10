@@ -28,3 +28,10 @@ config="${mod_id}.mixins.json"
     versionRange = "[${minecraft_version}]"
     ordering = "NONE"
     side = "BOTH"
+
+[[dependencies.${mod_id}]]
+    modId = "kotlinforforge"
+    mandatory = true
+    versionRange = "[${kotlin_for_forge_version},)"
+    ordering = "NONE"
+    side = "BOTH"
