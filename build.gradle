@@ -191,7 +191,9 @@ tasks.named('sourcesJar') {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    localImplementation fg.deobf("thedarkcolour:kotlinforforge:${kotlin_for_forge_version}")
+    localImplementation fg.deobf("maven.modrinth:kotlin-for-forge:${kotlin_for_forge_version}") {
+        transitive = false
+    }
 
     // JEI
     compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}") { transitive = false }
