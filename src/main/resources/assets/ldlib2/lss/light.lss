@@ -1,0 +1,451 @@
+.__root__ {
+  background: sdf(#30f7fafc, 0);
+}
+
+text,
+label {
+  text-color: #1f2933;
+  text-shadow: false;
+}
+
+.__white_icon__,
+button.__white_icon__ > .__icon__,
+button:host > .__white_icon__ {
+  color: #2f3d4d;
+}
+
+.panel_bg {
+  background: sdf(#c8ffffff, 8, 1, #a8c6d1dc);
+  padding-all: 7;
+  gap-all: 5;
+}
+
+.preview_bg,
+.configurator_preview_bg {
+  background: sdf(#b8ffffff, 7, 1, #90c6d1dc);
+  padding-all: 4;
+}
+
+button:host,
+tag-field:host button,
+color-selector:host button {
+  base-background: sdf(#d0f8fafc, 4, 1, #a8aeb8c4);
+  hover-background: sdf(#e8ffffff, 4, 1, #b87f98b2);
+  pressed-background: sdf(#d0e5edf6, 4, 1, #b87f98b2);
+  padding-horizontal: 5;
+  padding-vertical: 2;
+  height: 16;
+}
+
+button:host .__button_text__ {
+  text-color: #1f2933;
+  text-shadow: false;
+}
+
+button.__disabled__ .__button_text__,
+button:disabled:host .__button_text__ {
+  text-color: #7a8592;
+  text-shadow: false;
+}
+
+.__confirm-button__,
+.__sell-button__,
+.__buy-button__ {
+  base-background: sdf(#9fe6f4ea, 8, 1, #a06eab87);
+  hover-background: sdf(#c4f1fbf4, 8, 1, #b85ca878);
+  pressed-background: sdf(#acd4eadc, 8, 1, #b85ca878);
+}
+
+.__reject-button__ {
+  base-background: sdf(#9ff5e7e7, 8, 1, #a0bd8a8a);
+  hover-background: sdf(#c8fff3f3, 8, 1, #b8a97070);
+  pressed-background: sdf(#acdccccd, 8, 1, #b8a97070);
+}
+
+text-field:host,
+.__tag-field_text-field__,
+.__search-component_text-field__,
+search-component:host {
+  background: sdf(#d8ffffff, 6, 1, #9caab8c6);
+  focus-overlay: sdf(#00000000, 6, 1, #cc6fa4e8);
+  padding-all: 2;
+}
+
+search-component:host {
+  height: 16;
+}
+
+.__selector_dialog__,
+.__search-component_dialog__,
+menu {
+  background: sdf(#ccf8fafc, 12, 1, #90a8b8c8);
+  padding-all: 2;
+}
+
+selector:host {
+  background: sdf(#c8f8fafc, 6, 1, #9caab8c6);
+  focus-overlay: sdf(#00000000, 6, 1, #cc6fa4e8);
+  padding-horizontal: 3;
+}
+
+selector:host:hovered {
+  background: sdf(#e0ffffff, 6, 1, #b07f98b2);
+}
+
+.__selector_button-icon__ {
+  background: sprite(ldlib2:textures/gui/down.png) scale(0.6) color(#536273);
+}
+
+switch:host {
+  base-background: sdf(#80dce5ee, 8, 1, #80aab8c6);
+  pressed-background: sdf(#aa8fb6e8, 8, 1, #aa6f9fd8);
+  unmark-background: sdf(#9effffff, 7, 1, #80aab8c6);
+  mark-background: sdf(#f0ffffff, 7, 1, #aa6f9fd8);
+  height: 12;
+  width: 24;
+  padding-all: 1;
+}
+
+.__toggle_button__ {
+  base-background: sdf(#80f8fafc, 7, 1, #80aab8c6);
+  hover-background: sdf(#b0ffffff, 7, 1, #9b7f98b2);
+  pressed-background: sdf(#90e5edf6, 7, 1, #9b7f98b2);
+  padding-all: 1;
+}
+
+toggle:host {
+  mark-background: sdf(#cc6fa4e8, 5);
+  height: 12;
+}
+
+.__toggle_mark-icon__ {
+  margin-all: 2;
+  width: auto;
+  height: auto;
+  flex: 1;
+}
+
+progress-bar:host {
+  height: 10;
+}
+
+progress-bar:host label {
+  font-size: 6;
+  text-color: #4b5563;
+  text-shadow: false;
+}
+
+.__progress-bar_bar-container__ {
+  background: sdf(#70dde7f0, 6, 1, #80aab8c6);
+  padding-all: 1;
+}
+
+.__progress-bar_bar__ {
+  background: sdf(#cc6fa4e8, 6);
+}
+
+item-slot,
+.item-slot_bg {
+  background: sdf(#78f1f5f9, 5, 1, #80b7c4d1);
+  hover-overlay: sdf(#66ffffff, 4);
+}
+
+fluid-slot,
+.fluid-slot_bg {
+  background: sdf(#70e4ebf2, 5, 1, #80b7c4d1);
+}
+
+color-selector:host text-field {
+  background: sdf(#9effffff, 8, 1, #80aab8c6);
+  focus-overlay: sdf(#00000000, 8, 1, #cc6fa4e8);
+  height: 16;
+  padding-all: 2;
+}
+
+color-selector:host .__color-selector_alpha-slider__,
+color-selector:host .__color-selector_color-slider__,
+color-selector:host .__color-selector_color-preview__ {
+  background: sdf(#78ffffff, 8, 1, #80aab8c6);
+  padding-all: 2;
+}
+
+color-selector:host .__color-selector_alpha-slider__ {
+  margin-right: 2;
+}
+
+color-selector:host .__color-selector_color-slider__ {
+  margin-bottom: 2;
+}
+
+color-selector:host .__color-selector_color-preview__ {
+  margin-right: 2;
+  margin-bottom: 2;
+}
+
+text-area {
+  scroller-view-margin: 8;
+}
+
+text-area:host {
+  focus-overlay: sdf(#00000000, 8, 1, #cc6fa4e8);
+}
+
+.__text-area_content-view__ {
+  background: sdf(#78ffffff, 10, 1, #80aab8c6);
+  padding-all: 3;
+}
+
+scroller-horizontal:host,
+.__text-area_horizontal-scroller__,
+.__scroller_view_horizontal-scroller__ {
+  height: 7;
+  margin-top: 2;
+}
+
+scroller-vertical:host,
+.__text-area_vertical-scroller__,
+.__scroller_view_vertical-scroller__ {
+  width: 7;
+  margin-left: 2;
+}
+
+.__scroller_scroll_container__ {
+  background: sdf(#66dde7f0, 5, 1, #80aab8c6);
+  padding-all: 1;
+}
+
+scroller-horizontal .__scroller_scroll_bar__,
+scroller-vertical .__scroller_scroll_bar__ {
+  base-background: sdf(#a095a5b6, 5);
+  hover-background: sdf(#c87c91aa, 5);
+  pressed-background: sdf(#d86b829c, 5);
+}
+
+.__scroller_head_button__,
+.__scroller_tail_button__ {
+  display: none;
+}
+
+scroller-view {
+  scroller-view-margin: 8;
+}
+
+.__scroller_view_view-port__ {
+  background: sdf(#b8ffffff, 6, 1, #80c6d1dc);
+  padding-all: 2;
+}
+
+.__tab-view_tab_header_container__ {
+  background: sdf(#d0f4f7fb, 3 3 0 0, 1, #9aa8b8c8);
+  padding-all: 2;
+}
+
+.__tab-view_tab_header_container__ .__scroller_view_view-container__ {
+  gap-all: 1;
+}
+
+.__tab-view_tab_content_container__ {
+  background: sdf(#d8ffffff, 0 0 3 3, 1, #9aa8b8c8);
+  padding-all: 3;
+}
+
+tab-view .__tab-view_tab_scroller__ {
+  margin-bottom: 0;
+}
+
+tab:host {
+  base-background: sdf(#c8f8fafc, 4, 1, #8ea8b8c8);
+  hover-background: sdf(#e0ffffff, 4, 1, #a8a8b8c8);
+  pressed-background: sdf(#d8d9e8f6, 4, 1, #b06f9fd8);
+  padding-all: 1;
+  height: 14;
+}
+
+tab.__selected__:host,
+tab.__tab_selected__:host,
+tab:host:selected {
+  base-background: sdf(#d8d9e8f6, 4, 1, #b06f9fd8);
+  pressed-background: sdf(#d8d9e8f6, 4, 1, #b06f9fd8);
+}
+
+tab:host .__tab_text__,
+tab:host:selected .__tab_text__,
+tab.__selected__ .__tab_text__,
+tab.__tab_selected__ .__tab_text__ {
+  text-color: #1f2933;
+  text-shadow: false;
+}
+
+.__dialog_title__ {
+  background: sdf(#b8f8fafc, 12 12 0 0, 1, #90a8b8c8);
+}
+
+.__dialog_content-container__ {
+  background: sdf(#ccffffff, 0, 1, #80b7c4d1);
+}
+
+.__dialog_button-container__ {
+  background: sdf(#b8f8fafc, 0 0 12 12, 1, #90a8b8c8);
+}
+
+menu {
+  arrow: sprite(ldlib2:textures/gui/right.png) scale(0.6) color(#536273);
+}
+
+menu .__menu_leaf-node__,
+menu .__menu_branch-node__ {
+  hover-background: sdf(#88d9e8f6, 7);
+}
+
+.__editor__ code-editor {
+  background: sdf(#c8ffffff, 7, 1, #90aab8c6);
+}
+
+.__editor__,
+.__editor_main__,
+.__editor-window_editor-container__,
+.__split_view_first__,
+.__split_view_second__ {
+  background: empty;
+}
+
+.__editor_top__ {
+  background: sdf(#d0f8fafc, 3 3 0 0, 1, #a0a8b8c8);
+}
+
+.__editor__ button:host,
+button.__white_icon__,
+button.__white_icon__:host,
+.__editor_top__ button.__white_icon__,
+.__editor_top_button-container__ button.__white_icon__,
+.__tab-view_tab_header_container__ button.__white_icon__,
+.__view-container_collapse-button__ {
+  base-background: sdf(#d0f8fafc, 3, 1, #a0a8b8c8);
+  hover-background: sdf(#e8ffffff, 3, 1, #b87f98b2);
+  pressed-background: sdf(#d0e5edf6, 3, 1, #b87f98b2);
+  padding-all: 1;
+}
+
+.__editor_top__ button:host > .__icon__,
+.__editor_top__ button:host > .__white_icon__,
+.__view-container_collapse-button__ .__white_icon__ {
+  color: #2f3d4d;
+}
+
+.__editor-gizmo-bar__ {
+  background: sdf(#b8ffffff, 6, 1, #88a8b8c8);
+}
+
+.__view-container__ {
+  background: sdf(#b8f2f6fa, 4, 1, #88a8b8c8);
+  padding-all: 1;
+}
+
+.__view-container_tab-view__ .__tab-view_tab_content_container__ {
+  padding-all: 4;
+}
+
+.__view-container_collapse-button__ {
+  height: 14;
+  width: 14;
+}
+
+ResourceView tab:host {
+  base-background: sdf(#c8f8fafc, 4, 1, #88a8b8c8);
+  hover-background: sdf(#e0ffffff, 4, 1, #9aa8b8c8);
+  pressed-background: sdf(#d8d9e8f6, 4, 1, #b06f9fd8);
+}
+
+ResourceView .__tab-view_tab_header_container__ {
+  background: sdf(#d0f4f7fb, 3 0 0 3, 1, #9aa8b8c8);
+}
+
+ResourceView .__tab-view_tab_content_container__ {
+  background: sdf(#d8ffffff, 0 3 3 0, 1, #9aa8b8c8);
+}
+
+.__editor_top__ button:host,
+.__editor_top_button-container__ button:host,
+.__view-container_collapse-button__,
+.__tab-view_tab_header_container__ button:host {
+  height: 14;
+  base-background: sdf(#d0f8fafc, 3, 1, #a0a8b8c8);
+  hover-background: sdf(#e8ffffff, 3, 1, #b87f98b2);
+  pressed-background: sdf(#d0e5edf6, 3, 1, #b87f98b2);
+}
+
+.__ui-editor-view__ {
+  gap-all: 4;
+  padding-all: 1;
+}
+
+.__ui-editor-view_header__ {
+  background: sdf(#c8ffffff, 7, 1, #88b7c4d1);
+  padding-all: 4;
+}
+
+.__ui-editor-view_header__ button {
+  height: 14;
+}
+
+.__ui-editor-view_canvas__ {
+  background: sdf(#b0ffffff, 7, 1, #88b7c4d1);
+}
+
+.__ui-editor-view_builtin-styles-toggle__ {
+  padding-all: 0;
+  mark-background: sdf(#cc6fa4e8, 6);
+}
+
+.__ui-editor-view_style-view__ {
+  background: sdf(#b8ffffff, 7, 1, #88b7c4d1);
+  padding-all: 4;
+  gap-all: 2;
+}
+
+.__editor-window_active__ {
+  background: sdf(#c0d9e8f6, 5);
+}
+
+.__editor-window_inactive__ {
+  background: sdf(#b8ffffff, 5);
+}
+
+.__configurator-group__ .__configurator-group_container__ {
+  background: sdf(#c0ffffff, 7, 1, #88b7c4d1);
+  padding-all: 5;
+}
+
+.__configurator-group__ > .__configurator_line__ {
+  background: sdf(#a8ffffff, 6, 1, #70b7c4d1);
+}
+
+.__array-configurator_button-group__ {
+  background: sdf(#b8ffffff, 6, 1, #88b7c4d1);
+  padding-all: 2;
+}
+
+.__array-configurator_item_selected__ {
+  background: sdf(#9fd9e8f6, 7, 1, #aa6f9fd8);
+}
+
+.__blackboard-var-prop_title-bar__,
+.__node-title-element__ {
+  background: sdf(#c8f8fafc, 6, 1, #88b7c4d1);
+}
+
+.__blackboard-var-prop_content__,
+.__node-element__,
+.__node-port-container__,
+.__node-preview__,
+.__item-library__ {
+  background: sdf(#c0ffffff, 7, 1, #88b7c4d1);
+}
+
+.__node-graph-view_canvas__ {
+  background: #55f8fafc;
+}
+
+.__node-graph-view_canvas-view__ {
+  color: #8b96a3;
+}

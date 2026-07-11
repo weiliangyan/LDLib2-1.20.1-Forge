@@ -25,6 +25,8 @@ public final class StylesheetManager implements ResourceManagerReloadListener {
     public static final ResourceLocation MC_MERGED = LDLib2.id(PATH + "/mc");
     public static final ResourceLocation MODERN = LDLib2.id(PATH + "/modern.lss");
     public static final ResourceLocation MODERN_MERGED = LDLib2.id(PATH + "/modern");
+    public static final ResourceLocation LIGHT = LDLib2.id(PATH + "/light.lss");
+    public static final ResourceLocation LIGHT_MERGED = LDLib2.id(PATH + "/light");
 
     private final Map<ResourceLocation, Stylesheet> builtinStylesheets = new ConcurrentHashMap<>();
     private final Map<ResourceLocation, Stylesheet> packStylesheets = new ConcurrentHashMap<>();

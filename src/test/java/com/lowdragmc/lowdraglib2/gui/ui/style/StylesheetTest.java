@@ -3,6 +3,9 @@ package com.lowdragmc.lowdraglib2.gui.ui.style;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class StylesheetTest {
@@ -21,6 +24,15 @@ class StylesheetTest {
         StyleRule rule = sheet.rules.get(0);
         assertNotNull(rule.properties);
         assertTrue(rule.properties.containsKey(PropertyRegistry.BACKGROUND));
+    }
+
+    @Test
+    void testParseBundledStylesheets() throws Exception {
+        for (var name : new String[]{"gdp", "mc", "modern", "ore", "light"}) {
+            var path = Path.of("src/main/resources/assets/ldlib2/lss/" + name + ".lss");
+            var sheet = Stylesheet.parse(Files.readString(path));
+            assertFalse(sheet.rules.isEmpty(), name + ".lss should parse at least one rule");
+        }
     }
 
     @Test
