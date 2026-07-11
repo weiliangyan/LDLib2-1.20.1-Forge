@@ -49,7 +49,7 @@ public class ModularUIScreen extends Screen {
         return false;
     }
 
-    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        // TODO
+    public void renderBackground(GuiGraphics guiGraphics) {
+        // Standalone modular UIs should leave the world visible behind the interface.
     }
 }

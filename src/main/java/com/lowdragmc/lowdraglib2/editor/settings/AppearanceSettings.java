@@ -26,16 +26,19 @@ import com.lowdragmc.lowdraglib2.gui.ui.utils.UIElementProvider;
 import com.lowdragmc.lowdraglib2.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib2.utils.PersistedParser;
 import com.lowdragmc.lowdraglib2.utils.search.IResultHandler;
+import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.fml.loading.FMLLoader;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
+import java.io.FileReader;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -47,11 +50,45 @@ public class AppearanceSettings implements Settings {
     public static final Codec<AppearanceSettings> CODEC = PersistedParser.createCodec(AppearanceSettings::new);
     private static final int LIGHT_RUNTIME_FIX_SPECIFICITY = 120101;
     private static final int LIGHT_RUNTIME_FIX_SOURCE_ORDER = 120101;
+    private static ResourceLocation activeStylesheet = StylesheetManager.ORE_MERGED;
+    private static boolean activeStylesheetLoaded;
 
     @Configurable
     @ConfigSearch(searchConfiguratorMethod = "searchStyles")
     @Getter @Setter
     private ResourceLocation stylesheet = StylesheetManager.ORE_MERGED;
+
+    /**
+     * Returns the stylesheet most recently applied by the appearance settings.
+     * External modular UIs can use this to match the editor's active theme.
+     */
+    public static ResourceLocation getActiveStylesheet() {
+        loadActiveStylesheetFromFile();
+        return activeStylesheet;
+    }
+
+    public static boolean isLightThemeActive() {
+        var stylesheet = getActiveStylesheet();
+        return StylesheetManager.LIGHT.equals(stylesheet) || StylesheetManager.LIGHT_MERGED.equals(stylesheet);
+    }
+
+    private static synchronized void loadActiveStylesheetFromFile() {
+        if (activeStylesheetLoaded) return;
+        activeStylesheetLoaded = true;
+        var settingsFile = FMLLoader.getGamePath().resolve("config").resolve(LDLib2.MOD_ID).resolve("editor.json").toFile();
+        if (!settingsFile.exists()) return;
+        try (var reader = new FileReader(settingsFile)) {
+            var root = JsonParser.parseReader(reader).getAsJsonObject();
+            var appearance = root.getAsJsonObject(ID.toString());
+            if (appearance == null || !appearance.has("stylesheet")) return;
+            var stylesheet = ResourceLocation.tryParse(appearance.get("stylesheet").getAsString());
+            if (stylesheet != null) {
+                activeStylesheet = stylesheet;
+            }
+        } catch (Exception e) {
+            LDLib2.LOGGER.warn("Failed to read the active appearance stylesheet", e);
+        }
+    }
     @Persisted(key = "windowSize")
     @Getter @Setter
     private int screenScale = -1;
@@ -126,6 +163,8 @@ public class AppearanceSettings implements Settings {
     }
 
     private void applyStylesheet(Editor editor) {
+        activeStylesheet = stylesheet;
+        activeStylesheetLoaded = true;
         var stylesheet = StylesheetManager.INSTANCE.getStylesheet(this.stylesheet);
         if (stylesheet == null) {
             return;
@@ -218,14 +257,14 @@ public class AppearanceSettings implements Settings {
 
     private void applyLightElementFixes(UIElement element) {
         if (element instanceof Tab tab) {
-            setLightTexture(tab, PropertyRegistry.BASE_BACKGROUND, lightRect(0xc8f8fafc, 3, 1, 0xffa8b4c0));
-            setLightTexture(tab, PropertyRegistry.HOVER_BACKGROUND, lightRect(0xe0ffffff, 3, 1, 0xff9eacbb));
-            setLightTexture(tab, PropertyRegistry.PRESSED_BACKGROUND, lightRect(0xd8d9e8f6, 3, 1, 0xff6f9fd8));
+            setLightTexture(tab, PropertyRegistry.BASE_BACKGROUND, lightRect(0xc8f8fafc, 0, 1, 0xffa8b4c0));
+            setLightTexture(tab, PropertyRegistry.HOVER_BACKGROUND, lightRect(0xe0ffffff, 0, 1, 0xff9eacbb));
+            setLightTexture(tab, PropertyRegistry.PRESSED_BACKGROUND, lightRect(0xd8d9e8f6, 0, 1, 0xff6f9fd8));
         }
         if (element instanceof Button button && button.hasClass("__white_icon__")) {
-            setLightTexture(button, PropertyRegistry.BASE_BACKGROUND, lightRect(0xd0f8fafc, 3, 1, 0xffa8b4c0));
-            setLightTexture(button, PropertyRegistry.HOVER_BACKGROUND, lightRect(0xe8ffffff, 3, 1, 0xff8098b2));
-            setLightTexture(button, PropertyRegistry.PRESSED_BACKGROUND, lightRect(0xd0e5edf6, 3, 1, 0xff8098b2));
+            setLightTexture(button, PropertyRegistry.BASE_BACKGROUND, lightRect(0xd0f8fafc, 0, 1, 0xffa8b4c0));
+            setLightTexture(button, PropertyRegistry.HOVER_BACKGROUND, lightRect(0xe8ffffff, 0, 1, 0xff8098b2));
+            setLightTexture(button, PropertyRegistry.PRESSED_BACKGROUND, lightRect(0xd0e5edf6, 0, 1, 0xff8098b2));
         }
     }
 
