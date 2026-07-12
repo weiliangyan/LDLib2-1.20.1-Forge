@@ -14,6 +14,9 @@ import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Tab;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.TextArea;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.TextElement;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.TextField;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvent;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEventListener;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
@@ -50,8 +53,17 @@ public class AppearanceSettings implements Settings {
     public static final Codec<AppearanceSettings> CODEC = PersistedParser.createCodec(AppearanceSettings::new);
     private static final int LIGHT_RUNTIME_FIX_SPECIFICITY = 120101;
     private static final int LIGHT_RUNTIME_FIX_SOURCE_ORDER = 120101;
+    private static final int FONT_RUNTIME_FIX_SPECIFICITY = 120102;
+    private static final int FONT_RUNTIME_FIX_SOURCE_ORDER = 120102;
     private static ResourceLocation activeStylesheet = StylesheetManager.ORE_MERGED;
+    private static FontSettings activeFontSettings = FontSettings.DEFAULT;
+    @Nullable
+    private static AppearanceSettings activeSettings;
     private static boolean activeStylesheetLoaded;
+
+    public AppearanceSettings() {
+        activeSettings = this;
+    }
 
     @Configurable
     @ConfigSearch(searchConfiguratorMethod = "searchStyles")
@@ -63,6 +75,10 @@ public class AppearanceSettings implements Settings {
      * External modular UIs can use this to match the editor's active theme.
      */
     public static ResourceLocation getActiveStylesheet() {
+        var settings = activeSettings;
+        if (settings != null) {
+            return settings.stylesheet;
+        }
         loadActiveStylesheetFromFile();
         return activeStylesheet;
     }
@@ -70,6 +86,38 @@ public class AppearanceSettings implements Settings {
     public static boolean isLightThemeActive() {
         var stylesheet = getActiveStylesheet();
         return StylesheetManager.LIGHT.equals(stylesheet) || StylesheetManager.LIGHT_MERGED.equals(stylesheet);
+    }
+
+    /**
+     * Applies the configured font sizes to an external Modular UI.
+     * This uses an important runtime style so settings also affect elements
+     * that declare their own compact font size in code.
+     */
+    public static void applyActiveFontSettings(ModularUI modularUI) {
+        var fontSettings = getActiveFontSettings();
+        for (var element : modularUI.getAllElements()) {
+            element.getStyleBag().removeCandidates(PropertyRegistry.FONT_SIZE, AppearanceSettings::isFontRuntimeFix);
+            var fontSize = fontSizeFor(element, fontSettings);
+            if (fontSize > 0) {
+                setFontSize(element, fontSize);
+            }
+        }
+    }
+
+    private static FontSettings getActiveFontSettings() {
+        var settings = activeSettings;
+        if (settings != null) {
+            return new FontSettings(
+                    settings.globalFontSize,
+                    settings.textFontSize,
+                    settings.buttonFontSize,
+                    settings.inputFontSize,
+                    settings.textAreaFontSize,
+                    settings.progressFontSize
+            );
+        }
+        loadActiveStylesheetFromFile();
+        return activeFontSettings;
     }
 
     private static synchronized void loadActiveStylesheetFromFile() {
@@ -80,11 +128,14 @@ public class AppearanceSettings implements Settings {
         try (var reader = new FileReader(settingsFile)) {
             var root = JsonParser.parseReader(reader).getAsJsonObject();
             var appearance = root.getAsJsonObject(ID.toString());
-            if (appearance == null || !appearance.has("stylesheet")) return;
-            var stylesheet = ResourceLocation.tryParse(appearance.get("stylesheet").getAsString());
-            if (stylesheet != null) {
-                activeStylesheet = stylesheet;
+            if (appearance == null) return;
+            if (appearance.has("stylesheet")) {
+                var stylesheet = ResourceLocation.tryParse(appearance.get("stylesheet").getAsString());
+                if (stylesheet != null) {
+                    activeStylesheet = stylesheet;
+                }
             }
+            activeFontSettings = FontSettings.from(appearance);
         } catch (Exception e) {
             LDLib2.LOGGER.warn("Failed to read the active appearance stylesheet", e);
         }
@@ -163,8 +214,10 @@ public class AppearanceSettings implements Settings {
     }
 
     private void applyStylesheet(Editor editor) {
+        activeSettings = this;
         activeStylesheet = stylesheet;
         activeStylesheetLoaded = true;
+        activeFontSettings = new FontSettings(globalFontSize, textFontSize, buttonFontSize, inputFontSize, textAreaFontSize, progressFontSize);
         var stylesheet = StylesheetManager.INSTANCE.getStylesheet(this.stylesheet);
         if (stylesheet == null) {
             return;
@@ -220,6 +273,7 @@ public class AppearanceSettings implements Settings {
     }
 
     private void applyRuntimeThemeFixes(ModularUI mui) {
+        applyActiveFontSettings(mui);
         if (isLightStylesheet()) {
             removeKnownGlobalThemeStylesheets(mui);
             for (var element : mui.getAllElements()) {
@@ -297,22 +351,103 @@ public class AppearanceSettings implements Settings {
     }
 
     private String buildFontStylesheetRaw() {
+        return buildFontStylesheetRaw(new FontSettings(globalFontSize, textFontSize, buttonFontSize, inputFontSize, textAreaFontSize, progressFontSize));
+    }
+
+    private static String buildFontStylesheetRaw(FontSettings settings) {
         var builder = new StringBuilder();
-        appendFontSizeRule(builder, "text, label, text-field:host, text-area", globalFontSize);
-        appendFontSizeRule(builder, "text, label", textFontSize);
-        appendFontSizeRule(builder, "button:host .__button_text__, tab:host .__button_text__", buttonFontSize);
-        appendFontSizeRule(builder, "text-field:host, .__tag-field_text-field__, .__search-component_text-field__", inputFontSize);
-        appendFontSizeRule(builder, "text-area, code-editor", textAreaFontSize);
-        appendFontSizeRule(builder, "progress-bar:host label, .__progress-bar_label__", progressFontSize);
+        appendFontSizeRule(builder, "text, label, text-field:host, text-area", settings.global());
+        appendFontSizeRule(builder, "text, label", settings.text());
+        appendFontSizeRule(builder, "button:host .__button_text__, tab:host .__button_text__", settings.button());
+        appendFontSizeRule(builder, "text-field:host, .__tag-field_text-field__, .__search-component_text-field__", settings.input());
+        appendFontSizeRule(builder, "text-area, code-editor", settings.textArea());
+        appendFontSizeRule(builder, "progress-bar:host label, .__progress-bar_label__", settings.progress());
         return builder.toString();
     }
 
-    private void appendFontSizeRule(StringBuilder builder, String selector, float fontSize) {
+    private static void appendFontSizeRule(StringBuilder builder, String selector, float fontSize) {
         if (fontSize <= 0) return;
         builder.append(selector)
                 .append(" { font-size: ")
                 .append(fontSize)
                 .append("; }\n");
+    }
+
+    private static float fontSizeFor(UIElement element, FontSettings settings) {
+        float result = settings.global();
+        if (element instanceof TextField) {
+            return settings.inputOr(result);
+        }
+        if (element instanceof TextArea) {
+            return settings.textAreaOr(result);
+        }
+        if (element instanceof TextElement) {
+            if (element.hasClass("__button_text__")) {
+                return settings.buttonOr(result);
+            }
+            if (element.hasClass("__progress-bar_label__")) {
+                return settings.progressOr(result);
+            }
+            return settings.textOr(result);
+        }
+        return 0;
+    }
+
+    private static void setFontSize(UIElement element, float fontSize) {
+        element.getStyleBag().replaceOrPutCandidate(PropertyRegistry.FONT_SIZE, StyleSlot.of(
+                PropertyRegistry.FONT_SIZE,
+                StyleOrigin.IMPORTANT,
+                FONT_RUNTIME_FIX_SPECIFICITY,
+                FONT_RUNTIME_FIX_SOURCE_ORDER,
+                fontSize
+        ));
+    }
+
+    private static boolean isFontRuntimeFix(StyleSlot<?> slot) {
+        return slot.origin() == StyleOrigin.IMPORTANT &&
+                slot.specificity() == FONT_RUNTIME_FIX_SPECIFICITY &&
+                slot.sourceOrder() == FONT_RUNTIME_FIX_SOURCE_ORDER;
+    }
+
+    private record FontSettings(float global, float text, float button, float input, float textArea, float progress) {
+        private static final FontSettings DEFAULT = new FontSettings(0, 0, 0, 0, 0, 0);
+
+        private static FontSettings from(com.google.gson.JsonObject json) {
+            return new FontSettings(
+                    number(json, "globalFontSize"),
+                    number(json, "textFontSize"),
+                    number(json, "buttonFontSize"),
+                    number(json, "inputFontSize"),
+                    number(json, "textAreaFontSize"),
+                    number(json, "progressFontSize")
+            );
+        }
+
+        private static float number(com.google.gson.JsonObject json, String key) {
+            return json.has(key) && json.get(key).isJsonPrimitive() && json.get(key).getAsJsonPrimitive().isNumber()
+                    ? json.get(key).getAsFloat()
+                    : 0;
+        }
+
+        private float textOr(float fallback) {
+            return text > 0 ? text : fallback;
+        }
+
+        private float buttonOr(float fallback) {
+            return button > 0 ? button : fallback;
+        }
+
+        private float inputOr(float fallback) {
+            return input > 0 ? input : fallback;
+        }
+
+        private float textAreaOr(float fallback) {
+            return textArea > 0 ? textArea : fallback;
+        }
+
+        private float progressOr(float fallback) {
+            return progress > 0 ? progress : fallback;
+        }
     }
 
     @Nullable
