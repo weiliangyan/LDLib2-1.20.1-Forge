@@ -9,14 +9,12 @@ import lombok.Setter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.Tag;
-
-import net.neoforged.fml.ModLoader;
+import net.minecraft.network.chat.Component;
+import net.minecraftforge.common.MinecraftForge;
 import org.jetbrains.annotations.Nullable;
+
 import java.io.File;
 import java.io.IOException;
-
-import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.common.NeoForge;
 
 public abstract class Resource<T> {
     public enum DisplayMode {
@@ -83,7 +81,7 @@ public abstract class Resource<T> {
 
         // send an Event to register built resources
         var event = new EditorResourceEvent.LoadBuiltin(resourceInstance);
-        ModLoader.postEvent(event);
+        MinecraftForge.EVENT_BUS.post(event);
     }
 
     /**
@@ -132,7 +130,7 @@ public abstract class Resource<T> {
         }
         // one of our own resource files: read the value out of it and let the provider write its own copy
         try {
-            var tag = NbtIo.read(file.toPath());
+            var tag = NbtIo.read(file);
             if (tag != null && tag.getString("type").equals(getName())) {
                 var value = deserializeResource(tag.get("data"), Platform.getFrozenRegistry());
                 if (value != null) {

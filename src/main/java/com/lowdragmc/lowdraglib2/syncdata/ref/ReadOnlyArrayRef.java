@@ -6,8 +6,7 @@ import com.lowdragmc.lowdraglib2.syncdata.field.ManagedKey;
 import com.lowdragmc.lowdraglib2.syncdata.var.ArrayVar;
 import com.lowdragmc.lowdraglib2.syncdata.var.ReadOnlyVar;
 import lombok.Getter;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-
+import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.Nullable;
 
 public final class ReadOnlyArrayRef<TYPE> extends ReadOnlyManagedRef<TYPE[]> implements IArrayRef<TYPE, TYPE[]> {
@@ -80,12 +79,12 @@ public final class ReadOnlyArrayRef<TYPE> extends ReadOnlyManagedRef<TYPE[]> imp
     }
 
     @Override
-    public void readReadOnlySyncToStream(RegistryFriendlyByteBuf buffer) {
+    public void readReadOnlySyncToStream(FriendlyByteBuf buffer) {
         IArrayRef.super.readSyncToStream(buffer);
     }
 
     @Override
-    public void writeReadOnlySyncFromStream(RegistryFriendlyByteBuf buffer) {
+    public void writeReadOnlySyncFromStream(FriendlyByteBuf buffer) {
         IArrayRef.super.writeSyncFromStream(buffer);
     }
 }

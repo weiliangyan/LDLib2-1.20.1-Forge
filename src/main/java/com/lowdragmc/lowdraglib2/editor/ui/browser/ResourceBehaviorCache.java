@@ -1,11 +1,6 @@
 package com.lowdragmc.lowdraglib2.editor.ui.browser;
 
-import com.lowdragmc.lowdraglib2.editor.resource.FilePath;
-import com.lowdragmc.lowdraglib2.editor.resource.FileResourceProvider;
-import com.lowdragmc.lowdraglib2.editor.resource.IResourcePath;
-import com.lowdragmc.lowdraglib2.editor.resource.IResourceProvider;
-import com.lowdragmc.lowdraglib2.editor.resource.Resource;
-import com.lowdragmc.lowdraglib2.editor.resource.ResourceInstance;
+import com.lowdragmc.lowdraglib2.editor.resource.*;
 import com.lowdragmc.lowdraglib2.editor.ui.Editor;
 import com.lowdragmc.lowdraglib2.editor.ui.resource.ResourceProviderContainer;
 import com.lowdragmc.lowdraglib2.gui.texture.Icons;
@@ -14,15 +9,10 @@ import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.util.TreeBuilder;
 import lombok.Getter;
 import lombok.Setter;
-
 import org.jetbrains.annotations.Nullable;
+
 import java.io.File;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**

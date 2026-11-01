@@ -12,17 +12,18 @@ import com.lowdragmc.lowdraglib2.configurator.ui.NumberConfigurator;
 import com.lowdragmc.lowdraglib2.configurator.ui.StringConfigurator;
 import com.lowdragmc.lowdraglib2.editor.ClipboardManager;
 import com.lowdragmc.lowdraglib2.gui.ColorPattern;
-import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib2.gui.LDLibFonts;
+import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
+import com.lowdragmc.lowdraglib2.gui.ui.Style;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.event.CommandEvents;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvent;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext;
-import com.lowdragmc.lowdraglib2.gui.ui.Style;
 import com.lowdragmc.lowdraglib2.gui.ui.style.Property;
 import com.lowdragmc.lowdraglib2.gui.ui.style.PropertyRegistry;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
+import com.lowdragmc.lowdraglib2.gui.ui.utils.KeyState;
 import com.lowdragmc.lowdraglib2.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib2.integration.kjs.KJSBindings;
 import com.lowdragmc.lowdraglib2.math.Range;
@@ -32,7 +33,6 @@ import com.lowdragmc.lowdraglib2.syncdata.annotation.SkipPersistedValue;
 import com.lowdragmc.lowdraglib2.utils.HistoryStack;
 import com.lowdragmc.lowdraglib2.utils.TextUtilities;
 import com.lowdragmc.lowdraglib2.utils.XmlUtils;
-import com.lowdragmc.lowdraglib2.gui.ui.utils.KeyState;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import dev.vfyjxf.taffy.style.FlexWrap;
@@ -40,25 +40,23 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
-import net.minecraft.util.StringUtil;
 import net.minecraft.util.Tuple;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import org.appliedenergistics.yoga.*;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 
-import org.jetbrains.annotations.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.text.NumberFormat;
 import java.util.Objects;
@@ -295,7 +293,8 @@ public class TextField extends BindableUIElement<String> {
     /// events
     protected void onDragSource(UIEvent event) {
         if (isNumberField()) {
-            if (event.dragHandler.draggingObject instanceof NumberStart(double numberStart)) {
+            if (event.dragHandler.draggingObject instanceof NumberStart numberStartValue) {
+                var numberStart = numberStartValue.value();
                 var localMouse = getLocalMouse(event.x, event.y);
                 var localStart = getLocalMouse(event.dragStartX, event.dragStartY);
                 if (Mth.abs(localMouse.x - localStart.x) < 4) {
@@ -306,7 +305,8 @@ public class TextField extends BindableUIElement<String> {
                     handleNumber(value, false);
                 }
             }
-        } else if (event.dragHandler.draggingObject instanceof CursorStart(int cursorStart)) {
+        } else if (event.dragHandler.draggingObject instanceof CursorStart cursorStartValue) {
+            var cursorStart = cursorStartValue.value();
             var cursor = getCursorUnderMouseX(getLocalMouse(event.x, event.y).x);
             if (cursor != -1) {
                 setCursor(cursor);
@@ -819,7 +819,7 @@ public class TextField extends BindableUIElement<String> {
 
     protected void onCharTyped(UIEvent event) {
         if (!isEditable()) return;
-        if (StringUtil.isAllowedChatCharacter(event.codePoint) && charValidator.test(event.codePoint)) {
+        if (SharedConstants.isAllowedChatCharacter(event.codePoint) && charValidator.test(event.codePoint)) {
             this.insertText(Character.toString(event.codePoint));
         }
     }
@@ -1065,7 +1065,7 @@ public class TextField extends BindableUIElement<String> {
             if (lines.isEmpty()) {
                 formattedLineCache = new Tuple<>(FormattedCharSequence.EMPTY, 0f);
             } else {
-                formattedLineCache = lines.getFirst();
+                formattedLineCache = lines.get(0);
             }
         }
         return formattedLineCache;

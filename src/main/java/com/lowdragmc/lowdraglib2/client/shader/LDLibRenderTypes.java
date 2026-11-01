@@ -8,8 +8,8 @@ import net.minecraft.client.gui.font.GlyphRenderTypes;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.OptionalDouble;
 import java.util.function.Function;
@@ -18,7 +18,7 @@ import java.util.function.Function;
 public class LDLibRenderTypes extends RenderType {
     private static final RenderType POSITION_COLOR_NO_DEPTH = create("position_color_no_depth",
             DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLES, 256, false, false,
-            RenderType.CompositeState.builder()
+            CompositeState.builder()
                     .setShaderState(RenderStateShard.POSITION_COLOR_SHADER)
                     .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                     .setDepthTestState(NO_DEPTH_TEST)
@@ -26,9 +26,9 @@ public class LDLibRenderTypes extends RenderType {
 
     private static final RenderType NO_DEPTH_LINES = create("lines",
             DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES, 256, false, false,
-            RenderType.CompositeState.builder()
+            CompositeState.builder()
                     .setShaderState(RENDERTYPE_LINES_SHADER)
-                    .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(3f)))
+                    .setLineState(new LineStateShard(OptionalDouble.of(3f)))
                     .setLayeringState(VIEW_OFFSET_Z_LAYERING)
                     .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                     .setOutputState(ITEM_ENTITY_TARGET)
@@ -38,7 +38,7 @@ public class LDLibRenderTypes extends RenderType {
                     .createCompositeState(false));
 
 
-    private static final RenderStateShard.ShaderStateShard GUI_TEXTURE_SHADER = new RenderStateShard.ShaderStateShard(
+    private static final ShaderStateShard GUI_TEXTURE_SHADER = new ShaderStateShard(
             LDLibShaders::getGuiTexture);
 
     private static final Function<ResourceLocation, RenderType> GUI_TEXTURE = Util.memoize(
@@ -47,6 +47,8 @@ public class LDLibRenderTypes extends RenderType {
                     DefaultVertexFormat.POSITION_TEX_COLOR,
                     VertexFormat.Mode.QUADS,
                     1536,
+                    false,
+                    false,
                     CompositeState.builder()
                             .setShaderState(GUI_TEXTURE_SHADER)
                             .setTextureState(new TextureStateShard(texture, false, false))
@@ -57,7 +59,7 @@ public class LDLibRenderTypes extends RenderType {
             )
     );
 
-    private static final RenderStateShard.ShaderStateShard HSB_SHADER = new RenderStateShard.ShaderStateShard(
+    private static final ShaderStateShard HSB_SHADER = new ShaderStateShard(
             LDLibShaders::getHsbShader);
 
     private static final RenderType HSB = create("hsb",
@@ -96,7 +98,7 @@ public class LDLibRenderTypes extends RenderType {
      * Pushes the SDF tuning uniforms right before the shader is used. The supplier runs at draw time, which is
      * before {@code ShaderInstance#apply} uploads the uniform values.
      */
-    private static final RenderStateShard.ShaderStateShard SDF_TEXT_SHADER = new RenderStateShard.ShaderStateShard(() -> {
+    private static final ShaderStateShard SDF_TEXT_SHADER = new ShaderStateShard(() -> {
         var shader = LDLibShaders.getSdfText();
         if (shader != null) {
             var sharpness = shader.getUniform("Sharpness");
@@ -140,7 +142,7 @@ public class LDLibRenderTypes extends RenderType {
                 .setLightmapState(LIGHTMAP);
     }
 
-    private static final RenderStateShard.ShaderStateShard GRAPH_WIRE_SHADER = new RenderStateShard.ShaderStateShard(
+    private static final ShaderStateShard GRAPH_WIRE_SHADER = new ShaderStateShard(
             LDLibShaders::getGraphWireShader);
     private static final RenderType GRAPH_WIRE = create("graphWire",
             DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.TRIANGLE_STRIP,
@@ -185,8 +187,8 @@ public class LDLibRenderTypes extends RenderType {
         return GRAPH_WIRE;
     }
 
-    private static final RenderStateShard.ShaderStateShard RASTER_TEXT_SHADER =
-            new RenderStateShard.ShaderStateShard(LDLibShaders::getRasterText);
+    private static final ShaderStateShard RASTER_TEXT_SHADER =
+            new ShaderStateShard(LDLibShaders::getRasterText);
 
     private static final Function<ResourceLocation, RenderType> RASTER_TEXT = Util.memoize(
             texture -> create("ldlib_raster_text", DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
@@ -211,7 +213,7 @@ public class LDLibRenderTypes extends RenderType {
 
     /**
      * Render types for glyphs baked into an SDF glyph atlas page. Mirrors the three display modes vanilla
-     * expects from {@link net.minecraft.client.gui.font.GlyphRenderTypes}.
+     * expects from {@link GlyphRenderTypes}.
      */
     public static GlyphRenderTypes sdfTextGlyphs(ResourceLocation atlasPage) {
         return new GlyphRenderTypes(SDF_TEXT.apply(atlasPage), SDF_TEXT_SEE_THROUGH.apply(atlasPage),

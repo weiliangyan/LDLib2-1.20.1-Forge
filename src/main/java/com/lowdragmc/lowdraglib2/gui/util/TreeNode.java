@@ -1,9 +1,9 @@
 package com.lowdragmc.lowdraglib2.gui.util;
 
 import lombok.Getter;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
-import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

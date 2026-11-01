@@ -40,9 +40,9 @@ public class ModularUIJEIWidget implements IRecipeWidget, IJeiGuiEventListener {
     }
 
     @Override
-    public void drawWidget(GuiGraphics guiGraphics, double mouseX, double mouseY) {
+    public void draw(GuiGraphics guiGraphics, double mouseX, double mouseY) {
         guiGraphics.flush();
-        var partialTick = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+        var partialTick = Minecraft.getInstance().getPartialTick();
         // get real mouse
         localToWorld = guiGraphics.pose().last().pose().invert(new Matrix4f());
         var realMouse = getWorldMouse((float) mouseX, (float) mouseY);
@@ -63,7 +63,7 @@ public class ModularUIJEIWidget implements IRecipeWidget, IJeiGuiEventListener {
         return new Vector2f(realMouse.x, realMouse.y);
     }
 
-    @Override
+    //@Override
     public void getTooltip(ITooltipBuilder tooltipBuilder, double mouseX, double mouseY) {
         if (!modularUI.getDragHandler().isDragging() && modularUI.getTooltipTexts() != null && !modularUI.getTooltipTexts().isEmpty()) {
             tooltipBuilder.addAll(modularUI.getTooltipTexts());
@@ -108,9 +108,9 @@ public class ModularUIJEIWidget implements IRecipeWidget, IJeiGuiEventListener {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
         var realMouse = getWorldMouse((float) mouseX, (float) mouseY);
-        return modularUI.getWidget().mouseScrolled(realMouse.x, realMouse.y, scrollX, scrollY);
+        return modularUI.getWidget().mouseScrolled(realMouse.x, realMouse.y, scrollY);
     }
 
     @Override

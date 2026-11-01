@@ -10,11 +10,7 @@ import com.lowdragmc.lowdraglib2.editor.ui.View;
 import com.lowdragmc.lowdraglib2.editor.ui.browser.AssetBrowser;
 import com.lowdragmc.lowdraglib2.editor.ui.resource.ResourceContainer;
 import com.lowdragmc.lowdraglib2.gui.ColorPattern;
-import com.lowdragmc.lowdraglib2.gui.texture.DynamicTexture;
-import com.lowdragmc.lowdraglib2.gui.texture.GuiTextureGroup;
-import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
-import com.lowdragmc.lowdraglib2.gui.texture.Icons;
-import com.lowdragmc.lowdraglib2.gui.texture.SpriteTexture;
+import com.lowdragmc.lowdraglib2.gui.texture.*;
 import com.lowdragmc.lowdraglib2.gui.ui.Style;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.ScrollDisplay;
@@ -33,8 +29,8 @@ import dev.vfyjxf.taffy.style.FlexWrap;
 import lombok.Getter;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-
 import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -604,8 +600,8 @@ public class ResourceView extends View {
     @Nullable
     private Tab ownTabDrag(UIEvent event) {
         if (event.dragHandler == null) return null;
-        return event.dragHandler.getDraggingObject() instanceof TabDrag(ResourceView view, Tab tab) && view == this
-                ? tab : null;
+        return event.dragHandler.getDraggingObject() instanceof TabDrag tabDrag && tabDrag.view == this
+                ? tabDrag.tab : null;
     }
 
     /**

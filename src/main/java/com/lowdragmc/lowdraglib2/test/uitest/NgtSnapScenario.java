@@ -8,7 +8,6 @@ import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.GraphView;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.GraphViewPreferences;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.node.NodeElement;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.snap.SnapAnchor;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.snap.SnapGuide;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.wire.WireRouteStyle;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.Model;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.graph.GraphModel;
@@ -17,11 +16,7 @@ import com.lowdragmc.lowdraglib2.registry.RegistrationEnvironment;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
 import com.lowdragmc.lowdraglib2.test.noddegraphtoolkit.TestAddNode;
 import com.lowdragmc.lowdraglib2.test.noddegraphtoolkit.TestGraph;
-import com.lowdragmc.lowdraglib2.uitest.ElementBounds;
-import com.lowdragmc.lowdraglib2.uitest.ScenarioBuilder;
-import com.lowdragmc.lowdraglib2.uitest.ScenarioOptions;
-import com.lowdragmc.lowdraglib2.uitest.TestContext;
-import com.lowdragmc.lowdraglib2.uitest.UIScenario;
+import com.lowdragmc.lowdraglib2.uitest.*;
 import com.lowdragmc.lowdraglib2.uitest.input.Keys;
 import net.minecraft.util.Mth;
 import org.joml.Vector2f;
@@ -137,7 +132,7 @@ public class NgtSnapScenario implements UIScenario {
                             .step("a guide is showing through the column", ctx -> {
                                 var guides = graphView(ctx).getSnapGuides();
                                 ctx.check("exactly one guide", guides.size() == 1, 1, guides.size());
-                                var guide = guides.getFirst();
+                                var guide = guides.get(0);
                                 ctx.check("it is vertical", guide.vertical());
                                 ctx.check("it runs through the neighbour's left edge",
                                         Math.abs(guide.position() - node(ctx, ANCHOR).getPosition().x) < 0.5f,

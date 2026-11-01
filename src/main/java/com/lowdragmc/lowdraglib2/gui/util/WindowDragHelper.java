@@ -53,7 +53,9 @@ public class WindowDragHelper {
             }
         });
         element.addEventListener(UIEvents.DRAG_SOURCE_UPDATE, e -> {
-            if (e.dragHandler.draggingObject instanceof DragMove(var sx, var sy)) {
+            if (e.dragHandler.draggingObject instanceof DragMove dragMove) {
+                var sx = dragMove.startX();
+                var sy = dragMove.startY();
                 var normalPosOffset = element.getLocalMouseNormal(e.x - e.dragStartX, e.y - e.dragStartY);
                 target.getLayout()
                         .left(sx + normalPosOffset.x)

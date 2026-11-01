@@ -20,8 +20,8 @@ import dev.vfyjxf.taffy.style.AlignItems;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -339,7 +339,7 @@ public class UIDebuggerWindow extends ModularUIWindow {
         // The current target may be hosted by neither, or its host may have just gone; it still has to
         // be offered or the picker would show no way back to what is actually on screen.
         if (candidates.stream().noneMatch(candidate -> candidate.ui() == target)) {
-            candidates.addFirst(new Candidate("Target", target));
+            candidates.add(0, new Candidate("Target", target));
         }
         return candidates;
     }

@@ -4,16 +4,19 @@ import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.Platform;
 import com.lowdragmc.lowdraglib2.configurator.IConfigurable;
 import com.lowdragmc.lowdraglib2.configurator.IToggleConfigurable;
-import com.lowdragmc.lowdraglib2.configurator.annotation.*;
+import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigList;
+import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigNumber;
+import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigSelector;
+import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
 import com.lowdragmc.lowdraglib2.configurator.ui.Configurator;
 import com.lowdragmc.lowdraglib2.configurator.ui.ConfiguratorGroup;
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import com.lowdragmc.lowdraglib2.gui.ui.UI;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
+import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.ScrollerView;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.TextElement;
-import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
 import com.lowdragmc.lowdraglib2.math.Range;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
 import com.lowdragmc.lowdraglib2.syncdata.IPersistedSerializable;
@@ -26,7 +29,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.NbtUtils;
@@ -37,9 +39,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.common.util.INBTSerializable;
-import net.neoforged.neoforge.items.ItemStackHandler;
-import org.appliedenergistics.yoga.YogaFlexDirection;
+import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.items.ItemStackHandler;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
@@ -90,7 +91,7 @@ public class TestSerialization implements IScreenTest {
 
         public TestData() {
             itemStack = new ItemStack(Items.DIAMOND_PICKAXE);
-            itemStack.enchant(Platform.getFrozenRegistry().lookup(Registries.ENCHANTMENT).get().get(Enchantments.POWER).orElseThrow(), 1);
+            itemStack.enchant(Enchantments.POWER_ARROWS, 1);
         }
 
         public Configurator buildTestGroupConfigurator(Supplier<TestGroup> getter, Consumer<TestGroup> setter) {
@@ -197,14 +198,12 @@ public class TestSerialization implements IScreenTest {
                         ).layout(layout -> layout.flexDirection(FlexDirection.ROW)),
                         new UIElement().addChildren(
                                 new Button().setText("S buf").setOnClick(e -> {
-                                    serializedBuf = ByteBufUtil.writeCustomData(buf -> data.writeToBuff(buf), Platform.getFrozenRegistry());
+                                    serializedBuf = ByteBufUtil.writeCustomData(buf -> data.writeToBuff(buf));
                                     text.setText(serializedBuf.length + " bytes");
                                 }).layout(layout -> layout.flex(1)),
                                 new Button().setText("D buf").setOnClick(e -> {
                                     try {
-                                        ByteBufUtil.readCustomData(serializedBuf,
-                                                buf -> data.readFromBuff(buf),
-                                                Platform.getFrozenRegistry());
+                                        ByteBufUtil.readCustomData(serializedBuf, buf -> data.readFromBuff(buf));
                                     } catch (Exception ignored) {
                                     }
                                 }).layout(layout -> layout.flex(1))

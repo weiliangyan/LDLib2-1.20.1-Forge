@@ -1,7 +1,7 @@
 package com.lowdragmc.lowdraglib2.registry;
 
 import com.lowdragmc.lowdraglib2.Platform;
-import net.neoforged.fml.loading.modscan.ModAnnotation;
+import net.minecraftforge.fml.loading.moddiscovery.ModAnnotation;
 
 import java.util.Map;
 
@@ -45,7 +45,7 @@ public enum RegistrationEnvironment {
     public static boolean shouldRegister(Map<String, Object> annotationData) {
         // ASM scan stores enum values as ModAnnotation.EnumHolder(desc, value)
         if (annotationData.get("environment") instanceof ModAnnotation.EnumHolder envHolder) {
-            return RegistrationEnvironment.valueOf(envHolder.value()).shouldRegister();
+            return RegistrationEnvironment.valueOf(envHolder.getValue()).shouldRegister();
         }
         // Legacy: check deprecated manual field
         if (annotationData.get("manual") instanceof Boolean manual && manual) {

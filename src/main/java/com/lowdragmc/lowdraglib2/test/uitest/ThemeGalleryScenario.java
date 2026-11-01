@@ -85,13 +85,13 @@ public class ThemeGalleryScenario implements UIScenario {
         if (component.equals("selector")) {
             // open it, so the dialog and its rows are in the shot rather than just the closed control
             s.step("%s: open the selector".formatted(theme), ctx -> ctx.query().type(Selector.class)
-                    .list().getFirst().as(Selector.class).show());
+                    .list().get(0).as(Selector.class).show());
         }
         s.frames(2).screenshotElement("%s_%s".formatted(theme, component), "#right_container");
         if (component.equals("selector")) {
             // and close it again: an overlay left open floats over every shot that follows
             s.step("%s: close the selector".formatted(theme), ctx -> ctx.query().type(Selector.class)
-                    .list().getFirst().as(Selector.class).hide());
+                    .list().get(0).as(Selector.class).hide());
         }
     }
 

@@ -8,10 +8,10 @@ import com.lowdragmc.lowdraglib2.gui.ui.UI;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
 import dev.vfyjxf.taffy.style.AlignItems;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -91,7 +91,7 @@ public final class LDFontStatsOverlay implements ModularHudLayer {
     }
 
     @Override
-    public void render(GuiGraphics graphics, DeltaTracker deltaTracker) {
+    public void render(ForgeGui gui, GuiGraphics graphics, float partialTick, int screenWidth, int screenHeight) {
         if (!LDFontStats.isEnabled()) {
             return;
         }
@@ -108,7 +108,7 @@ public final class LDFontStatsOverlay implements ModularHudLayer {
 
         LDFontStats.suspend(true);
         try {
-            ModularHudLayer.super.render(graphics, deltaTracker);
+            ModularHudLayer.super.render(gui, graphics, partialTick, screenWidth, screenHeight);
         } finally {
             LDFontStats.suspend(false);
         }

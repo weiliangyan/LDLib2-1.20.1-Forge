@@ -6,18 +6,19 @@ import com.lowdragmc.lowdraglib2.gui.ui.data.Tooltips;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.node.Node;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.node.OptionVisibility;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.port.*;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire.WireModel;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire.WireSide;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.type.TypeHandle;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.type.TypeHandles;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.GraphElement;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.node.CollapsibleInOutNodeElement;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.*;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.model.ChangeHint;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.model.INodeWithOptions;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.constant.Constant;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.constant.SubPortCustomConstant;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.constant.TypeConstant;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.definition.NodeDefinitionScope;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.definition.SubPortDefinitionScope;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire.WireModel;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire.WireSide;
 import lombok.Getter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -25,11 +26,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -573,7 +570,8 @@ public abstract class NodeModel extends InputOutputPortsNodeModel implements INo
 
         // Now constants for NodeOptions have NodeOption.k_OptionIdPrefix in their id. We need to migrate constants with no prefix to the new id.
         if (!isNodeOptionConstantsMigrated() && !inputConstantsById.containsKey(portId)) {
-            if (inputConstantsById.remove(optionId) instanceof Constant oldConstant) {
+            Constant oldConstant = inputConstantsById.remove(optionId);
+            if (oldConstant != null) {
                 inputConstantsById.put(portId, oldConstant);
             }
         }
@@ -614,7 +612,8 @@ public abstract class NodeModel extends InputOutputPortsNodeModel implements INo
         }
 
         Constant newConstant = null;
-        if (inputConstantsById.get(id) instanceof Constant existingConstant) {
+        Constant existingConstant = inputConstantsById.get(id);
+        if (existingConstant != null) {
             if (graphModel != null) {
                 newConstant = graphModel.createConstantValue(inputPort.dataTypeHandle);
             }
@@ -719,7 +718,8 @@ public abstract class NodeModel extends InputOutputPortsNodeModel implements INo
         PortModel portModel = null;
         if (graphModel != null && graphModel.getModel(uid) instanceof PortModel found) {
             portModel = found;
-        } else if (ports != null && ports.get(PortModel.computeUniqueName(portId, parentPort == null ? null : parentPort.getUniqueName())) instanceof PortModel found) {
+        } else if (ports != null) {
+            PortModel found = ports.get(PortModel.computeUniqueName(portId, parentPort == null ? null : parentPort.getUniqueName()));
             portModel = found;
         }
         if (portModel != null) {
@@ -755,8 +755,9 @@ public abstract class NodeModel extends InputOutputPortsNodeModel implements INo
     public PortModel getOrCreateTypeConflictPlaceholder(PortDirection direction, String basePortId) {
         var id = basePortId.endsWith(TYPE_CONFLICT_SUFFIX) ? basePortId : basePortId + TYPE_CONFLICT_SUFFIX;
         var infos = getPortInfos(direction);
-        if (infos.portsById.get(id) instanceof PortModel existing) return existing;
-        return addMissingPort(direction, id, null);
+        return infos.portsById.get(id);
+        /*if (infos.portsById.get(id) instanceof PortModel existing) return existing;
+        return addMissingPort(direction, id, null);*/
     }
 
     /**
@@ -783,20 +784,18 @@ public abstract class NodeModel extends InputOutputPortsNodeModel implements INo
 
     private void reviveTypeConflictPlaceholders(PortInfos infos) {
         for (var candidate : new ArrayList<>(infos.portsById.values())) {
-            if (!(candidate instanceof PortModel placeholder)
-                    || !placeholder.getPortType().equals(PortType.MISSING_PORT)) continue;
-            var id = placeholder.getPortId();
+            if (!candidate.getPortType().equals(PortType.MISSING_PORT)) continue;
+            var id = candidate.getPortId();
             if (!id.endsWith(TYPE_CONFLICT_SUFFIX)) continue;
             var base = infos.portsById.get(id.substring(0, id.length() - TYPE_CONFLICT_SUFFIX.length()));
-            if (!(base instanceof PortModel basePort)
-                    || basePort.getPortType().equals(PortType.MISSING_PORT)) continue;
-            for (var wire : new ArrayList<>(placeholder.getConnectedWires())) {
-                var other = wire.getFromPort() == placeholder ? wire.getToPort() : wire.getFromPort();
+            if (!base.getPortType().equals(PortType.MISSING_PORT)) continue;
+            for (var wire : new ArrayList<>(candidate.getConnectedWires())) {
+                var other = wire.getFromPort() == candidate ? wire.getToPort() : wire.getFromPort();
                 if (other == null || other.getPortType().equals(PortType.MISSING_PORT)) continue;
-                if (!wireTypesCompatible(basePort, other)) continue;
-                rebindWireSide(wire, placeholder, basePort);
+                if (!wireTypesCompatible(base, other)) continue;
+                rebindWireSide(wire, candidate, base);
             }
-            removeUnusedMissingPort(placeholder); // gone once its last wire migrated away
+            removeUnusedMissingPort(candidate); // gone once its last wire migrated away
         }
     }
 
@@ -880,18 +879,21 @@ public abstract class NodeModel extends InputOutputPortsNodeModel implements INo
     public void onPortUniqueNameChanged(PortModel portModel, String oldUniqueName, String newUniqueName) {
         if (portModel.getDirection() == PortDirection.INPUT) {
             inputPortInfos.portsById.changePortName(portModel, oldUniqueName);
-            if (inputConstantsById.remove(oldUniqueName) instanceof Constant constant) {
+            Constant constant = inputConstantsById.remove(oldUniqueName);
+            if (constant != null) {
                 if (!inputConstantsById.containsKey(newUniqueName)) {
                     inputConstantsById.put(newUniqueName, constant);
                 }
             }
-            if (inputPortInfos.expandedPortsById.remove(oldUniqueName) instanceof PortModel expandedPort) {
+            PortModel expandedPort = inputPortInfos.expandedPortsById.remove(oldUniqueName);
+            if (expandedPort != null) {
                 inputPortInfos.expandedPortsById.putIfAbsent(newUniqueName, expandedPort);
             }
         } else {
             outputPortInfos.portsById.changePortName(portModel, oldUniqueName);
 
-            if (outputPortInfos.expandedPortsById.remove(oldUniqueName) instanceof PortModel expandedPort) {
+            PortModel expandedPort = outputPortInfos.expandedPortsById.remove(oldUniqueName);
+            if (expandedPort != null) {
                 outputPortInfos.expandedPortsById.put(newUniqueName, expandedPort);
             }
         }

@@ -2,7 +2,6 @@ package com.lowdragmc.lowdraglib2.editor.resource;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.LDLib2Registries;
-import com.lowdragmc.lowdraglib2.Platform;
 import com.lowdragmc.lowdraglib2.editor.ui.Editor;
 import com.lowdragmc.lowdraglib2.editor.ui.resource.ResourceContainer;
 import com.lowdragmc.lowdraglib2.gui.ColorPattern;
@@ -14,16 +13,15 @@ import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.ui.utils.UIElementProvider;
 import com.lowdragmc.lowdraglib2.utils.search.IResultHandler;
 import lombok.Getter;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.common.util.INBTSerializable;
+import net.minecraftforge.common.util.INBTSerializable;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
-import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -68,9 +66,9 @@ public class ResourceInstance<T> implements INBTSerializable<CompoundTag> {
         buildBuiltin();
         var metaFile = new File(LDLib2.getAssetsDir(), "ldlib2/resources/" + resource.getName() + ".meta.nbt");
         try {
-            var data = NbtIo.read(metaFile.toPath());
+            var data = NbtIo.read(metaFile);
             if (data != null) {
-                deserializeNBT(Platform.getFrozenRegistry(), data);
+                deserializeNBT(data);
             }
         } catch (Exception ignored) {}
     }
@@ -88,8 +86,8 @@ public class ResourceInstance<T> implements INBTSerializable<CompoundTag> {
                     return;
                 }
             }
-            var data = serializeNBT(Platform.getFrozenRegistry());
-            NbtIo.write(data, metaFile.toPath());
+            var data = serializeNBT();
+            NbtIo.write(data, metaFile);
         } catch (Exception e) {
             LDLib2.LOGGER.error("Failed to save resource {} meta file", resource, e);
         }
@@ -506,7 +504,7 @@ public class ResourceInstance<T> implements INBTSerializable<CompoundTag> {
                 entry -> entry.provider().getType().getIcon(),
                 entry -> Component.literal(entry.getResourceName())
                         .append(Component.literal(" (%s)".formatted(entry.provider().getName()))
-                                .withColor(ColorPattern.GRAY.color))));
+                                .withStyle(style-> style.withColor(ColorPattern.GRAY.color)))));
         searchComponent.getLayout().widthPercent(100);
         searchComponent.style(style -> style.tooltips(Component.translatable("resource.selector.search")));
         // refresh the snapshot on the main thread each time the search begins.
@@ -515,7 +513,7 @@ public class ResourceInstance<T> implements INBTSerializable<CompoundTag> {
     }
 
     @Override
-    public @Nonnull CompoundTag serializeNBT(@Nonnull HolderLookup.Provider provider) {
+    public @Nonnull CompoundTag serializeNBT() {
         var data = new CompoundTag();
 
         data.putString("displayMode", displayMode.name());
@@ -542,7 +540,7 @@ public class ResourceInstance<T> implements INBTSerializable<CompoundTag> {
     }
 
     @Override
-    public void deserializeNBT(@Nonnull HolderLookup.Provider provider, @Nonnull CompoundTag nbt) {
+    public void deserializeNBT(@Nonnull CompoundTag nbt) {
         clearCache();
         customProviders.clear();
         providersVersion++;

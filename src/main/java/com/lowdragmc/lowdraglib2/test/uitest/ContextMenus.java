@@ -78,7 +78,7 @@ public final class ContextMenus {
             throw new IllegalStateException("expected exactly one menu entry labelled '"
                     + Component.translatable(translationKey).getString() + "' but found " + matches.size());
         }
-        return matches.getFirst();
+        return matches.get(0);
     }
 
     /**

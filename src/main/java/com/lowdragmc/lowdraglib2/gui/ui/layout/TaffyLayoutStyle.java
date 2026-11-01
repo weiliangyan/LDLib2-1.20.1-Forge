@@ -2,13 +2,11 @@ package com.lowdragmc.lowdraglib2.gui.ui.layout;
 
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.*;
-import dev.vfyjxf.taffy.geometry.TaffyPoint;
 import dev.vfyjxf.taffy.geometry.TaffyRect;
 import dev.vfyjxf.taffy.geometry.TaffySize;
 import dev.vfyjxf.taffy.style.*;
-import org.appliedenergistics.yoga.*;
+import org.appliedenergistics.yoga.YogaOverflow;
 import org.appliedenergistics.yoga.numeric.FloatOptional;
-import org.appliedenergistics.yoga.style.StyleSizeLength;
 
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -288,14 +286,14 @@ public class TaffyLayoutStyle {
         }
     }
 
-    public void setGridRow(com.lowdragmc.lowdraglib2.gui.ui.data.Grid value) {
+    public void setGridRow(Grid value) {
         if (!Objects.equals(style.gridRow, value.grid())) {
             style.gridRow = value.grid();
             element.markTaffyStyleDirty();
         }
     }
 
-    public void setGridColumn(com.lowdragmc.lowdraglib2.gui.ui.data.Grid value) {
+    public void setGridColumn(Grid value) {
         if (!Objects.equals(style.gridColumn, value.grid())) {
             style.gridColumn = value.grid();
             element.markTaffyStyleDirty();

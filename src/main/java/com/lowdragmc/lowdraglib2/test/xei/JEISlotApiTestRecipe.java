@@ -21,7 +21,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.neoforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidStack;
 import org.joml.Vector4f;
 
 import java.util.ArrayList;
@@ -72,7 +72,7 @@ public enum JEISlotApiTestRecipe {
         var displayedIndex = new int[]{0};
         var status = label("JEI cycles until the first button click", 6);
         var slot = new ItemSlot()
-                .setItem(allLogs.getFirst())
+                .setItem(allLogs.get(0))
                 .xeiRecipeSlot(IngredientIO.INPUT, 1, 1, allLogs::stream);
         var changeSource = new Button()
                 .setText("Next log")
@@ -133,7 +133,7 @@ public enum JEISlotApiTestRecipe {
     private static ModularUI tooltip() {
         var allLogs = allLogs();
         var slot = new ItemSlot()
-                .setItem(allLogs.getFirst())
+                .setItem(allLogs.get(0))
                 .xeiRecipeSlot(IngredientIO.INPUT, 1, 1, allLogs::stream)
                 .style(style -> style.tooltips(Component.literal("LDLib appended tooltip line")
                         .withStyle(ChatFormatting.AQUA)));

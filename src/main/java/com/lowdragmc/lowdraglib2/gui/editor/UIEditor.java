@@ -25,8 +25,8 @@ public class UIEditor extends Editor {
     }
 
     public UIEditor() {
-        this.leftWindow.setDisplay(false);
-        this.leftWindow.getParentWindow().removeSplitWindow(this.leftWindow);
+//        this.leftWindow.setDisplay(false);
+//        this.leftWindow.getParentWindow().removeSplitWindow(this.leftWindow);
         initResources();
     }
 

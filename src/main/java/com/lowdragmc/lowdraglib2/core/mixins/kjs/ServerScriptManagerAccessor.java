@@ -4,9 +4,9 @@ import dev.latvian.mods.kubejs.server.ServerScriptManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ServerScriptManager.class)
+@Mixin(value = ServerScriptManager.class, remap = false)
 public interface ServerScriptManagerAccessor {
-    @Accessor
+    @Accessor("instance")
     static ServerScriptManager getStaticInstance() {
         throw new AssertionError();
     }

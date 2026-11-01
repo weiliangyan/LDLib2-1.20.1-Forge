@@ -1,15 +1,15 @@
 package com.lowdragmc.lowdraglib2.syncdata;
 
+import com.lowdragmc.lowdraglib2.Platform;
+import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
+import com.lowdragmc.lowdraglib2.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib2.utils.PersistedParser;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.EndTag;
 import net.minecraft.nbt.Tag;
-import net.neoforged.neoforge.common.util.INBTSerializable;
 import org.jetbrains.annotations.NotNull;
-import com.lowdragmc.lowdraglib2.syncdata.annotation.Persisted;
-import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
 
 /**
  * Class with this interface can serialize and deserialize itself by detecting fields with
@@ -37,7 +37,7 @@ import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
  *     <li>Call {@link #afterDeserialize()}</li>
  * </ol>
  */
-public interface IPersistedSerializable extends INBTSerializable<CompoundTag> {
+public interface IPersistedSerializable extends IProviderAwareNBTSerializable<CompoundTag> {
 
     /**
      * This method is invoked before the serialization process begins.
@@ -72,6 +72,11 @@ public interface IPersistedSerializable extends INBTSerializable<CompoundTag> {
     @Override
     default CompoundTag serializeNBT(HolderLookup.@NotNull Provider provider) {
         return PersistedParser.serializeNBT(this, provider);
+    }
+
+    @Override
+    default CompoundTag serializeNBT() {
+        return serializeNBT(Platform.getFrozenRegistry());
     }
 
     /**
@@ -131,6 +136,11 @@ public interface IPersistedSerializable extends INBTSerializable<CompoundTag> {
     @Override
     default void deserializeNBT(HolderLookup.@NotNull Provider provider, @NotNull CompoundTag tag) {
         PersistedParser.deserializeNBT(tag, this, provider);
+    }
+
+    @Override
+    default void deserializeNBT(@NotNull CompoundTag tag) {
+        deserializeNBT(Platform.getFrozenRegistry(), tag);
     }
 
     /**

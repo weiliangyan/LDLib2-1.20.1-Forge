@@ -5,26 +5,20 @@ import com.lowdragmc.lowdraglib2.misc.FluidStorage;
 import com.lowdragmc.lowdraglib2.misc.ItemStackTransfer;
 import com.lowdragmc.lowdraglib2.syncdata.accessor.direct.CustomDirectAccessor;
 import com.lowdragmc.lowdraglib2.syncdata.accessor.readonly.INBTSerializableReadOnlyAccessor;
-import com.lowdragmc.lowdraglib2.syncdata.annotation.ConditionalSynced;
-import com.lowdragmc.lowdraglib2.syncdata.annotation.DescSynced;
-import com.lowdragmc.lowdraglib2.syncdata.annotation.LazyManaged;
-import com.lowdragmc.lowdraglib2.syncdata.annotation.ManagedCodec;
-import com.lowdragmc.lowdraglib2.syncdata.annotation.Persisted;
+import com.lowdragmc.lowdraglib2.syncdata.annotation.*;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.network.chat.Component;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.Item;
@@ -33,24 +27,18 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.neoforge.common.util.INBTSerializable;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.nikdo53.neobackports.io.utils.ByteBufCodecs;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Stream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * Pins down what the auto sync notices today, field kind by field kind, so changes to change detection can't silently
@@ -188,7 +176,7 @@ public class SyncChangeDetectionTest {
             lockableItems.setStackInSlot(0, new ItemStack(Items.IRON_INGOT, 4));
             passThroughItems.setStackInSlot(0, new ItemStack(Items.IRON_INGOT, 4));
             lockableTank.fill(new FluidStack(Fluids.WATER, 200), IFluidHandler.FluidAction.EXECUTE);
-            itemList.getFirst().setStackInSlot(0, new ItemStack(Items.IRON_INGOT, 4));
+            itemList.get(0).setStackInSlot(0, new ItemStack(Items.IRON_INGOT, 4));
         }
 
         private boolean isPositive(int value) {
@@ -224,7 +212,7 @@ public class SyncChangeDetectionTest {
             Case.synced("BlockState assigned", "state", p -> p.state = Blocks.DIRT.defaultBlockState()),
             Case.synced("ItemStack assigned", "stack", p -> p.stack = new ItemStack(Items.DIAMOND)),
             Case.synced("ItemStack grown in place", "stack", p -> p.stack.grow(1)),
-            Case.synced("ItemStack renamed in place", "stack", p -> p.stack.set(DataComponents.CUSTOM_NAME, Component.literal("renamed"))),
+            Case.synced("ItemStack renamed in place", "stack", p -> p.stack.setHoverName(Component.literal("renamed"))),
             Case.synced("FluidStack grown in place", "fluid", p -> p.fluid.grow(10)),
             Case.synced("mutable BlockPos moved in place", "pos", p -> ((BlockPos.MutableBlockPos) p.pos).move(Direction.UP)),
             Case.synced("Vector3f changed in place", "vector", p -> p.vector.x = 5),
@@ -244,12 +232,12 @@ public class SyncChangeDetectionTest {
             Case.synced("@ManagedCodec list added to", "codecTags", p -> p.codecTags.add("b")),
             Case.synced("container slot set", "items", p -> p.items.setStackInSlot(2, new ItemStack(Items.DIAMOND, 3))),
             Case.synced("container stack grown in place", "items", p -> p.items.getStackInSlot(1).grow(1)),
-            Case.synced("container stack renamed in place", "items", p -> p.items.getStackInSlot(1).set(DataComponents.CUSTOM_NAME, Component.literal("renamed"))),
+            Case.synced("container stack renamed in place", "items", p -> p.items.getStackInSlot(1).setHoverName(Component.literal("renamed"))),
             Case.synced("container slot emptied", "items", p -> p.items.setStackInSlot(0, ItemStack.EMPTY)),
             Case.synced("container resized", "items", p -> p.items.setSize(5)),
             Case.synced("tank filled", "tank", p -> p.tank.fill(new FluidStack(Fluids.WATER, 100), IFluidHandler.FluidAction.EXECUTE)),
             Case.synced("tank fluid grown in place", "tank", p -> p.tank.getFluid().grow(10)),
-            Case.synced("tank fluid renamed in place", "tank", p -> p.tank.getFluid().set(DataComponents.CUSTOM_NAME, Component.literal("renamed"))),
+            //Case.synced("tank fluid renamed in place", "tank", p -> p.tank.getFluid().set(DataComponents.CUSTOM_NAME, Component.literal("renamed"))),
             Case.synced("container reading slots through an override: slot set", "passThroughItems", p -> p.passThroughItems.setStackInSlot(1, new ItemStack(Items.DIAMOND))),
             Case.synced("container reading slots through an override: grown in place", "passThroughItems", p -> p.passThroughItems.getStackInSlot(0).grow(1)),
             Case.synced("tank drained empty", "tank", p -> p.tank.drain(1000, IFluidHandler.FluidAction.EXECUTE)),
@@ -259,8 +247,8 @@ public class SyncChangeDetectionTest {
             Case.synced("custom container's own state changed", "lockableItems", p -> p.lockableItems.locked = true),
             Case.synced("custom tank filled", "lockableTank", p -> p.lockableTank.fill(new FluidStack(Fluids.WATER, 100), IFluidHandler.FluidAction.EXECUTE)),
             Case.synced("custom tank's own state changed", "lockableTank", p -> p.lockableTank.locked = true),
-            Case.synced("container in a List: slot set", "itemList", p -> p.itemList.getFirst().setStackInSlot(1, new ItemStack(Items.DIAMOND))),
-            Case.synced("container in a List: stack grown in place", "itemList", p -> p.itemList.getFirst().getStackInSlot(0).grow(1)),
+            Case.synced("container in a List: slot set", "itemList", p -> p.itemList.get(0).setStackInSlot(1, new ItemStack(Items.DIAMOND))),
+            Case.synced("container in a List: stack grown in place", "itemList", p -> p.itemList.get(0).getStackInSlot(0).grow(1)),
             Case.synced("container added to a List", "itemList", p -> p.itemList.add(new ItemStackTransfer(1))),
             Case.synced("INBTSerializable in a Map changed in place", "nestedMap", p -> p.nestedMap.get("a").counter = 5),
             Case.synced("nested managed field assigned", "part", p -> p.part.progress = 9),
@@ -275,7 +263,7 @@ public class SyncChangeDetectionTest {
             Case.unchanged("List<String> element set to an equal copy", "strings", p -> p.strings.set(0, new String(p.strings.get(0)))),
             Case.unchanged("List<Direction> element set to the same value", "directions", p -> p.directions.set(0, Direction.UP)),
             Case.unchanged("container slot set to an equal stack", "items", p -> p.items.setStackInSlot(0, p.items.getStackInSlot(0).copy())),
-            Case.unchanged("container in a List: slot set to an equal stack", "itemList", p -> p.itemList.getFirst().setStackInSlot(0, p.itemList.getFirst().getStackInSlot(0).copy())),
+            Case.unchanged("container in a List: slot set to an equal stack", "itemList", p -> p.itemList.get(0).setStackInSlot(0, p.itemList.get(0).getStackInSlot(0).copy())),
             Case.unchanged("INBTSerializable in a Map given an equal value", "nestedMap", p -> p.nestedMap.get("a").label = new String(p.nestedMap.get("a").label)),
             Case.unchanged("tank refilled with an equal copy", "tank", p -> p.tank.setFluid(p.tank.getFluid().copy())),
             Case.unchanged("custom container slot set to an equal stack", "lockableItems", p -> p.lockableItems.setStackInSlot(0, p.lockableItems.getStackInSlot(0).copy())),

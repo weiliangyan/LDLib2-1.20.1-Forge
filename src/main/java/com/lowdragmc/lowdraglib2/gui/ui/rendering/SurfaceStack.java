@@ -2,8 +2,8 @@ package com.lowdragmc.lowdraglib2.gui.ui.rendering;
 
 import com.lowdragmc.lowdraglib2.utils.Scope;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * Backing store for {@link UISurface#current()}.

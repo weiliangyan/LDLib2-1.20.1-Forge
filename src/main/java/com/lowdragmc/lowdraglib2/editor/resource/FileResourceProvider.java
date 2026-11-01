@@ -3,15 +3,15 @@ package com.lowdragmc.lowdraglib2.editor.resource;
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.Platform;
 import com.lowdragmc.lowdraglib2.editor.ui.resource.ResourceContainer;
+import com.lowdragmc.lowdraglib2.gui.ColorPattern;
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib2.gui.texture.Icons;
-import com.lowdragmc.lowdraglib2.gui.ColorPattern;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
+import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Vertical;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Dialog;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
-import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
 import dev.vfyjxf.taffy.style.AlignItems;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import lombok.Getter;
@@ -20,9 +20,9 @@ import net.minecraft.Util;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
-import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -233,7 +233,7 @@ public final class FileResourceProvider<T> extends ResourceProvider<T>  {
                     if (!file.getParentFile().exists()) {
                         file.getParentFile().mkdirs();
                     }
-                    NbtIo.write(nbt, file.toPath());
+                    NbtIo.write(nbt, file);
                     resourcesLastModified.put(file, file.lastModified());
                     // it exists from now on, without waiting for the next scan to notice the file
                     remember(path, file);
@@ -369,7 +369,7 @@ public final class FileResourceProvider<T> extends ResourceProvider<T>  {
     @Nullable
     private T readResourceFromFile(File file) {
         try {
-            var fileData = NbtIo.read(file.toPath());
+            var fileData = NbtIo.read(file);
             if (fileData != null) {
                 var data = deserializeNBT(fileData, Platform.getFrozenRegistry());
                 if (data != null) return data;

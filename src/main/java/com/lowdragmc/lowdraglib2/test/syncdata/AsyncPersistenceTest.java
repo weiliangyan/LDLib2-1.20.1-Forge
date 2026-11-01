@@ -8,8 +8,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.concurrent.locks.LockSupport;
 
@@ -27,7 +27,7 @@ public class AsyncPersistenceTest {
     public static void changesFoundInOnePeriodMarkTheBlockEntityChangedOnce(GameTestHelper helper) {
         var pos = new BlockPos(1, 2, 1);
         helper.setBlock(pos, SyncBenchBlock.BLOCK);
-        SyncBenchBlockEntity be = helper.getBlockEntity(pos);
+        SyncBenchBlockEntity be = (SyncBenchBlockEntity) helper.getBlockEntity(pos);
         var step = new int[1];
         var since = new long[]{System.nanoTime()};
         helper.onEachTick(() -> {
@@ -69,7 +69,7 @@ public class AsyncPersistenceTest {
     public static void unwatchedChangesWaitUnsentButArePersisted(GameTestHelper helper) {
         var pos = new BlockPos(3, 2, 1);
         helper.setBlock(pos, SyncBenchBlock.BLOCK);
-        SyncBenchBlockEntity be = helper.getBlockEntity(pos);
+        SyncBenchBlockEntity be = (SyncBenchBlockEntity) helper.getBlockEntity(pos);
         var chunk = helper.getLevel().getChunkAt(be.getBlockPos());
         var step = new int[1];
         var since = new long[]{System.nanoTime()};

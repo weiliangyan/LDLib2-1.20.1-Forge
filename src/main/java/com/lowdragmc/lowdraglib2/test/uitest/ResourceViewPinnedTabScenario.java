@@ -58,7 +58,7 @@ public class ResourceViewPinnedTabScenario implements UIScenario {
                         })
                         .check("it is the first thing in the header", ctx -> {
                             var view = resourceView(ctx);
-                            return view.tabView.tabHeaderContainer.getChildren().getFirst()
+                            return view.tabView.tabHeaderContainer.getChildren().get(0)
                                     == view.getAssetBrowserTab();
                         })
                         .check("the divider sits right after it", ctx -> {

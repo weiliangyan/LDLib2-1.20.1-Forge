@@ -7,13 +7,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.graph.Graph;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.GraphView;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegister;
-import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
-import com.lowdragmc.lowdraglib2.test.noddegraphtoolkit.OptionTestNode;
-import com.lowdragmc.lowdraglib2.test.noddegraphtoolkit.TestAddNode;
-import com.lowdragmc.lowdraglib2.test.noddegraphtoolkit.TestConstantNode;
-import com.lowdragmc.lowdraglib2.test.noddegraphtoolkit.TestDescriptionNode;
-import com.lowdragmc.lowdraglib2.test.noddegraphtoolkit.TestGraph;
-import com.lowdragmc.lowdraglib2.test.noddegraphtoolkit.TestStringConcatNode;
+import com.lowdragmc.lowdraglib2.test.noddegraphtoolkit.*;
 import lombok.NoArgsConstructor;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
@@ -24,6 +18,9 @@ import org.joml.Vector2f;
 public class TestGraphToolkit implements IMenuTest {
     @Override
     public ModularUI createUI(@NotNull Player entityPlayer) {
+        if (!entityPlayer.level().isClientSide) {
+            return new ModularUI(UI.empty(), entityPlayer);
+        }
         var root = new UIElement();
         root.layout(layout -> {
             layout.widthPercent(75);

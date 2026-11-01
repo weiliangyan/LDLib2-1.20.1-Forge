@@ -1,13 +1,14 @@
 package com.lowdragmc.lowdraglib2.misc;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
+import com.lowdragmc.lowdraglib2.Platform;
 import lombok.Setter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.neoforged.neoforge.common.util.INBTSerializable;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -142,13 +143,12 @@ public class FluidTransferList implements IFluidHandlerModifiable, INBTSerializa
         return totalDrained == null ? FluidStack.EMPTY : totalDrained;
     }
 
-    @Override
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         var tag = new CompoundTag();
         var list = new ListTag();
         for (IFluidHandler transfer : transfers) {
             if (transfer instanceof INBTSerializable<?> serializable) {
-                list.add(serializable.serializeNBT(provider));
+                list.add(serializable.serializeNBT());
             } else {
                 LDLib2.LOGGER.warn("[FluidTransferList] internal tank doesn't support serialization");
             }
@@ -159,15 +159,24 @@ public class FluidTransferList implements IFluidHandlerModifiable, INBTSerializa
     }
 
     @Override
+    public CompoundTag serializeNBT() {
+        return serializeNBT(Platform.getFrozenRegistry());
+    }
+
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         var list = nbt.getList("tanks", nbt.getByte("type"));
         for (int i = 0; i < list.size(); i++) {
             if (transfers[i] instanceof INBTSerializable serializable) {
-                serializable.deserializeNBT(provider, list.get(i));
+                serializable.deserializeNBT(list.get(i));
             } else {
                 LDLib2.LOGGER.warn("[FluidTransferList] internal tank doesn't support serialization");
             }
         }
+    }
+
+    @Override
+    public void deserializeNBT(CompoundTag nbt) {
+        deserializeNBT(Platform.getFrozenRegistry(), nbt);
     }
 
     @Override

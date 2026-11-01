@@ -2,10 +2,11 @@ package com.lowdragmc.lowdraglib2.client.font;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import lombok.Getter;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.Set;
 
@@ -48,6 +49,7 @@ public final class LDFontStats {
         }
     }
 
+    @Getter
     private static boolean enabled;
     /**
      * Set while the overlay draws itself, so the overlay's own text does not pollute the next frame.
@@ -63,10 +65,6 @@ public final class LDFontStats {
     private static Snapshot last = Snapshot.EMPTY;
 
     private LDFontStats() {
-    }
-
-    public static boolean isEnabled() {
-        return enabled;
     }
 
     public static void setEnabled(boolean value) {

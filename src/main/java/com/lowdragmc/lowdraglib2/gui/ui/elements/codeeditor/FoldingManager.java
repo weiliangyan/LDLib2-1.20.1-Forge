@@ -1,4 +1,4 @@
-//package com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor;
+package com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor;//package com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor;
 //
 //import java.util.ArrayList;
 //import java.util.List;

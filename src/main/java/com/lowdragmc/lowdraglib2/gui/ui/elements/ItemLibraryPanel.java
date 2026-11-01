@@ -202,7 +202,8 @@ public class ItemLibraryPanel<T extends ILibraryItem> extends UIElement {
                     .setDragTexture(- width / 2f, -height / 2f, width, height);
         });
         resizeButton.addEventListener(UIEvents.DRAG_SOURCE_UPDATE, e -> {
-            if (e.dragHandler.draggingObject instanceof DragResize(var oSize)) {
+            if (e.dragHandler.draggingObject instanceof DragResize dragResize) {
+                var oSize = dragResize.originalSize();
                 var normalSizeOffset = getLocalMouseNormal(e.x - e.dragStartX, e.y - e.dragStartY);
                 // Live resize — width/height are data-driven and must outrank stylesheet defaults.
                 Style.importantPipeline(getLayout(), l -> l

@@ -99,7 +99,7 @@ public final class DirectFileResourceProvider<T> {
             if (!file.getParentFile().exists()) {
                 file.getParentFile().mkdirs();
             }
-            NbtIo.write(nbt, file.toPath());
+            NbtIo.write(nbt, file);
         } catch (Exception e) {
             LDLib2.LOGGER.error("Failed to write resource file {} as {}: ", file, resourceInstance.resource.getName(), e);
             return false;
@@ -112,7 +112,7 @@ public final class DirectFileResourceProvider<T> {
     private T readResourceFromFile(File file) {
         if (!file.isFile()) return null;
         try {
-            var fileData = NbtIo.read(file.toPath());
+            var fileData = NbtIo.read(file);
             if (fileData != null) {
                 var data = deserializeNBT(fileData, Platform.getFrozenRegistry());
                 if (data != null) return data;

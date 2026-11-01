@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib2.LDLib2Registries;
 import com.lowdragmc.lowdraglib2.Platform;
 import com.lowdragmc.lowdraglib2.client.renderer.block.RendererBlock;
 import com.lowdragmc.lowdraglib2.client.renderer.block.RendererBlockEntity;
+import com.lowdragmc.lowdraglib2.compat.TriState;
 import com.lowdragmc.lowdraglib2.configurator.IConfigurable;
 import com.lowdragmc.lowdraglib2.configurator.ui.Configurator;
 import com.lowdragmc.lowdraglib2.configurator.ui.ConfiguratorGroup;
@@ -23,25 +24,21 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import dev.vfyjxf.taffy.style.AlignItems;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
-import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
-import net.minecraft.world.phys.AABB;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -49,15 +46,19 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.ChunkRenderTypeSet;
-import net.neoforged.neoforge.client.model.data.ModelData;
-import net.neoforged.neoforge.common.util.TriState;
-import org.appliedenergistics.yoga.YogaEdge;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.ChunkRenderTypeSet;
+import net.minecraftforge.client.model.data.ModelData;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
-import org.jetbrains.annotations.Nullable;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -79,7 +80,7 @@ public interface IRenderer extends ILDLRegisterClient<IRenderer, Supplier<IRende
         if (LDLib2.isClient()) {
             return LDLib2Registries.RENDERERS.optionalCodec().dispatch(ILDLRegisterClient::getRegistryHolderOptional,
                     optional -> optional.map(holder -> PersistedParser.createCodec(holder.value()).fieldOf("data"))
-                            .orElseGet(() -> MapCodec.unit(EMPTY)));
+                            .orElseGet(() -> MapCodec.unit(EMPTY)).codec());
         } else {
             return Codec.unit(EMPTY);
         }
@@ -87,11 +88,11 @@ public interface IRenderer extends ILDLRegisterClient<IRenderer, Supplier<IRende
 
     @Nullable
     default CompoundTag serializeWrapper() {
-        return (CompoundTag) CODEC.encodeStart(Platform.getFrozenRegistry().createSerializationContext(NbtOps.INSTANCE), this).result().orElse(null);
+        return (CompoundTag) CODEC.encodeStart(Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry()), this).result().orElse(null);
     }
 
     static IRenderer deserializeWrapper(Tag tag) {
-        return CODEC.parse(Platform.getFrozenRegistry().createSerializationContext(NbtOps.INSTANCE), tag).result().orElse(EMPTY);
+        return CODEC.parse(Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry()), tag).result().orElse(EMPTY);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -142,7 +143,7 @@ public interface IRenderer extends ILDLRegisterClient<IRenderer, Supplier<IRende
      * Register additional models here.
      */
     @OnlyIn(Dist.CLIENT)
-    default void onAdditionalModel(Consumer<ModelResourceLocation> registry) {
+    default void onAdditionalModel(Consumer<ResourceLocation> registry) {
 
     }
 
@@ -160,7 +161,7 @@ public interface IRenderer extends ILDLRegisterClient<IRenderer, Supplier<IRende
     }
 
     /**
-     * Does the block entity have the {@link net.minecraft.client.renderer.blockentity.BlockEntityRenderer}.
+     * Does the block entity have the {@link BlockEntityRenderer}.
      */
     @OnlyIn(Dist.CLIENT)
     default boolean hasBlockEntityRenderer(BlockEntity blockEntity) {
@@ -168,7 +169,7 @@ public interface IRenderer extends ILDLRegisterClient<IRenderer, Supplier<IRende
     }
 
     /**
-     * Does the block entity render offscreen {@link net.minecraft.client.renderer.blockentity.BlockEntityRenderer#shouldRenderOffScreen(BlockEntity)}.
+     * Does the block entity render offscreen {@link BlockEntityRenderer#shouldRenderOffScreen(BlockEntity)}.
      */
     @OnlyIn(Dist.CLIENT)
     default boolean shouldRenderOffScreen(BlockEntity blockEntity) {
@@ -184,7 +185,7 @@ public interface IRenderer extends ILDLRegisterClient<IRenderer, Supplier<IRende
     }
 
     /**
-     * Should the TESR {@link net.minecraft.client.renderer.blockentity.BlockEntityRenderer} render.
+     * Should the TESR {@link BlockEntityRenderer} render.
      */
     @OnlyIn(Dist.CLIENT)
     default boolean shouldRender(BlockEntity blockEntity, Vec3 cameraPos) {
@@ -192,7 +193,7 @@ public interface IRenderer extends ILDLRegisterClient<IRenderer, Supplier<IRende
     }
 
     /**
-     * Render the TESR {@link net.minecraft.client.renderer.blockentity.BlockEntityRenderer}.
+     * Render the TESR {@link BlockEntityRenderer}.
      */
     @OnlyIn(Dist.CLIENT)
     default void render(BlockEntity blockEntity, float partialTicks, PoseStack stack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {

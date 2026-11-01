@@ -3,12 +3,12 @@ package com.lowdragmc.lowdraglib2.gui.ui.elements;
 import com.google.common.base.Predicates;
 import com.lowdragmc.lowdraglib2.gui.ColorPattern;
 import com.lowdragmc.lowdraglib2.gui.texture.DynamicTexture;
-import com.lowdragmc.lowdraglib2.gui.texture.Icons;
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
+import com.lowdragmc.lowdraglib2.gui.texture.Icons;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
+import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.data.ScrollDisplay;
 import com.lowdragmc.lowdraglib2.gui.ui.data.ScrollerMode;
-import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Vertical;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvent;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
@@ -28,12 +28,7 @@ import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -788,7 +783,7 @@ public class StructuredTagEditor extends BindableUIElement<Tag> {
     }
 
     private static TagKind listElementKind(ListTag listTag) {
-        return listTag.isEmpty() ? TagKind.END : kindOf(listTag.getFirst());
+        return listTag.isEmpty() ? TagKind.END : kindOf(listTag.get(0));
     }
 
     public static ListTag changeListElementType(ListTag listTag, TagKind kind) {

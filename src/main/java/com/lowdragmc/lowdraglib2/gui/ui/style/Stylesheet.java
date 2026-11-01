@@ -89,7 +89,7 @@ public final class Stylesheet {
             universalRules.add(rule);
             return;
         }
-        var lastGroup = groups.getLast();
+        var lastGroup = groups.get(groups.size() - 1);
         var selectors = lastGroup.styleMatcher().selector();
         StyleSelector bucketSelector = null;
         for (StyleSelector s : selectors) {

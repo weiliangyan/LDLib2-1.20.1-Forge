@@ -1,6 +1,8 @@
 package com.lowdragmc.lowdraglib2.nodegraphtookit.model;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Static lists used to avoid allocations when using simple change hint lists.

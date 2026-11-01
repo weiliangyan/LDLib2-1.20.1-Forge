@@ -13,6 +13,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.elements.Dialog;
 import com.lowdragmc.lowdraglib2.gui.ui.style.StyleOrigin;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
 import com.lowdragmc.lowdraglib2.math.HDRColor;
+import com.lowdragmc.lowdraglib2.syncdata.IProviderAwareNBTSerializable;
 import com.lowdragmc.lowdraglib2.utils.ColorUtils;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.shaders.AbstractUniform;
@@ -27,20 +28,14 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.FloatTag;
-import net.minecraft.nbt.IntArrayTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceProvider;
-import net.neoforged.neoforge.common.util.INBTSerializable;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 import org.joml.*;
 
 import javax.annotation.Nonnull;
-import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -50,7 +45,7 @@ import java.util.stream.Stream;
 
 import static com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_TEX_COLOR;
 
-public class LDShaderHolder implements IConfigurable, INBTSerializable<CompoundTag>, AutoCloseable {
+public class LDShaderHolder implements IConfigurable, IProviderAwareNBTSerializable<CompoundTag>, AutoCloseable {
     public final static String SHADER_UID_DEFINE = "LD_SHADER_%d";
     private final static AtomicInteger SHADER_ID = new AtomicInteger();
     /** Bumped when the {@code hdrUniforms} payload shape changes; absent means pre-HDR data. */
@@ -103,7 +98,7 @@ public class LDShaderHolder implements IConfigurable, INBTSerializable<CompoundT
     /**
      * As {@link #create(ResourceLocation, VertexFormat)} but reading the shader assets from an explicit
      * {@link ResourceProvider} (see {@link LDShaderInstance#create(ResourceProvider, ResourceLocation,
-     * VertexFormat, java.util.Set)}) — lets callers serve shaders that are not shipped assets. The
+     * VertexFormat, Set)}) — lets callers serve shaders that are not shipped assets. The
      * provider is retained and reused for define-variant compiles.
      */
     public static LDShaderHolder create(ResourceProvider resourceProvider, ResourceLocation location, VertexFormat format) throws Throwable {
@@ -128,8 +123,9 @@ public class LDShaderHolder implements IConfigurable, INBTSerializable<CompoundT
         if (defines.isEmpty()) return baseInstance;
         return shadersWithDefines.computeIfAbsent(defines.stream().collect(Collectors.toUnmodifiableSet()),
                 definesKey -> {
-                    var defineWithUid = new LinkedHashSet<>(definesKey);
-                    defineWithUid.addFirst(shaderUid);
+                    var defineWithUid = new LinkedHashSet<String>();
+                    defineWithUid.add(shaderUid);
+                    defineWithUid.addAll(definesKey);
                     try {
                         var shader = LDShaderInstance.create(resourceProvider, baseInstance.shaderLocation, baseInstance.getVertexFormat(), defineWithUid);
                         if (shader == null) return baseInstance;
@@ -253,7 +249,7 @@ public class LDShaderHolder implements IConfigurable, INBTSerializable<CompoundT
     public Object deserializeSampler(CompoundTag tag) {
         var type  = tag.getString("type");
         if (type.equals("texture")) {
-            return ResourceLocation.parse(tag.getString("resource"));
+            return new ResourceLocation(tag.getString("resource"));
         }
         return null;
     }
@@ -431,14 +427,16 @@ public class LDShaderHolder implements IConfigurable, INBTSerializable<CompoundT
             float imageWidth = 1;
             float imageHeight = 1;
             var mat = graphics.pose().last().pose();
-            var buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, POSITION_TEX_COLOR);
+            var tesselator = Tesselator.getInstance();
+            var buffer = tesselator.getBuilder();
+            buffer.begin(VertexFormat.Mode.QUADS, POSITION_TEX_COLOR);
             RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
             RenderSystem.setShaderTexture(0, getSamplerID(name));
-            buffer.addVertex(mat, x, y + height, 0).setUv(imageU, imageV + imageHeight).setColor(-1);
-            buffer.addVertex(mat, x + width, y + height, 0).setUv(imageU + imageWidth, imageV + imageHeight).setColor(-1);
-            buffer.addVertex(mat, x + width, y, 0).setUv(imageU + imageWidth, imageV).setColor(-1);
-            buffer.addVertex(mat, x, y, 0).setUv(imageU, imageV).setColor(-1);
-            BufferUploader.drawWithShader(buffer.buildOrThrow());
+            buffer.vertex(mat, x, y + height, 0).uv(imageU, imageV + imageHeight).color(-1).endVertex();
+            buffer.vertex(mat, x + width, y + height, 0).uv(imageU + imageWidth, imageV + imageHeight).color(-1).endVertex();
+            buffer.vertex(mat, x + width, y, 0).uv(imageU + imageWidth, imageV).color(-1).endVertex();
+            buffer.vertex(mat, x, y, 0).uv(imageU, imageV).color(-1).endVertex();
+            BufferUploader.drawWithShader(buffer.end());
         };
     }
 

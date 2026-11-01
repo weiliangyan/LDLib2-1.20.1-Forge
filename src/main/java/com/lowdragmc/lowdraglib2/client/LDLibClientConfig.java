@@ -2,8 +2,7 @@ package com.lowdragmc.lowdraglib2.client;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.common.TranslatableEnum;
-import net.neoforged.neoforge.common.ModConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Locale;
@@ -25,10 +24,10 @@ public class LDLibClientConfig {
     private static final String LANG = LDLib2.MOD_ID + ".configuration.";
 
     /**
-     * How LDLib turns an outline into pixels. Implements {@link TranslatableEnum} so the configuration screen
+     * How LDLib turns an outline into pixels. Implements TranslatableEnum so the configuration screen
      * shows the translated names rather than the raw constants.
      */
-    public enum FontRenderMode implements TranslatableEnum {
+    public enum FontRenderMode /*implements TranslatableEnum*/ {
         /**
          * Hand text to Minecraft's own font renderer and stay out of the way entirely. The baseline everything
          * else is compared against.
@@ -52,31 +51,31 @@ public class LDLibClientConfig {
          */
         AUTO;
 
-        @Override
+        //@Override
         public Component getTranslatedName() {
             return Component.translatable(LANG + "font.fontRenderMode." + name().toLowerCase(Locale.ROOT));
         }
     }
 
-    public static final ModConfigSpec SPEC;
+    public static final ForgeConfigSpec SPEC;
     public static final LDLibClientConfig INSTANCE;
 
     static {
-        Pair<LDLibClientConfig, ModConfigSpec> pair = new ModConfigSpec.Builder().configure(LDLibClientConfig::new);
+        Pair<LDLibClientConfig, ForgeConfigSpec> pair = new ForgeConfigSpec.Builder().configure(LDLibClientConfig::new);
         SPEC = pair.getRight();
         INSTANCE = pair.getLeft();
     }
 
-    public final ModConfigSpec.IntValue fontAtlasSize;
-    public final ModConfigSpec.IntValue sdfEmSize;
-    public final ModConfigSpec.DoubleValue sdfSharpness;
-    public final ModConfigSpec.DoubleValue sdfWeight;
-    public final ModConfigSpec.BooleanValue textLayoutCache;
-    public final ModConfigSpec.EnumValue<FontRenderMode> fontRenderMode;
-    public final ModConfigSpec.IntValue fontRasterMaxSize;
-    public final ModConfigSpec.IntValue fontRasterEvictSeconds;
+    public final ForgeConfigSpec.IntValue fontAtlasSize;
+    public final ForgeConfigSpec.IntValue sdfEmSize;
+    public final ForgeConfigSpec.DoubleValue sdfSharpness;
+    public final ForgeConfigSpec.DoubleValue sdfWeight;
+    public final ForgeConfigSpec.BooleanValue textLayoutCache;
+    public final ForgeConfigSpec.EnumValue<FontRenderMode> fontRenderMode;
+    public final ForgeConfigSpec.IntValue fontRasterMaxSize;
+    public final ForgeConfigSpec.IntValue fontRasterEvictSeconds;
 
-    private LDLibClientConfig(ModConfigSpec.Builder builder) {
+    private LDLibClientConfig(ForgeConfigSpec.Builder builder) {
         builder.translation(LANG + "font").push("font");
         fontRenderMode = builder
                 .comment("How LDLib UI text is rendered.",

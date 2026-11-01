@@ -24,7 +24,7 @@ public class ItemAccessor extends TypesAccessor<Item> {
     @Override
     public Item defaultValue(@Nullable Field field, @Nullable Class<?> type) {
         if (field != null && field.isAnnotationPresent(DefaultValue.class)) {
-            return BuiltInRegistries.ITEM.get(ResourceLocation.parse(field.getAnnotation(DefaultValue.class).stringValue()[0]));
+            return BuiltInRegistries.ITEM.get(new ResourceLocation(field.getAnnotation(DefaultValue.class).stringValue()[0]));
         }
         return Items.AIR;
     }

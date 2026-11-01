@@ -55,7 +55,7 @@ public final class EditorProjectStore {
         var file = getFile();
         if (!file.exists()) return new CompoundTag();
         try {
-            var tag = NbtIo.read(file.toPath());
+            var tag = NbtIo.read(file);
             return tag == null ? new CompoundTag() : tag;
         } catch (Exception e) {
             return new CompoundTag();
@@ -64,7 +64,7 @@ public final class EditorProjectStore {
 
     private static void write(CompoundTag tag) {
         try {
-            NbtIo.write(tag, getFile().toPath());
+            NbtIo.write(tag, getFile());
         } catch (Exception e) {
             LDLib2.LOGGER.error("Failed to save the editor project store: ", e);
         }

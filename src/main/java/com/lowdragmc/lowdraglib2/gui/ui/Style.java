@@ -4,7 +4,10 @@ import com.google.common.collect.ImmutableList;
 import com.lowdragmc.lowdraglib2.configurator.IConfigurable;
 import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
 import com.lowdragmc.lowdraglib2.configurator.ui.ConfiguratorGroup;
-import com.lowdragmc.lowdraglib2.gui.ui.style.*;
+import com.lowdragmc.lowdraglib2.gui.ui.style.Property;
+import com.lowdragmc.lowdraglib2.gui.ui.style.StyleBag;
+import com.lowdragmc.lowdraglib2.gui.ui.style.StyleOrigin;
+import com.lowdragmc.lowdraglib2.gui.ui.style.StyleSlot;
 import com.lowdragmc.lowdraglib2.syncdata.IPersistedSerializable;
 import lombok.Getter;
 import lombok.Setter;
@@ -255,7 +258,7 @@ public abstract class Style implements IConfigurable, IPersistedSerializable {
         for (Property<?> property : getProperties()) {
             var inline = getInline(property);
             if (inline != null) {
-                tag.put(property.name, property.codec.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), cast(inline)).result().orElseThrow());
+                tag.put(property.name, property.codec.encodeStart(com.lowdragmc.lowdraglib2.Platform.registryOps(NbtOps.INSTANCE, provider), cast(inline)).result().orElseThrow());
             }
         }
         return tag;
@@ -266,7 +269,7 @@ public abstract class Style implements IConfigurable, IPersistedSerializable {
         IPersistedSerializable.super.deserializeNBT(provider, tag);
         for (Property<?> property : getProperties()) {
             if (!tag.contains(property.name)) continue;
-            property.codec.parse(provider.createSerializationContext(NbtOps.INSTANCE), tag.get(property.name)).result()
+            property.codec.parse(com.lowdragmc.lowdraglib2.Platform.registryOps(NbtOps.INSTANCE, provider), tag.get(property.name)).result()
                     .ifPresent(value -> set(property, cast(value)));
         }
     }

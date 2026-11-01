@@ -1,21 +1,21 @@
 package com.lowdragmc.lowdraglib2.client.shader;
 
 import com.google.gson.JsonObject;
-import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.core.mixins.accessor.ShaderInstanceAccessor;
 import com.mojang.blaze3d.shaders.Program;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import net.minecraft.util.GsonHelper;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
-import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collections;
+import java.util.Set;
 
 public class LDShaderInstance extends ShaderInstance implements ILDShaderInstance {
     public final ResourceLocation shaderLocation;
@@ -49,14 +49,16 @@ public class LDShaderInstance extends ShaderInstance implements ILDShaderInstanc
      */
     @Nullable
     public static LDShaderInstance create(ResourceProvider resourceProvider, ResourceLocation location, VertexFormat format, Set<String> defines) throws Throwable {
+        var resourcelocation = new ResourceLocation(location.getNamespace(), "shaders/core/" + location.getPath() + ".json");
+        if (resourceProvider.getResource(resourcelocation).isEmpty()) return null;
         for (var define : defines) {
             LDProgramDefineManager.addProgramDefine(define);
         }
-        var resourcelocation = ResourceLocation.fromNamespaceAndPath(location.getNamespace(), "shaders/core/" + location.getPath() + ".json");
-        if (resourceProvider.getResource(resourcelocation).isEmpty()) return null;
-        var shaderWithDefines = new LDShaderInstance(resourceProvider, location, format, defines);
-        LDProgramDefineManager.clearProgramDefines();
-        return shaderWithDefines;
+        try {
+            return new LDShaderInstance(resourceProvider, location, format, defines);
+        } finally {
+            LDProgramDefineManager.clearProgramDefines();
+        }
     }
 
     private LDShaderInstance(ResourceProvider resourceProvider, ResourceLocation shaderLocation, VertexFormat vertexFormat, Set<String> defines) throws IOException {

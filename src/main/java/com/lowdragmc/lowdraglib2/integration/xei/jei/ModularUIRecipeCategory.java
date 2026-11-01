@@ -16,7 +16,6 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.gui.navigation.ScreenPosition;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,10 +46,9 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
         for (var binding : cachedRecipeUI.get(recipe).bindings()) {
             var area = LDLibJEIPlugin.getAreaLocal(binding.element(), true);
             var tagLines = JEITagNameTooltip.resolve(binding);
-            builder.addSlot(binding.role())
+            builder.addSlot(binding.role(), area.getX(), area.getY())
                     .addTypedIngredients(binding.ingredients())
                     .setSlotName(binding.name())
-                    .setPosition(area.getX(), area.getY())
                     .addRichTooltipCallback((slot, tooltip) -> {
                         JEITagNameTooltip.append(binding, tagLines, slot, tooltip);
                         appendAdditionalTooltip(binding, tooltip);
@@ -66,7 +64,8 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
         builder.addWidget(widget);
         builder.addGuiEventListener(widget);
 
-        var bindings = recipeUI.bindings();
+        // todo
+/*        var bindings = recipeUI.bindings();
         var slottedBindings = new ArrayList<SlottedBinding>(bindings.size());
         for (var binding : bindings) {
             builder.getRecipeSlots().findSlotByName(binding.name())
@@ -76,7 +75,7 @@ public abstract class ModularUIRecipeCategory<T> implements IRecipeCategory<T> {
         if (!slottedBindings.isEmpty()) {
             List<IRecipeSlotDrawable> slots = slottedBindings.stream().map(slottedBinding -> slottedBinding.slot).toList();
             builder.addSlottedWidget(new ModularUIRecipeWidget(slottedBindings, widget), slots);
-        }
+        }*/
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib2.gui.ui.style;
 
+import com.lowdragmc.lowdraglib2.compat.network.chat.ComponentSerialization;
 import com.lowdragmc.lowdraglib2.editor.ui.SplittableWindow;
 import com.lowdragmc.lowdraglib2.gui.ColorPattern;
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
@@ -9,11 +10,13 @@ import com.lowdragmc.lowdraglib2.gui.ui.elements.*;
 import com.lowdragmc.lowdraglib2.gui.ui.layout.LayoutProperties;
 import com.lowdragmc.lowdraglib2.gui.ui.style.animation.Transition;
 import com.lowdragmc.lowdraglib2.gui.ui.style.properties.*;
-import com.lowdragmc.lowdraglib2.gui.ui.style.values.*;
+import com.lowdragmc.lowdraglib2.gui.ui.style.values.BoolValue;
+import com.lowdragmc.lowdraglib2.gui.ui.style.values.ComponentValue;
+import com.lowdragmc.lowdraglib2.gui.ui.style.values.ResourceLocationValue;
+import com.lowdragmc.lowdraglib2.gui.ui.style.values.StringValue;
 import com.mojang.serialization.Codec;
 import lombok.experimental.UtilityClass;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;

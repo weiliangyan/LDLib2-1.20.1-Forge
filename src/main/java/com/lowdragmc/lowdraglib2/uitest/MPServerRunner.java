@@ -2,25 +2,13 @@ package com.lowdragmc.lowdraglib2.uitest;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.LDLib2Registries;
-import com.lowdragmc.lowdraglib2.uitest.mp.MPHubClient;
-import com.lowdragmc.lowdraglib2.uitest.mp.MPMessages;
-import com.lowdragmc.lowdraglib2.uitest.mp.MPRunConfig;
-import com.lowdragmc.lowdraglib2.uitest.mp.MPScenarioBuilder;
-import com.lowdragmc.lowdraglib2.uitest.mp.MPScenarioOptions;
-import com.lowdragmc.lowdraglib2.uitest.mp.MPSegment;
+import com.lowdragmc.lowdraglib2.uitest.mp.*;
 import com.lowdragmc.lowdraglib2.uitest.report.ReportWriter;
 import com.lowdragmc.lowdraglib2.uitest.report.RunReport;
 import net.minecraft.server.MinecraftServer;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -408,7 +396,7 @@ final class MPServerRunner {
     /** The lazily-created report for a SERVER_WAIT segment, shared across its re-evaluations. */
     private RunReport.StepReport currentSegmentStepReport(MPSegment segment) {
         if (!currentReport.steps.isEmpty()) {
-            var last = currentReport.steps.getLast();
+            var last = currentReport.steps.get(currentReport.steps.size() - 1);
             if (last.index == segment.index + 1) return last;
         }
         return newStepReport(segment);

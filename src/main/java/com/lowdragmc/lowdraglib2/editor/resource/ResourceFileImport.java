@@ -102,7 +102,7 @@ public final class ResourceFileImport {
                         onCancel.run();
                         return;
                     }
-                    onResolved.accept(ResourceLocation.fromNamespaceAndPath(IMPORT_NAMESPACE, target));
+                    onResolved.accept(new ResourceLocation(IMPORT_NAMESPACE, target));
                 }).show(owner);
     }
 

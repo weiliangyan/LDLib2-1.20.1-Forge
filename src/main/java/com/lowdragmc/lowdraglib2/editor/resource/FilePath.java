@@ -127,7 +127,7 @@ public final class FilePath implements IResourcePath {
         }
         
         try {
-            return ResourceLocation.fromNamespaceAndPath(namespace, resourcePath);
+            return new ResourceLocation(namespace, resourcePath);
         } catch (Exception e) {
             return null;
         }

@@ -40,12 +40,12 @@ public class UIResource extends Resource<UITemplate> {
     @Nullable
     @Override
     public Tag serializeResource(UITemplate value, HolderLookup.Provider provider) {
-        return UITemplate.CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), value).result().orElse(null);
+        return UITemplate.CODEC.encodeStart(com.lowdragmc.lowdraglib2.Platform.registryOps(NbtOps.INSTANCE, provider), value).result().orElse(null);
     }
 
     @Override
     public UITemplate deserializeResource(Tag nbt, HolderLookup.Provider provider) {
-        return UITemplate.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), nbt).result().orElse(UITemplate.missing());
+        return UITemplate.CODEC.parse(com.lowdragmc.lowdraglib2.Platform.registryOps(NbtOps.INSTANCE, provider), nbt).result().orElse(UITemplate.missing());
     }
 
     @Override

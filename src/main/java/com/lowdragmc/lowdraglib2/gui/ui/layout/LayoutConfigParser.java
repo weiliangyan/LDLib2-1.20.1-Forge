@@ -1,6 +1,9 @@
 package com.lowdragmc.lowdraglib2.gui.ui.layout;
 
-import com.lowdragmc.lowdraglib2.configurator.ui.*;
+import com.lowdragmc.lowdraglib2.configurator.ui.Configurator;
+import com.lowdragmc.lowdraglib2.configurator.ui.ConfiguratorGroup;
+import com.lowdragmc.lowdraglib2.configurator.ui.LPAConfigurator;
+import com.lowdragmc.lowdraglib2.configurator.ui.ToggleSelectorConfigurator;
 import com.lowdragmc.lowdraglib2.gui.texture.DynamicTexture;
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib2.gui.ui.style.LayoutStyle;

@@ -1,10 +1,9 @@
 package com.lowdragmc.lowdraglib2.configurator;
 
-import com.lowdragmc.lowdraglib2.Platform;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.nbt.Tag;
-import net.neoforged.neoforge.common.util.INBTSerializable;
+import net.minecraftforge.common.util.INBTSerializable;
 
 import org.jetbrains.annotations.Nullable;
 import java.util.function.BiConsumer;
@@ -35,8 +34,8 @@ public class SerializableRecordAction<T extends INBTSerializable<?>> implements 
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static <T extends INBTSerializable<?>> SerializableRecordAction<T> of(T serializable) {
         return new SerializableRecordAction<>(serializable,
-                value -> value.serializeNBT(Platform.getFrozenRegistry()),
-                (value, tag) -> ((INBTSerializable) value).deserializeNBT(Platform.getFrozenRegistry(), tag));
+                value -> value.serializeNBT(),
+                (value, tag) -> ((INBTSerializable) value).deserializeNBT(tag));
     }
 
     /**

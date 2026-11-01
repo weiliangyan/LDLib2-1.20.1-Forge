@@ -15,8 +15,8 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import org.joml.Vector3f;
 
 import java.util.*;
@@ -344,10 +344,10 @@ public class MapSerializationTest {
         src.roListManaged.put("beta", new ArrayList<>(List.of(
                 new BlockPos(-1, -2, -3))));
 
-        byte[] bytes = ByteBufUtil.writeCustomData(src::writeToBuff, provider);
+        byte[] bytes = ByteBufUtil.writeCustomData(src::writeToBuff);
 
         var dst = new MapHolder();
-        ByteBufUtil.readCustomData(bytes, dst::readFromBuff, provider);
+        ByteBufUtil.readCustomData(bytes, dst::readFromBuff);
 
         assertEq(helper, "size", 2, dst.roListManaged.size());
         assertNotNull(helper, "alpha", dst.roListManaged.get("alpha"));
@@ -376,10 +376,10 @@ public class MapSerializationTest {
         src.stringStack.put("d", new ItemStack(Items.DIAMOND, 3));
         src.dirVec.put(Direction.NORTH, new Vector3f(0, 0, -1));
 
-        byte[] bytes = ByteBufUtil.writeCustomData(src::writeToBuff, provider);
+        byte[] bytes = ByteBufUtil.writeCustomData(src::writeToBuff);
 
         var dst = new MapHolder();
-        ByteBufUtil.readCustomData(bytes, dst::readFromBuff, provider);
+        ByteBufUtil.readCustomData(bytes, dst::readFromBuff);
 
         assertEq(helper, "stringInt.size", 2, dst.stringInt.size());
         assertEq(helper, "stringInt.a", 1, dst.stringInt.get("a"));
@@ -513,10 +513,10 @@ public class MapSerializationTest {
         src.roKDirectV.put(new NestedReadOnly(1, "alpha"), 100);
         src.roKDirectV.put(new NestedReadOnly(2, "beta"), 200);
 
-        byte[] bytes = ByteBufUtil.writeCustomData(src::writeToBuff, provider);
+        byte[] bytes = ByteBufUtil.writeCustomData(src::writeToBuff);
 
         var dst = new MapHolder();
-        ByteBufUtil.readCustomData(bytes, dst::readFromBuff, provider);
+        ByteBufUtil.readCustomData(bytes, dst::readFromBuff);
 
         assertEq(helper, "size", 2, dst.roKDirectV.size());
         Integer alphaV = null, betaV = null;
@@ -539,10 +539,10 @@ public class MapSerializationTest {
         src.roKRoV.put(new NestedReadOnly(1, "alpha"), new NestedReadOnly(11, "vA"));
         src.roKRoV.put(new NestedReadOnly(2, "beta"), new NestedReadOnly(22, "vB"));
 
-        byte[] bytes = ByteBufUtil.writeCustomData(src::writeToBuff, provider);
+        byte[] bytes = ByteBufUtil.writeCustomData(src::writeToBuff);
 
         var dst = new MapHolder();
-        ByteBufUtil.readCustomData(bytes, dst::readFromBuff, provider);
+        ByteBufUtil.readCustomData(bytes, dst::readFromBuff);
 
         assertEq(helper, "size", 2, dst.roKRoV.size());
         NestedReadOnly alphaV = null, betaV = null;
@@ -567,11 +567,11 @@ public class MapSerializationTest {
         src.readOnlyValues.put("k1", new NestedReadOnly(11, "one"));
         src.readOnlyValues.put("k2", new NestedReadOnly(22, "two"));
 
-        byte[] bytes = ByteBufUtil.writeCustomData(src::writeToBuff, provider);
+        byte[] bytes = ByteBufUtil.writeCustomData(src::writeToBuff);
 
         var dst = new MapHolder();
         dst.prepareReadOnlyValuesKeys("k1", "k2");
-        ByteBufUtil.readCustomData(bytes, dst::readFromBuff, provider);
+        ByteBufUtil.readCustomData(bytes, dst::readFromBuff);
 
         assertEq(helper, "size", 2, dst.readOnlyValues.size());
         assertEq(helper, "k1.counter", 11, dst.readOnlyValues.get("k1").counter);
@@ -636,12 +636,12 @@ public class MapSerializationTest {
         src.autoStringRo.put("alpha", new NestedReadOnly(11, "A"));
         src.autoStringRo.put("beta", new NestedReadOnly(22, "B"));
 
-        byte[] bytes = ByteBufUtil.writeCustomData(src::writeToBuff, provider);
+        byte[] bytes = ByteBufUtil.writeCustomData(src::writeToBuff);
 
         var dst = new AutoFabHolder();
         dst.autoStringRo.put("old", new NestedReadOnly(99, "X"));
 
-        ByteBufUtil.readCustomData(bytes, dst::readFromBuff, provider);
+        ByteBufUtil.readCustomData(bytes, dst::readFromBuff);
 
         assertEq(helper, "size", 2, dst.autoStringRo.size());
         if (dst.autoStringRo.containsKey("old")) {
@@ -697,10 +697,10 @@ public class MapSerializationTest {
         src.autoStringListPos.put("a", new ArrayList<>(List.of(new BlockPos(10, 20, 30))));
         src.autoStringListPos.put("b", new ArrayList<>(List.of(new BlockPos(-1, -2, -3), new BlockPos(7, 8, 9))));
 
-        byte[] bytes = ByteBufUtil.writeCustomData(src::writeToBuff, provider);
+        byte[] bytes = ByteBufUtil.writeCustomData(src::writeToBuff);
 
         var dst = new AutoFabHolder();
-        ByteBufUtil.readCustomData(bytes, dst::readFromBuff, provider);
+        ByteBufUtil.readCustomData(bytes, dst::readFromBuff);
 
         assertEq(helper, "size", 2, dst.autoStringListPos.size());
         assertEq(helper, "a.size", 1, dst.autoStringListPos.get("a").size());
@@ -749,10 +749,10 @@ public class MapSerializationTest {
         src.autoList.add(new NestedReadOnly(10, "ten"));
         src.autoList.add(new NestedReadOnly(20, "twenty"));
 
-        byte[] bytes = ByteBufUtil.writeCustomData(src::writeToBuff, provider);
+        byte[] bytes = ByteBufUtil.writeCustomData(src::writeToBuff);
 
         var dst = new AutoFabHolder();
-        ByteBufUtil.readCustomData(bytes, dst::readFromBuff, provider);
+        ByteBufUtil.readCustomData(bytes, dst::readFromBuff);
 
         assertEq(helper, "size", 2, dst.autoList.size());
         assertEq(helper, "[0].counter", 10, dst.autoList.get(0).counter);

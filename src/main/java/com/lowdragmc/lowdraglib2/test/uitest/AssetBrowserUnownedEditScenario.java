@@ -3,11 +3,7 @@ package com.lowdragmc.lowdraglib2.test.uitest;
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.Platform;
 import com.lowdragmc.lowdraglib2.configurator.ui.Configurator;
-import com.lowdragmc.lowdraglib2.editor.resource.BuiltinResourceProvider;
-import com.lowdragmc.lowdraglib2.editor.resource.FilePath;
-import com.lowdragmc.lowdraglib2.editor.resource.IResourcePath;
-import com.lowdragmc.lowdraglib2.editor.resource.ResourceInstance;
-import com.lowdragmc.lowdraglib2.editor.resource.TexturesResource;
+import com.lowdragmc.lowdraglib2.editor.resource.*;
 import com.lowdragmc.lowdraglib2.editor.ui.Editor;
 import com.lowdragmc.lowdraglib2.editor.ui.browser.FileOps;
 import com.lowdragmc.lowdraglib2.gui.holder.ModularUIScreen;
@@ -169,7 +165,7 @@ public class AssetBrowserUnownedEditScenario implements UIScenario {
     @Nullable
     private static CompoundTag read(File file) {
         try {
-            return NbtIo.read(file.toPath());
+            return NbtIo.read(file);
         } catch (Exception e) {
             return null;
         }

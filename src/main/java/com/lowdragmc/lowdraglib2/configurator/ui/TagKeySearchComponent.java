@@ -17,7 +17,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
-import net.neoforged.neoforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidStack;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.function.Consumer;
@@ -33,7 +33,7 @@ public class TagKeySearchComponent<T> extends SearchComponentConfigurator<TagKey
 
     public TagKeySearchComponent(String name, Supplier<TagKey<T>> supplier, Consumer<TagKey<T>> onUpdate, TagKey<T> defaultValue,
                                  boolean forceUpdate, Registry<T> registry, UIElementProvider<TagKey<T>> uiProvider) {
-        super(name, supplier, onUpdate, new SearchComponentConfigurator.ISearchConfigurator<>() {
+        super(name, supplier, onUpdate, new ISearchConfigurator<>() {
             @Override
             public TagKey<T> defaultValue() {
                 return defaultValue;

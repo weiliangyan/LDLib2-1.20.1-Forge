@@ -3,32 +3,40 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.gradle.userdev' version '7.0.181'
+    id 'net.neoforged.moddev.legacyforge' version '2.0.141'
     id 'org.jetbrains.kotlin.jvm' version '2.1.20'
     id 'org.jetbrains.kotlin.plugin.lombok' version '2.1.20'
-    id 'io.freefair.lombok' version "9.2.0"
+    id 'io.freefair.lombok' version '8.6'
 }
 
 version = mod_version
 group = maven_group
 
-// Enable the Jar-in-Jar system for your mod
-jarJar.enable()
+base {
+    archivesName = "${project.name}-${minecraft_version}"
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(17)
+    withSourcesJar()
+}
+
+kotlin {
+    jvmToolchain(17)
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
+}
 
 configurations {
     libraries
     api.extendsFrom libraries
 
-    // dev-only dependencies: on this project's classpaths, never published, so downstream
-    // consumers do not have to add the matching repositories to resolve our pom
     localImplementation
     runtimeClasspath.extendsFrom localImplementation
     compileOnly.extendsFrom localImplementation
 
-    // the runtime-only flavour of the above: present when we run the game, absent from
-    // the compile classpath and from the published metadata
-    localRuntime
-    runtimeClasspath.extendsFrom localRuntime
+    yogaSources
 }
 
 // allprojects, not project-local: the add-on modules under module.* resolve LDLib2's own
@@ -50,210 +58,202 @@ allprojects {
         }
         mavenCentral()
         mavenLocal()
-        maven { url = "https://maven.shedaniel.me/" } // Cloth Config, REI
+        maven { url = "https://maven.minecraftforge.net/" }
+        maven { url = "https://maven.shedaniel.me/" }
         maven {
             name = "Modrinth"
             url = "https://api.modrinth.com/maven"
             content {
                 includeGroup "maven.modrinth"
             }
-        } // Modrinth File
+        }
+        maven { url = "https://maven.architectury.dev/" }
         maven {
             name = "CurseForge"
             url = "https://cursemaven.com"
-        } // CurseForge
+        }
         maven {
-            // location of the maven that hosts JEI files since January 2023
             name = "Jared's maven"
             url = "https://maven.blamejared.com/"
         }
         maven {
-            // location of a maven mirror for JEI files, as a fallback
+            name = "Kotlin for Forge"
+            url = "https://thedarkcolour.github.io/KotlinForForge/"
+        }
+        maven {
             name = "ModMaven"
             url = "https://modmaven.dev"
         }
-        maven { url = "https://maven.parchmentmc.org" } // Parchment mappings
-        maven { url = "https://maven.quiltmc.org/repository/release" } // Quilt Mappings
-        maven { // Flywheel
+        maven { url = "https://maven.parchmentmc.org" }
+        maven { url = "https://maven.quiltmc.org/repository/release" }
+        maven {
             url = "https://maven.tterrag.com/"
             content {
-                // need to be specific here due to version overlaps
                 includeGroup("com.jozufozu.flywheel")
-            }
-        }
-        // mavens for Forge-exclusives
-        maven { url = "https://maven.theillusivec4.top/" } // Curios
-        maven { url = "https://maven.terraformersmc.com/releases/" } // Mod Menu, EMI
-        maven { // Create Forge and Registrate Forge
-            url = "https://maven.tterrag.com/"
-            content {
                 includeGroup("com.tterrag.registrate")
                 includeGroup("com.simibubi.create")
             }
         }
-        maven { url = "https://jitpack.io/" } // Mixin Extras, Fabric ASM
+        maven { url = "https://maven.theillusivec4.top/" }
+        maven { url = "https://maven.terraformersmc.com/releases/" }
+        maven { url = "https://jitpack.io/" }
         maven {
-            // saps.dev Maven (KubeJS and Rhino)
-            url "https://maven.latvian.dev/releases"
+            url = "https://maven.latvian.dev/releases"
             content {
                 includeGroup "dev.latvian.mods"
                 includeGroup "dev.latvian.apps"
             }
         }
+        maven {
+            url = 'https://nikdo53.github.io'
+        }
     }
 }
 
-base {
-    archivesName = "${project.name}-${minecraft_version}"
-}
-
-// Mojang ships Java 21 to end users in 1.20.5+, so your mod should target Java 21.
-java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
-    withSourcesJar()
-}
-
-kotlin {
-    jvmToolchain(21)
-    compilerOptions {
-        freeCompilerArgs.add("-Xcontext-parameters")
-        freeCompilerArgs.add("-Xwhen-guards")
+legacyForge {
+    version = project.minecraft_version + '-' + project.forge_version
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.minecraft_version
     }
-}
 
-minecraft.accessTransformers.file rootProject.file('src/main/resources/META-INF/accesstransformer.cfg')
+    runs {
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
 
-// Default run configurations.
-// These can be tweaked, removed, or duplicated as needed.
-runs {
-    // applies to all the run configs below
-    configureEach {
-        // Recommended logging data for a userdev environment
-        // The markers can be added/remove as needed separated by commas.
-        // "SCAN": For mods scan.
-        // "REGISTRIES": For firing of registry events.
-        // "REGISTRYDUMP": For getting the contents of all registries.
-        systemProperty 'forge.logging.markers', 'REGISTRIES'
+        client {
+            client()
+            systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+        }
 
-        // Recommended logging level for the console
-        // You can set various levels here.
-        // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
-        systemProperty 'forge.logging.console.level', 'debug'
-
-        modSource project.sourceSets.main
-
-        dependencies {
-            runtime project.configurations.libraries
+        server {
+            server()
+            systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+            programArgument '--nogui'
         }
     }
 
-    client {
-        // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
-    }
-
-    server {
-        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
-        programArgument '--nogui'
-    }
-
-    // This run config launches GameTestServer and runs all registered gametests, then exits.
-    // By default, the server will crash when no gametests are provided.
-    // The gametest system is also enabled by default for other run configs under the /test command.
-    gameTestServer {
-        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
-        // -PldSyncBench runs the sync benchmark (test/syncdata/bench) along with the gametests
-        systemProperty 'ldlib2.syncBench', project.hasProperty('ldSyncBench').toString()
-    }
-
-    data {
-        // example of overriding the workingDirectory set in configureEach above, uncomment if you want to use it
-        // workingDirectory project.file('run-data')
-
-        // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-        programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
     }
 }
 
-// In-client UI test harness: -PldTest wiring plus the verifyUiTest gate.
-// Kept in its own file so downstream mods can apply the identical block.
-apply from: rootProject.file('gradle/ldlib2-uitest.gradle')
+mixin {
+    add sourceSets.main, "${mod_id}.refmap.json"
+    config "${mod_id}.mixins.json"
+}
 
-// Parallel UI test harness: runParTest splits the same scenarios across N client processes.
-apply from: rootProject.file('gradle/ldlib2-uitest-par.gradle')
+jar {
+    manifest.attributes([
+            "MixinConfigs": "${mod_id}.mixins.json"
+    ])
+}
 
-// Multi-process test harness: runMpTest orchestrates a dedicated server + N clients.
-apply from: rootProject.file('gradle/ldlib2-mptest.gradle')
-
-// Include resources generated by data generators.
-sourceSets.main.resources { srcDir 'src/generated/resources' }
+sourceSets.main.resources {
+    srcDir 'src/generated/resources'
+    srcDir(layout.buildDirectory.dir("generated/resources/taffy"))
+}
 sourceSets.main.kotlin { srcDir("src/main/java") }
+sourceSets.main.java { srcDir(layout.buildDirectory.dir("generated/sources/yoga")) }
+
+tasks.register('extractYogaSources', Copy) {
+    from {
+        zipTree(configurations.yogaSources.singleFile)
+    }
+    include '**/*.java'
+    into layout.buildDirectory.dir("generated/sources/yoga")
+}
+
+tasks.named('compileJava') {
+    dependsOn tasks.named('extractYogaSources')
+}
+
+tasks.named('compileKotlin') {
+    dependsOn tasks.named('extractYogaSources')
+}
+
+tasks.register('syncMixinRefmapForRuns', Copy) {
+    dependsOn tasks.named('processResources')
+    dependsOn tasks.named('compileJava')
+    from layout.buildDirectory.file("tmp/compileJava/${mod_id}.refmap.json")
+    into layout.buildDirectory.dir("resources/main")
+}
+
+tasks.configureEach {
+    if (name in ['prepareRunClient', 'prepareRunServer', 'prepareRunGameTestServer', 'prepareRunData']) {
+        dependsOn tasks.named('syncMixinRefmapForRuns')
+    }
+}
+
+tasks.named('sourcesJar') {
+    dependsOn tasks.named('extractYogaSources')
+}
 
 dependencies {
-    implementation "net.neoforged:neoforge:${neo_version}"
-    libraries("org.jetbrains.kotlin:kotlin-stdlib:${kotlin_stdlib_version}") {
-        exclude group: "org.jetbrains", module: "annotations"
-    }
-    // a bare range embeds the newest release, pre-releases included; prefer pins what the jar ships
-    jarJar(group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib') {
-        version {
-            require "[${kotlin_stdlib_version},)"
-            prefer kotlin_stdlib_version
-        }
+    jarJar(modImplementation("net.nikdo53:NeoBackports:${neobackports_version}"))
+    interfaceInjectionData("net.nikdo53:NeoBackports:${neobackports_version}")
+
+    modImplementation("maven.modrinth:kotlin-for-forge:${kotlin_for_forge_version}") {
+        transitive = false
     }
 
     // JEI
-    compileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}") { transitive = false }
-    compileOnly("mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}") { transitive = false }
-    // only the api is on the compile classpath, the full mod is runtime only.
-    // localRuntime rather than runtimeOnly: runtimeOnly is published, and that would make
-    // every downstream mod declare JEI's maven just to resolve us
-    localRuntime("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
+    modImplementation("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}") { transitive = false }
+    modImplementation("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}") { transitive = false }
+    modImplementation("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
 
     // REI
-    compileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}")
-    compileOnly("me.shedaniel:RoughlyEnoughItems-api-neoforge:${rei_version}")
-    compileOnly("me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}")
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-forge:${rei_version}")
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-forge:${rei_version}")
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-forge:${rei_version}")
 
     // EMI
-//    compileOnly("dev.emi:emi-neoforge:${emi_version}:api")
-//    compileOnly("dev.emi:emi-neoforge:${emi_version}")
-    compileOnly("maven.modrinth:emi:1.1.24+1.21.1+neoforge")
+//    modCompileOnly("dev.emi:emi-forge:${emi_version}:api")
+//    modCompileOnly("dev.emi:emi-forge:${emi_version}")
+    modCompileOnly("maven.modrinth:emi:1.1.24+1.20.1+forge")
 
     // AE2
-    localImplementation("org.appliedenergistics:appliedenergistics2:${ae2_version}")
-//    localImplementation("curse.maven:ae2-jei-integration-1074338:7727898")
+    modCompileOnly("appeng:appliedenergistics2-forge:${ae2_version}")
 
-    // KJS
-    localImplementation("dev.latvian.mods:kubejs-neoforge:${kjs_version}") {
-        exclude(group: "dev.architectury")
-    }
+    // KubeJS
+    modImplementation("dev.latvian.mods:kubejs-forge:${kjs_version}")
+    modImplementation("dev.latvian.mods:rhino-forge:${rhino_version}")
 
-    // Iris
-    localImplementation("maven.modrinth:sodium:${sodium_version}")
-    localImplementation("maven.modrinth:iris:${iris_version}")
+    // REI and KubeJS publish parts of their 1.20.1 Forge API through these
+    // dependencies, but ForgeGradle's remapped classpath does not keep them
+    // transitively in this single-loader setup.
+    modImplementation("dev.architectury:architectury-forge:${architectury_version}")
+    modImplementation("me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}")
+    compileOnly "me.shedaniel.cloth:basic-math:${cloth_basic_math_version}"
 
-    // lombok
-//    compileOnly 'org.projectlombok:lombok:1.18.30'
-//    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+    // Oculus / Embeddium are the Forge 1.20.1 equivalents for Iris / Sodium compatibility.
+    modImplementation("maven.modrinth:embeddium:${embeddium_version}") { transitive = false }
+    // modImplementation("maven.modrinth:oculus:${oculus_version}") { transitive = true }
+    runtimeOnly("org.anarres:jcpp:1.4.14")
 
-    // Yoga
-    libraries("org.appliedenergistics.yoga:yoga:${yoga_version}")
-    jarJar(group: 'org.appliedenergistics.yoga', name: 'yoga') {
-        version {
-            require "[${yoga_version},)"
-            prefer yoga_version
-        }
-    }
+    // Yoga 1.0.0 is published as Java 21 bytecode. Recompile its sources for the Java 17
+    // runtime used by Minecraft Forge 1.20.1 while preserving the public Yoga API.
+    yogaSources("org.appliedenergistics.yoga:yoga:${yoga_version}:sources@jar")
+    compileOnly "org.jetbrains:annotations:24.1.0"
 
     // Taffy
-    libraries("dev.vfyjxf:taffy:${taffy_version}")
-    jarJar(group: 'dev.vfyjxf', name: 'taffy') {
-        version {
-            require "[${taffy_version},)"
-            prefer taffy_version
-        }
+    additionalRuntimeClasspath("dev.vfyjxf:taffy:${taffy_version}")
+    jarJar(implementation("dev.vfyjxf:taffy:${taffy_version}")) {
+        transitive = false
     }
+
+    annotationProcessor("org.spongepowered:mixin:0.8.5")
+    annotationProcessor("org.ow2.asm:asm-tree:9.8")
+    annotationProcessor("com.google.code.gson:gson:2.10")
+    annotationProcessor("com.google.guava:guava:31.1-jre")
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:${mixinextras_version}"))
+    implementation("io.github.llamalad7:mixinextras-forge:${mixinextras_version}")
+
+    implementation("org.lwjgl:lwjgl-freetype:3.3.3") { transitive = false }
 
     // JUnit 5
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
@@ -265,23 +265,25 @@ dependencies {
     testImplementation 'org.mockito:mockito-junit-jupiter:5.5.0'
 }
 
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
 tasks.withType(ProcessResources).configureEach {
-    // set up properties for filling into metadata
-    var replaceProperties = [
-            "mod_id": mod_id,
-            "version": version,
-            "loader_version": loader_version,
-            "forge_version": neo_version.split("\\.")[0], // only specify major version of forge
-            "minecraft_version": minecraft_version,
-            "jei_version_range": jei_version_range,
-            "mod_license": mod_license,
-            "mod_name": mod_name,
-            "mod_description": mod_description,
-            "mod_url": mod_url
+    def replaceProperties = [
+            "mod_id"             : mod_id,
+            "version"            : version,
+            "loader_version"     : loader_version,
+            "forge_version"      : forge_version.split("\\.")[0],
+            "minecraft_version"  : minecraft_version,
+            "kotlin_for_forge_version": kotlin_for_forge_version,
+            "mod_license"        : mod_license,
+            "mod_name"           : mod_name,
+            "mod_description"    : mod_description
     ]
     inputs.properties replaceProperties
 
-    filesMatching(['META-INF/neoforge.mods.toml']) {
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
         expand replaceProperties + [project: project]
     }
 }
@@ -295,30 +297,20 @@ test {
     }
 }
 
-// Configure the 'jarJar' task
-// 'all' is the default classifier
-tasks.named('jarJar') {
-    // ...
-}
-
-tasks.register("printVersion") {
-    println(mod_version)
-}
-
-// Example configuration to allow publishing using the maven-publish plugin
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
-            artifactId = archivesBaseName
+            artifactId = base.archivesName.get()
             from components.java
         }
     }
     repositories {
         maven {
-            url "https://maven.firstdark.dev/snapshots"
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/weiliangyan/LDLib2-1.20.1-Forge")
             credentials {
-                username System.getenv("MAVEN_USER")
-                password System.getenv("MAVEN_PASS")
+                username = System.getenv("GITHUB_ACTOR") ?: "weiliangyan"
+                password = System.getenv("GITHUB_TOKEN") ?: System.getenv("GH_TOKEN")
             }
         }
     }

@@ -11,11 +11,11 @@ import com.lowdragmc.lowdraglib2.gui.ui.elements.TabView;
 import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
 import com.lowdragmc.lowdraglib2.registry.RegistrationEnvironment;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
-import com.lowdragmc.lowdraglib2.uitest.input.Keys;
 import com.lowdragmc.lowdraglib2.uitest.ScenarioBuilder;
 import com.lowdragmc.lowdraglib2.uitest.ScenarioOptions;
 import com.lowdragmc.lowdraglib2.uitest.TestContext;
 import com.lowdragmc.lowdraglib2.uitest.UIScenario;
+import com.lowdragmc.lowdraglib2.uitest.input.Keys;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -59,7 +59,7 @@ public class UIEditorHistoryScenario implements UIScenario {
                         .step("focus the editor", ctx -> view(ctx).focus())
                         .key(GLFW.GLFW_KEY_Z, Keys.MOD_CONTROL)
                         .checkEquals("undo puts a back first", List.of("a", "b", "c"), UIEditorHistoryScenario::panelIds)
-                        .check("as the same element", ctx -> panel(ctx).getChildren().getFirst() == ctx.get(A))
+                        .check("as the same element", ctx -> panel(ctx).getChildren().get(0) == ctx.get(A))
                         .key(GLFW.GLFW_KEY_Y, Keys.MOD_CONTROL)
                         .checkEquals("redo removes it again", List.of("b", "c"), UIEditorHistoryScenario::panelIds)
                         .key(GLFW.GLFW_KEY_Z, Keys.MOD_CONTROL)
@@ -73,7 +73,8 @@ public class UIEditorHistoryScenario implements UIScenario {
                         .step("paste into the panel", ctx -> {
                             view(ctx).focusElement(panel(ctx));
                             view(ctx).hierarchy.pasteToSelected();
-                            ctx.put(PASTED, panel(ctx).getChildren().getLast());
+                            var children = panel(ctx).getChildren();
+                            ctx.put(PASTED, children.get(children.size() - 1));
                         })
                         .checkEquals("the copy is appended", List.of("a", "b", "c", "b"), UIEditorHistoryScenario::panelIds)
                         .step("focus the editor", ctx -> view(ctx).focus())
@@ -81,7 +82,7 @@ public class UIEditorHistoryScenario implements UIScenario {
                         .checkEquals("undo takes the copy out", List.of("a", "b", "c"), UIEditorHistoryScenario::panelIds)
                         .check("and leaves the original children in place", ctx -> sameChildren(ctx, A, B, C))
                         .key(GLFW.GLFW_KEY_Y, Keys.MOD_CONTROL)
-                        .check("redo brings the same copy back", ctx -> panel(ctx).getChildren().getLast() == ctx.get(PASTED))
+                        .check("redo brings the same copy back", ctx -> panel(ctx).getChildren().get(panel(ctx).getChildren().size() - 1) == ctx.get(PASTED))
                         .key(GLFW.GLFW_KEY_Z, Keys.MOD_CONTROL))
 
                 .group("a property edit on the container and a structural edit undo and redo together", g -> g
@@ -165,7 +166,8 @@ public class UIEditorHistoryScenario implements UIScenario {
                             var tabs = tabs(ctx);
                             view(ctx).focusElement(tabs);
                             view(ctx).hierarchy.pasteToSelected();
-                            var pasted = tabs.tabScroller.viewContainer.getChildren().getLast();
+                            var children = tabs.tabScroller.viewContainer.getChildren();
+                            var pasted = children.get(children.size() - 1);
                             ctx.put(PASTED_TAB, pasted);
                             ctx.put(PASTED_CONTENT, tabs.getTabContents().get(pasted));
                         })
@@ -201,7 +203,7 @@ public class UIEditorHistoryScenario implements UIScenario {
 
     private static UIElement panel(TestContext ctx) {
         var root = view(ctx).getCurrentUI().rootElement;
-        return root.getChildren().getFirst();
+        return root.getChildren().get(0);
     }
 
     private static TabView tabs(TestContext ctx) {

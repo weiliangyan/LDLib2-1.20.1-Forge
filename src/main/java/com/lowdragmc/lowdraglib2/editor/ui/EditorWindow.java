@@ -4,24 +4,24 @@ import com.google.common.collect.Maps;
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.client.window.OsWindowManager;
 import com.lowdragmc.lowdraglib2.editor.settings.AppearanceSettings;
-import com.lowdragmc.lowdraglib2.gui.texture.DynamicTexture;
-import com.lowdragmc.lowdraglib2.gui.texture.Icons;
 import com.lowdragmc.lowdraglib2.gui.ColorPattern;
 import com.lowdragmc.lowdraglib2.gui.holder.ModularUIScreen;
+import com.lowdragmc.lowdraglib2.gui.texture.DynamicTexture;
+import com.lowdragmc.lowdraglib2.gui.texture.Icons;
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import com.lowdragmc.lowdraglib2.gui.ui.UI;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
-import com.lowdragmc.lowdraglib2.gui.ui.window.ModularUIWindow;
-import com.lowdragmc.lowdraglib2.gui.ui.window.WindowBounds;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
+import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Vertical;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.TextElement;
 import com.lowdragmc.lowdraglib2.gui.ui.event.HoverTooltips;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
-import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext;
 import com.lowdragmc.lowdraglib2.gui.ui.style.StyleOrigin;
+import com.lowdragmc.lowdraglib2.gui.ui.window.ModularUIWindow;
+import com.lowdragmc.lowdraglib2.gui.ui.window.WindowBounds;
 import com.lowdragmc.lowdraglib2.gui.util.WindowDragHelper;
 import dev.vfyjxf.taffy.style.AlignItems;
 import dev.vfyjxf.taffy.style.FlexDirection;
@@ -31,12 +31,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import org.appliedenergistics.yoga.*;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
 
 import javax.annotation.Nonnull;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -136,7 +134,7 @@ public class EditorWindow extends UIElement {
                 editorWindow.dockingBack = false;
             } else {
                 Minecraft.getInstance().getToasts().addToast(new SystemToast(
-                        new SystemToast.SystemToastId(1000L),
+                        SystemToast.SystemToastIds.PERIODIC_NOTIFICATION,
                         Component.translatable("editor.minimized.title"),
                         Component.translatable("editor.minimized.tips")
                 ));
@@ -488,7 +486,9 @@ public class EditorWindow extends UIElement {
             currentEditor = null;
             hideHost();
         } else {
-            showEditor(editors.lastEntry().getKey());
+            Editor lastEditor = null;
+            for (var editorEntry : editors.keySet()) lastEditor = editorEntry;
+            if (lastEditor != null) showEditor(lastEditor);
         }
     }
 

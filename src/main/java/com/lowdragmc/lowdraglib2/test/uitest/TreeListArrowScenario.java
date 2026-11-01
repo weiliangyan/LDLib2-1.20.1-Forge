@@ -119,7 +119,7 @@ public class TreeListArrowScenario implements UIScenario {
                 .setDoubleClickToExpand(true)
                 .setOnNodeUICreated((node, ui) -> {
                     ui.setId("row_" + node.key);
-                    ui.getChildren().getFirst().setId("arrow_" + node.key);
+                    ui.getChildren().get(0).setId("arrow_" + node.key);
                     ui.getChildren().get(1).setId("label_" + node.key);
                 })
                 .setOnSelectedChanged(selected -> ((int[]) ctx.get(SELECTIONS))[0]++)
@@ -144,7 +144,7 @@ public class TreeListArrowScenario implements UIScenario {
 
     private static Node a(TestContext ctx) {
         Node root = ctx.get(ROOT);
-        return root.children.getFirst();
+        return root.children.get(0);
     }
 
     private static List<String> selectedKeys(TestContext ctx) {

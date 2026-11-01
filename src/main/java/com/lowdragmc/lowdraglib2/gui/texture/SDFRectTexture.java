@@ -2,11 +2,11 @@ package com.lowdragmc.lowdraglib2.gui.texture;
 
 import com.lowdragmc.lowdraglib2.client.shader.LDLibShaders;
 import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigColor;
-import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext;
 import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigNumber;
 import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigSetter;
 import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Transform2D;
+import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext;
 import com.lowdragmc.lowdraglib2.integration.kjs.KJSBindings;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
 import com.lowdragmc.lowdraglib2.utils.ColorUtils;
@@ -19,11 +19,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.client.gui.GuiGraphics;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Vector4f;
 
-import static com.mojang.blaze3d.vertex.DefaultVertexFormat.*;
+import static com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION;
 
 @KJSBindings
 @LDLRegisterClient(name = "sdf_rect_texture", registry = "ldlib2:gui_texture")
@@ -135,11 +135,10 @@ public class SDFRectTexture extends TransformTexture {
         var mat = pose.last().pose();
 
         var modelView = RenderSystem.getModelViewStack();
-        modelView.pushMatrix();
-        modelView.mul(mat);
+        modelView.pushPose();
+        modelView.mulPoseMatrix(mat);
         RenderSystem.applyModelViewMatrix();
 
-        RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(
                 GlStateManager.SourceFactor.SRC_ALPHA,
                 GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
@@ -160,15 +159,17 @@ public class SDFRectTexture extends TransformTexture {
             shader.safeGetUniform("BorderColor").set(borderVec);
         }
 
-        var buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, POSITION);
+        var tesselator = Tesselator.getInstance();
+        var buffer = tesselator.getBuilder();
+        buffer.begin(VertexFormat.Mode.QUADS, POSITION);
 
-        buffer.addVertex(-halfWidth, halfHeight, 0);
-        buffer.addVertex(halfWidth, halfHeight, 0);
-        buffer.addVertex(halfWidth, -halfHeight, 0);
-        buffer.addVertex(-halfWidth, -halfHeight, 0);
-        BufferUploader.drawWithShader(buffer.buildOrThrow());
+        buffer.vertex(-halfWidth, halfHeight, 0).endVertex();
+        buffer.vertex(halfWidth, halfHeight, 0).endVertex();
+        buffer.vertex(halfWidth, -halfHeight, 0).endVertex();
+        buffer.vertex(-halfWidth, -halfHeight, 0).endVertex();
+        BufferUploader.drawWithShader(buffer.end());
 
-        modelView.popMatrix();
+        modelView.popPose();
         RenderSystem.applyModelViewMatrix();
         pose.popPose();
     }

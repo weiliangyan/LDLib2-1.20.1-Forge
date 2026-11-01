@@ -2,7 +2,10 @@ package com.lowdragmc.lowdraglib2.nodegraphtookit.model;
 
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.graph.GraphModel;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public abstract class GraphElementModel extends Model implements IGraphElementModelHolder, IHasContextualMenuItems {

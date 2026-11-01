@@ -11,11 +11,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.elements.TreeList;
 import com.lowdragmc.lowdraglib2.gui.util.FileNode;
 import com.lowdragmc.lowdraglib2.registry.RegistrationEnvironment;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
-import com.lowdragmc.lowdraglib2.uitest.ElementBounds;
-import com.lowdragmc.lowdraglib2.uitest.ScenarioBuilder;
-import com.lowdragmc.lowdraglib2.uitest.ScenarioOptions;
-import com.lowdragmc.lowdraglib2.uitest.TestContext;
-import com.lowdragmc.lowdraglib2.uitest.UIScenario;
+import com.lowdragmc.lowdraglib2.uitest.*;
 import com.lowdragmc.lowdraglib2.uitest.input.Keys;
 import org.jetbrains.annotations.Nullable;
 

@@ -4,10 +4,14 @@ import com.lowdragmc.lowdraglib2.syncdata.IManaged;
 import com.lowdragmc.lowdraglib2.syncdata.accessor.readonly.IManagedObjectAccessor;
 import com.lowdragmc.lowdraglib2.syncdata.field.ManagedKey;
 import com.lowdragmc.lowdraglib2.syncdata.var.ReadOnlyVar;
+import com.lowdragmc.lowdraglib2.utils.LDLibExtraCodecs;
 import com.mojang.serialization.DynamicOps;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.HashMap;
+import java.util.Objects;
 
 public class IManagedReadOnlyRef extends ReadOnlyRef<IManaged> {
     private long seenSyncMarks = -1;
@@ -85,7 +89,7 @@ public class IManagedReadOnlyRef extends ReadOnlyRef<IManaged> {
     @Override
     public <T> void writeReadOnlyPersisted(DynamicOps<T> op, T payload) {
         var persistedFields = getManaged().getSyncStorage().getPersistedFields();
-        var map = op.getMap(payload).getOrThrow();
+        var map = LDLibExtraCodecs.getOrThrow(op.getMap(payload));
         for (IRef<?> persistedField : persistedFields) {
             var key = persistedField.getPersistedKey();
             var data = map.get(op.createString(key));
@@ -108,7 +112,7 @@ public class IManagedReadOnlyRef extends ReadOnlyRef<IManaged> {
     @Override
     public <T> void writeReadOnlySync(DynamicOps<T> op, T payload) {
         var syncedFields = getManaged().getSyncStorage().getSyncFields();
-        var list = op.getStream(payload).getOrThrow().toList();
+        var list = LDLibExtraCodecs.getOrThrow(op.getStream(payload)).toList();
         if (list.size() != syncedFields.length) {
             throw new IllegalArgumentException("Size of list does not match size of synced fields");
         }
@@ -120,7 +124,7 @@ public class IManagedReadOnlyRef extends ReadOnlyRef<IManaged> {
     }
 
     @Override
-    public void readReadOnlySyncToStream(RegistryFriendlyByteBuf buffer) {
+    public void readReadOnlySyncToStream(FriendlyByteBuf buffer) {
         var syncedFields = getManaged().getSyncStorage().getSyncFields();
         var changed = new BitSet();
         for (int i = 0; i < syncedFields.length; i++) {
@@ -139,7 +143,7 @@ public class IManagedReadOnlyRef extends ReadOnlyRef<IManaged> {
     }
 
     @Override
-    public void writeReadOnlySyncFromStream(RegistryFriendlyByteBuf buffer) {
+    public void writeReadOnlySyncFromStream(FriendlyByteBuf buffer) {
         var storage = getManaged().getSyncStorage();
         var syncedFields = storage.getSyncFields();
         var changed = BitSet.valueOf(buffer.readByteArray());

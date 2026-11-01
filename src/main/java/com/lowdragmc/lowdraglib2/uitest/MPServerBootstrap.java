@@ -3,11 +3,11 @@ package com.lowdragmc.lowdraglib2.uitest;
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.Platform;
 import com.lowdragmc.lowdraglib2.uitest.mp.MPRunConfig;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
-import net.neoforged.neoforge.event.server.ServerStoppedEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
  * that is, when the {@code runMpServer} Gradle run set the mptest role/hub system properties.
  * Inert everywhere else, including ordinary {@code runServer} launches.
  */
-@EventBusSubscriber(modid = LDLib2.MOD_ID)
+@Mod.EventBusSubscriber(modid = LDLib2.MOD_ID)
 public final class MPServerBootstrap {
 
     @Nullable
@@ -34,8 +34,8 @@ public final class MPServerBootstrap {
     }
 
     @SubscribeEvent
-    public static void onServerTick(ServerTickEvent.Post event) {
-        if (runner != null) {
+    public static void onServerTick(TickEvent.ServerTickEvent event) {
+        if (event.phase == TickEvent.Phase.END && runner != null) {
             runner.tick();
         }
     }

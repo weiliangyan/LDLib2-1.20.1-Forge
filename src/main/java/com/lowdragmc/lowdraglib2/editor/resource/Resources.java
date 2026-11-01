@@ -4,7 +4,8 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.MethodsReturnNonnullByDefault;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author KilaBash

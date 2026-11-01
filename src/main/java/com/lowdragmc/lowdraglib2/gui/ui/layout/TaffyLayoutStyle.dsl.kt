@@ -6,14 +6,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.data.GridAuto
 import com.lowdragmc.lowdraglib2.gui.ui.data.GridTemplate
 import com.lowdragmc.lowdraglib2.gui.ui.data.GridTemplateAreas
 import com.lowdragmc.lowdraglib2.gui.ui.style.LayoutStyle
-import dev.vfyjxf.taffy.style.AlignContent
-import dev.vfyjxf.taffy.style.AlignItems
-import dev.vfyjxf.taffy.style.FlexDirection
-import dev.vfyjxf.taffy.style.FlexWrap
-import dev.vfyjxf.taffy.style.GridAutoFlow
-import dev.vfyjxf.taffy.style.TaffyDirection
-import dev.vfyjxf.taffy.style.TaffyDisplay
-import dev.vfyjxf.taffy.style.TaffyPosition
+import dev.vfyjxf.taffy.style.*
 
 sealed interface LP {
     data class Px(val value: Float) : LP

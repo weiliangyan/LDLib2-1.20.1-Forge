@@ -11,13 +11,12 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.bus.api.Event;
-import net.neoforged.neoforge.common.NeoForge;
-
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.Event;
+import net.nikdo53.neobackports.io.StreamCodec;
 import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +32,7 @@ public class UITemplate {
             ResourceLocation.CODEC.listOf().optionalFieldOf("stylesheets").forGetter(ui -> Optional.ofNullable(ui.stylesheets.isEmpty() ? null : ui.stylesheets))
     ).apply(instance, (template, customStyles, stylesheets) ->
             new UITemplate(template, customStyles.orElse(""), stylesheets.orElseGet(Collections::emptyList))));
-    public static final StreamCodec<FriendlyByteBuf, UITemplate> STREAM_CODEC = StreamCodec.of((buffer, value) -> {
+    public static final StreamCodec<UITemplate> STREAM_CODEC = StreamCodec.of((buffer, value) -> {
         buffer.writeNbt(value.data);
         buffer.writeUtf((value.builtinStyles == null || value.builtinStyles.isBlank()) ? "" : value.builtinStyles);
         buffer.writeVarInt(value.stylesheets.size());
@@ -98,7 +97,7 @@ public class UITemplate {
         initUI(root);
         var ui = UI.of(root, getAllStylesheets());
         var event = new CreateUI(this, ui);
-        NeoForge.EVENT_BUS.post(event);
+        MinecraftForge.EVENT_BUS.post(event);
         return event.ui;
     }
 

@@ -1,8 +1,8 @@
 package com.lowdragmc.lowdraglib2.uitest.input;
 
 import com.lowdragmc.lowdraglib2.uitest.InputMode;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * {@link InputMode#REAL}: move the OS cursor and let Minecraft's own {@code MouseHandler} deliver

@@ -13,7 +13,6 @@ import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegister;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.world.entity.player.Player;
-import org.apache.commons.lang3.function.Consumers;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -140,7 +139,7 @@ public class TestSyncHooks implements IMenuTest {
                 // say about it and the client refuses to accept it, so it must not appear in the
                 // initial data pack at all - if it does, everything after it misparses.
                 new BindableValue<String>().bind(DataBindingBuilder
-                        .string(() -> "poison", Consumers.nop())
+                        .string(() -> "poison", value -> {})
                         .name("poison")
                         .s2cStrategy(SyncStrategy.NONE)
                         .build()),

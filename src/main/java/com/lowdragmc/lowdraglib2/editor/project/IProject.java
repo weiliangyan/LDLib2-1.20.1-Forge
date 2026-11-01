@@ -1,12 +1,13 @@
 package com.lowdragmc.lowdraglib2.editor.project;
 
+import com.lowdragmc.lowdraglib2.Platform;
 import com.lowdragmc.lowdraglib2.editor.resource.Resources;
 import com.lowdragmc.lowdraglib2.editor.ui.Editor;
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.common.util.INBTSerializable;
+import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nonnull;
 
@@ -122,6 +123,10 @@ public interface IProject extends INBTSerializable<CompoundTag> {
     }
 
     @Override
+    default CompoundTag serializeNBT() {
+        return serializeNBT(Platform.getFrozenRegistry());
+    }
+
     default CompoundTag serializeNBT(@Nonnull HolderLookup.Provider provider) {
         var data = new CompoundTag();
         data.put("meta", getMetadata());
@@ -130,6 +135,10 @@ public interface IProject extends INBTSerializable<CompoundTag> {
     }
 
     @Override
+    default void deserializeNBT(@Nonnull CompoundTag nbt) {
+        deserializeNBT(Platform.getFrozenRegistry(), nbt);
+    }
+
     default void deserializeNBT(@Nonnull HolderLookup.Provider provider, @Nonnull CompoundTag nbt) {
         deserializeProject(provider, nbt.getCompound("data"));
     }

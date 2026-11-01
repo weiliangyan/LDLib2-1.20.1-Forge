@@ -1,218 +1,135 @@
-# LDLib2
+# LowDragLib2 - 1.20.1 Forge 移植版
 
-<div align="center">
+这是 `LowDragLib2` 的 **Minecraft 1.20.1 Forge 非官方移植版**。
 
-**A modern Minecraft modding library for UI, rendering, synchronization, persistence, and in-game editors.**
+这个仓库主要是为了让仍在使用 1.20.1 Forge 的整合包、服务器和模组项目，也能继续使用 LDLib2 的 UI、渲染、同步、持久化和游戏内编辑器相关能力。
 
-[![GitHub stars](https://img.shields.io/github/stars/low-drag-mc/ldlib2?style=for-the-badge&logo=github)](https://github.com/Low-Drag-MC/LDLib2/stargazers)
-[![CurseForge downloads](https://img.shields.io/curseforge/dt/626676?style=for-the-badge&logo=curseforge&label=CurseForge)](https://www.curseforge.com/minecraft/mc-mods/ldlib)
-[![Modrinth downloads](https://img.shields.io/modrinth/dt/ldlib?style=for-the-badge&logo=modrinth&label=Modrinth)](https://modrinth.com/mod/ldlib)
-[![Latest Maven version](https://img.shields.io/maven-metadata/v?style=for-the-badge&label=latest&metadataUrl=https%3A%2F%2Fmaven.firstdark.dev%2Fsnapshots%2Fcom%2Flowdragmc%2Fldlib2%2Fldlib2-neoforge-1.21.1%2Fmaven-metadata.xml)](https://maven.firstdark.dev/snapshots/com/lowdragmc/ldlib2/)
-[![NeoForge](https://img.shields.io/badge/NeoForge-21.1+-E04E14?style=for-the-badge)](https://neoforged.net/)
-[![License](https://img.shields.io/github/license/low-drag-mc/ldlib2?style=for-the-badge)](LICENSE)
+## 开源与来源声明
 
-[Documentation](https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/) |
-[Java Integration](https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/java_integration.html) |
-[UI Guide](https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/ui/) |
-[Compose](https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/ui/compose/) |
-[Discord](https://discord.com/invite/sDdf2yD9bh) |
-[CurseForge](https://www.curseforge.com/minecraft/mc-mods/ldlib) |
-[Modrinth](https://modrinth.com/mod/ldlib)
+本项目是基于原项目 `LDLib2` 进行的移植与兼容维护，不是原作者发布的官方版本。
 
-</div>
+- **原作者 / 版权所有者：** KilaBash / Low-Drag-MC
+- **原项目仓库：** https://github.com/Low-Drag-MC/LDLib2
+- **原项目文档：** https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/
+- **当前移植目标：** Minecraft 1.20.1 + Forge 47.x
+- **开源协议：** GNU Lesser General Public License v3.0，见仓库根目录 `LICENSE`
+- **原移植版本仓库：** https://github.com/weiliangyan/LDLib2-1.20.1-Forge
+- **现维护者：** Amotassic
 
----
+## 维护状态（By Amotassic）
 
-LDLib2 is a complete rewrite of the original [LDLib](https://github.com/Low-Drag-MC/LDLib-MultiLoader), redesigned around modern Minecraft and NeoForge development. It gives mod authors a higher-level foundation for building UI, in-game tools, renderer-backed content, synchronized data, and persistent runtime systems without rebuilding the same infrastructure in every project.
+由于我能力有限（基本不懂渲染），目前最大的问题是字体渲染，已强行使用原版渲染。
 
-## Feature Highlights
-
-<table>
-<tr>
-<td width="50%" valign="top">
-<a href="https://www.youtube.com/watch?v=Ic5H3YoVPjQ"><img src="https://img.youtube.com/vi/Ic5H3YoVPjQ/maxresdefault.jpg" alt="LDLib2 UI showcase"></a><br>
-<strong><a href="https://www.youtube.com/watch?v=Ic5H3YoVPjQ">LDLib2 UI</a></strong><br>
-Build Minecraft screens with Taffy-powered layout, LSS stylesheets, reusable components, XML definitions, data bindings, RPC events, and HUD overlays.
-</td>
-<td width="50%" valign="top">
-<a href="https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/ui/compose/"><img src=".github/readme/compose.svg" alt="A Kotlin composable next to the LDLib2 panel it renders"></a><br>
-<strong><a href="https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/ui/compose/">Compose UI</a></strong><br>
-Write screens in Kotlin as a function of state on the Compose runtime. Lists, tabs, and dialogs follow your data, and every widget is a real LDLib2 element. Ships as the optional <code>ldlib2-compose</code> module.
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
-<a href="https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/sync/"><img src=".github/readme/sync-persistence.svg" alt="Data synchronization and persistence overview"></a><br>
-<strong><a href="https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/sync/">Data Synchronization and Persistence</a></strong><br>
-Annotate fields with <code>@Persisted</code>, <code>@DescSynced</code>, and RPC helpers to generate NBT IO, codecs, dirty-field sync, and packet flow with minimal boilerplate.
-</td>
-<td width="50%" valign="top">
-<a href="https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/configurable/"><img src=".github/readme/configurable.svg" alt="Annotated fields next to the property editors LDLib2 generates"></a><br>
-<strong><a href="https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/configurable/">Configurable</a></strong><br>
-Turn annotated Java objects into inspector-ready property panels, including ranges, selectors, lists, item and fluid pickers, search fields, undo history, and persistence.
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
-<a href="https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/node-graph-toolkit/"><img src="https://raw.githubusercontent.com/Low-Drag-MC/LowDragMC-Doc/v2/docs/en/ldlib2/node-graph-toolkit/assets/ngt-overview-placeholder.png" alt="Node Graph Toolkit editor"></a><br>
-<strong><a href="https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/node-graph-toolkit/">Node Graph Toolkit</a></strong><br>
-Create in-game graph editors with nodes, ports, wires, variables, subgraphs, blackboards, auto layout, undoable commands, and resource-backed graph assets.
-</td>
-<td width="50%" valign="top">
-<a href="https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/editor/"><img src="https://raw.githubusercontent.com/Low-Drag-MC/LowDragMC-Doc/v2/docs/en/ldlib2/editor/assets/ui_editor.png" alt="LDLib2 in-game UI editor"></a><br>
-<strong><a href="https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/editor/">In-game Editor Framework</a></strong><br>
-Build Unity-, Blender-, or Blockbench-style tools with dockable views, project files, an asset browser, inspectors, history, rebindable shortcuts, and settings.
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
-<a href="https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/ui/xei_support.html"><img src=".github/readme/xei.png" alt="LDLib2 XEI integration"></a><br>
-<strong><a href="https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/ui/xei_support.html">Rendering and Integrations</a></strong><br>
-Use LDLib2's shader, texture, model rendering, and scene utilities together with JEI, REI, EMI, KubeJS, and Java plugin entry points.
-</td>
-<td width="50%" valign="top">
-<a href="https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/ui/testing/"><img src=".github/readme/ui-test.png" alt="A Snake HUD opened and driven by an LDLib2 UI test scenario"></a><br>
-<strong><a href="https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/ui/testing/">UI Test Harness</a></strong><br>
-Script scenarios that open real UIs in a real client, click and type through them, wait for server sync, and save screenshots and reports. Runs headless, in parallel, or on a dedicated server with several clients. The same scripts record documentation videos, kept apart from the tests: a smooth pointer, click ripples, the keys pressed, bilingual captions, spotlights and zooms, encoded straight to MP4 (<code>-PldRecord</code>, see <a href="uitest.md#recording-video">uitest.md</a>).
-</td>
-</tr>
-</table>
-
-## Java Integration
-
-LDLib2 is published to the FirstDark Maven snapshots repository.
-
+引入了 [NeoBackports](https://modrinth.com/mod/neobackports) 依赖，用于弥补部分 1.20.1 Forge 的缺失特性（主要是`StreamCodec`）。因此对于需要依赖此项目的开发者，你还需要在开发环境依赖 NeoBackports：
 ```gradle
 repositories {
-    maven { url = "https://maven.firstdark.dev/snapshots" }
+    maven {
+        url = 'https://nikdo53.github.io'
+    }
 }
 
 dependencies {
-    implementation("com.lowdragmc.ldlib2:ldlib2-neoforge-${minecraft_version}:${ldlib2_version}:all")
+    modImplementation "net.nikdo53:NeoBackports:1.4.2"
+    interfaceInjectionData "net.nikdo53:NeoBackports:1.4.2"
 }
 ```
 
-For LDLib2 versions before `2.2.1`, disable transitive dependencies and add Yoga manually:
+## 现在能做什么
 
-```gradle
-dependencies {
-    implementation("com.lowdragmc.ldlib2:ldlib2-neoforge-${minecraft_version}:${ldlib2_version}:all") {
-        transitive = false
-    }
-    compileOnly("org.appliedenergistics.yoga:yoga:1.0.0")
-}
+LDLib2 是一个面向模组开发者的基础库，不是单独给玩家游玩的内容模组。它主要提供这些能力：
+
+- 游戏内 UI 框架：组件、布局、样式、XML UI、数据绑定和事件
+- 游戏内编辑器：资源管理器、检视面板、UI 模板编辑、预览和保存
+- 渲染工具：GUI 纹理、模型/场景渲染、Shader 相关封装
+- 同步与持久化：NBT、Codec、字段同步、RPC、网络包
+- 资源系统：颜色、贴图、UI 模板、渲染器等资源的加载和编辑
+- 常见模组生态兼容：JEI、REI、EMI、KubeJS 等相关接口
+
+## 适配进度
+
+当前分支以 **Minecraft 1.20.1 + Forge 47.1.30** 为目标环境，已经完成基础运行和多人服验证。
+
+已验证项目：
+
+- 客户端可以启动并进入游戏
+- Dedicated Server 可以启动
+- 客户端和服务端双端安装后可以正常进服
+- `/ldlib2_ui_editor` 可以在多人服务器中打开 UI 编辑器
+- UI 编辑器基础渲染、资源面板、检视面板可以显示
+- 已修复 1.20.1 Forge 下的部分 Mixin、网络包、字体和编辑器显示问题
+
+本项目目前只围绕原项目做 Minecraft 1.20.1 Forge 的版本兼容与必要修复，不加入额外功能，也不改变原项目方向。
+
+## 使用方式
+
+客户端和服务端都需要安装本模组。
+
+推荐环境：
+
+- Minecraft：`1.20.1`
+- Forge：`47.4.10`，或同系列 47.x
+- Java：`17+`
+
+把构建出的 `libs` 目录下的无 `-sources.jar` 后缀的 jar 文件放入客户端和服务端的 `mods` 文件夹即可。
+
+> 注意：这个库属于双端模组。多人服务器上使用时，客户端和服务端需要保持同一个版本，否则可能出现网络通道不匹配或连接失败。
+
+## 开发构建
+
+```bash
+./gradlew build
 ```
 
-Recommended project variables:
+如果 ForgeGradle 证书检查导致依赖下载失败，可以使用：
 
-```properties
-minecraft_version=1.21.1
-ldlib2_version=2.2.44
+```bash
+./gradlew -Dnet.minecraftforge.gradle.check.certs=false build
 ```
 
-### Optional: Compose UI
+构建产物在：
 
-[Compose UI](https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/ui/compose/) is a separate mod, `ldlib2-compose`, that your mod ships as Jar-in-Jar. It is written against Kotlin and needs the Kotlin Compose compiler plugin at the same version as your Kotlin plugin.
-
-Its version starts with the Minecraft line it is built for: `21.0.0.1` is the first release for 1.21.1, and each Minecraft version gets its own build. Only 1.21.1 is published so far.
-
-```gradle
-dependencies {
-    implementation "com.lowdragmc.ldlib2:ldlib2-compose-1.21.1:21.0.0.1"
-    jarJar(group: 'com.lowdragmc.ldlib2', name: 'ldlib2-compose-1.21.1') {
-        version { require '[21.0.0.1,)'; prefer '21.0.0.1' }
-    }
-}
+```text
+build/libs/
 ```
 
-See [Optional module: ldlib2-compose](https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/java_integration.html#optional-module-ldlib2-compose) for the plugin, repository, and `neoforge.mods.toml` setup.
+## 游戏内编辑器
 
-### LDLib Plugin Entry Point
+有 OP 权限的玩家可以在服务器内执行：
 
-Create a plugin class when your mod needs to register LDLib2 resources, integrations, or startup hooks.
-
-```java
-import com.lowdragmc.lowdraglib2.plugin.ILDLibPlugin;
-import com.lowdragmc.lowdraglib2.plugin.LDLibPlugin;
-
-@LDLibPlugin
-public class MyLDLibPlugin implements ILDLibPlugin {
-    @Override
-    public void onLoad() {
-        // Register LDLib2 extensions here.
-    }
-}
+```text
+/ldlib2_ui_editor
 ```
 
-## Quick UI Example
+这个命令会在客户端打开 LDLib2 的 UI 编辑器。它主要用于开发和调试 UI 模板，不是普通玩家菜单。
 
-This creates a small `ModularUI` with a label, a button, and a styled root element.
+编辑器里可以做的事：
 
-```java
-public class MyScreenUi {
-    public static ModularUI createUi() {
-        var root = new UIElement()
-                .layout(layout -> layout.paddingAll(7).gapAll(5))
-                .style(style -> style.background(Sprites.BORDER));
+- 新建或打开 UI 项目
+- 编辑 XML UI 配置
+- 查看 UI 预览
+- 管理 UI / 颜色 / 贴图资源
+- 在检视面板里调整元素属性
+- 保存 UI 模板
 
-        root.addChildren(
-                new Label().setText("My First LDLib2 UI"),
-                new Button()
-                        .setText("Click Me")
-                        .setOnClick(event -> {
-                            // Handle the click here.
-                        })
-        );
+## 赞助说明
 
-        return ModularUI.of(UI.of(root));
-    }
-}
-```
+本项目严格遵守开源协议，**承诺永久开源且免费发布**。
 
-For a full walkthrough, see the [UI Getting Started guide](https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/ui/getting_start.html).
+本移植版的后续维护由社区自愿赞助支持，赞助资金仅用于补贴开发人员的劳动。如果你想支持本项目的后续更新，欢迎前往支持：
 
-With [Compose UI](https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/ui/compose/), the screen is a Kotlin function of its state, and changing the state updates the elements:
+- **[点击前往「爱发电」赞助支持](https://ifdian.net/a/hutaoawa)**
 
-```kotlin
-@Composable
-fun Counter() {
-    var count by remember { mutableStateOf(0) }
+## 鸣谢
 
-    Column(layout = { width(120.px); padding { all(6.px) }; gap { all(4.px) } }) {
-        Text("Clicked $count times")
-        Button(onClick = { count++ }, text = "Click")
-    }
-}
+感谢 KilaBash 和 Low-Drag-MC 带来的 LDLib / LDLib2。这个库里很多设计都很扎实，移植工作也是建立在原项目长期积累的基础上。
 
-fun openCounter() {
-    val mc = Minecraft.getInstance()
-    val mui = composeModularUI(mc.player, StylesheetManager.MODERN) { Counter() }
-    mc.setScreen(ModularUIScreen(mui, Component.literal("Counter")))
-}
-```
+如果你需要最新的官方版本、完整文档或上游更新，请优先查看原项目：
 
-## Developer Tools
+- https://github.com/Low-Drag-MC/LDLib2
+- https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/
 
-If you develop with LDLib2, install the LDLib Dev Tool IDEA plugin for editor assistance around LDLib2-specific files and annotations. The [Java Integration guide](https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/java_integration.html) covers code highlighting, syntax checks, jump-to-definition, autocomplete, and annotation support.
+## 协议
 
-## Migrating from LDLib
+本项目遵循 **GNU Lesser General Public License v3.0**。
 
-LDLib2 is not a small patch over LDLib. It removes old systems and rebuilds the core architecture for Minecraft `1.21+`.
-
-- Legacy UI and outdated framework pieces have been removed.
-- UI layout, styling, events, and data flow have been redesigned.
-- Documentation and examples are written around the new architecture.
-- Compatibility work focuses on modern NeoForge and current modding integrations.
-
-## Links
-
-- [Documentation](https://low-drag-mc.github.io/LowDragMC-Doc/en/ldlib2/)
-- [GitHub repository](https://github.com/Low-Drag-MC/LDLib2)
-- [CurseForge project](https://www.curseforge.com/minecraft/mc-mods/ldlib)
-- [Modrinth project](https://modrinth.com/mod/ldlib)
-- [Discord community](https://discord.com/invite/sDdf2yD9bh)
-- [Original LDLib](https://github.com/Low-Drag-MC/LDLib-MultiLoader)
-
-## License
-
-LDLib2 is licensed under the [LGPL-3.0 license](LICENSE).
+完整协议文本见仓库根目录的 `LICENSE` 文件。

@@ -7,11 +7,10 @@ import com.lowdragmc.lowdraglib2.math.Size;
 import com.lowdragmc.lowdraglib2.utils.XmlUtils;
 import lombok.Data;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Function;

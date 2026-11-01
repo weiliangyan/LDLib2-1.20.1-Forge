@@ -27,7 +27,8 @@ public interface ModularUIDisplay extends Display {
 
     @Nullable
     default ModularUI getModularUI() {
-        if (getCategory() instanceof ModularUIDisplayCategory category) {
+        ModularUIDisplayCategory category = getCategory();
+        if (category != null) {
             return category.getUIForDisplay(this);
         }
         return null;
@@ -35,7 +36,8 @@ public interface ModularUIDisplay extends Display {
 
     @Override
     default List<EntryIngredient> getInputEntries() {
-        if (getCategory() instanceof ModularUIDisplayCategory category) {
+        ModularUIDisplayCategory category = getCategory();
+        if (category != null) {
             return category.getIngredients(this).inputs;
         }
         return List.of();
@@ -43,7 +45,8 @@ public interface ModularUIDisplay extends Display {
 
     @Override
     default List<EntryIngredient> getOutputEntries() {
-        if (getCategory() instanceof ModularUIDisplayCategory category) {
+        ModularUIDisplayCategory category = getCategory();
+        if (category != null) {
             return category.getIngredients(this).outputs;
         }
         return List.of();

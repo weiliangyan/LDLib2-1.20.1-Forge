@@ -10,8 +10,8 @@ import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.io.File;
 import java.io.IOException;
@@ -84,8 +84,7 @@ public final class WorldBootstrap {
         minecraft.createWorldOpenFlows().createFreshLevel(worldName, settings,
                 new WorldOptions(0L, false, false),
                 registryAccess -> registryAccess.registryOrThrow(Registries.WORLD_PRESET)
-                        .getHolderOrThrow(WorldPresets.FLAT).value().createWorldDimensions(),
-                null);
+                        .getHolderOrThrow(WorldPresets.FLAT).value().createWorldDimensions());
     }
 
     /**

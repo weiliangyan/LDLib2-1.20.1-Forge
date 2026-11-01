@@ -3,14 +3,13 @@ package com.lowdragmc.lowdraglib2.gui.ui.elements;
 import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
 import com.lowdragmc.lowdraglib2.gui.ColorPattern;
 import com.lowdragmc.lowdraglib2.gui.sync.rpc.RPCEmitter;
-import com.lowdragmc.lowdraglib2.gui.sync.rpc.RPCEvent;
 import com.lowdragmc.lowdraglib2.gui.sync.rpc.RPCEventBuilder;
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
+import com.lowdragmc.lowdraglib2.gui.ui.Style;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvent;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext;
-import com.lowdragmc.lowdraglib2.gui.ui.Style;
 import com.lowdragmc.lowdraglib2.gui.ui.style.Property;
 import com.lowdragmc.lowdraglib2.gui.ui.style.PropertyRegistry;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
@@ -26,19 +25,12 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.chat.Component;
-import org.appliedenergistics.yoga.*;
-
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -135,7 +127,7 @@ public class SearchComponent<T> extends BindableUIElement<T> {
     @Getter
     private final SearchStyle searchStyle = new SearchStyle();
     private UIElementProvider<T> candidateUIProvider = UIElementProvider.text(value -> value == null ?
-            Component.translatable("text_field.empty").withColor(ColorPattern.LIGHT_GRAY.color) :
+            Component.translatable("text_field.empty").withStyle(style -> style.withColor(ColorPattern.LIGHT_GRAY.color)) :
             Component.translatable(value.toString()));
     @Getter
     private ISearchUI<T> searchUI = ISearchUI.empty();
@@ -253,6 +245,8 @@ public class SearchComponent<T> extends BindableUIElement<T> {
         this.searchUI = searchUI;
         this.searchEngine.dispose();
         this.searchEngine = new SearchEngine<>(searchUI, this::onResultFound);
+        candidates.clear();
+        isCandidatesDirty.set(true);
         return this;
     }
 
@@ -485,6 +479,8 @@ public class SearchComponent<T> extends BindableUIElement<T> {
             return;
         }
         delayedHideGeneration++;
+        onSearchWordChanged(textField.getText());
+        updateCandidatesUI();
         var mui = getModularUI();
         if (mui != null) {
             var root = mui.ui.rootElement;

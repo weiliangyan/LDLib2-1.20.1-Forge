@@ -124,7 +124,7 @@ public class NgtWireStyleScenario implements UIScenario {
                         .step("its route leaves the box its endpoints would imply", ctx -> {
                             var element = backwardWire(ctx);
                             var points = element.getRoutePoints();
-                            var startX = points.getFirst().x;
+                            var startX = points.get(0).x;
                             var maxX = points.stream().map(p -> p.x).max(Float::compare).orElseThrow();
                             ctx.check("the route pushes past the source port before turning back",
                                     maxX > startX + 1f, "> " + (startX + 1f), maxX);
@@ -219,7 +219,7 @@ public class NgtWireStyleScenario implements UIScenario {
             var outLength = (float) Math.sqrt(outX * outX + outY * outY);
             if (inLength < 1e-3f || outLength < 1e-3f) continue;
             var cos = (inX * outX + inY * outY) / (inLength * outLength);
-            var turn = (float) Math.toDegrees(Math.acos(Math.clamp(cos, -1f, 1f)));
+            var turn = (float) Math.toDegrees(Math.acos(Math.min(Math.max(cos, -1f), 1f)));
             if (turn <= MAX_GENTLE_TURN) continue;
             ctx.check("a %.0f° turn at point %d is a tight bend, not a kink".formatted(turn, i + 1),
                     Math.max(inLength, outLength) < TIGHT_BEND_SPAN,

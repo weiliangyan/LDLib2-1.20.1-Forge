@@ -1,9 +1,9 @@
 package com.lowdragmc.lowdraglib2.syncdata.ref;
 
 import com.lowdragmc.lowdraglib2.syncdata.accessor.arraylike.IArrayLikeAccessor;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-
+import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.Nullable;
+
 import java.lang.reflect.Array;
 
 /**
@@ -37,7 +37,7 @@ public interface IArrayRef<TYPE, TYPE_ARRAY> extends IRef<TYPE_ARRAY> {
     }
 
     @Override
-    default void readSyncToStream(RegistryFriendlyByteBuf buffer) {
+    default void readSyncToStream(FriendlyByteBuf buffer) {
         var refs = getRefs();
         if (refs == null) {
             buffer.writeBoolean(true);
@@ -52,7 +52,7 @@ public interface IArrayRef<TYPE, TYPE_ARRAY> extends IRef<TYPE_ARRAY> {
     }
 
     @Override
-    default void writeSyncFromStream(RegistryFriendlyByteBuf buffer) {
+    default void writeSyncFromStream(FriendlyByteBuf buffer) {
         if (buffer.readBoolean()) {
             IRef.super.writeSyncFromStream(buffer);
             return;

@@ -3,8 +3,7 @@ package com.lowdragmc.lowdraglib2.gui.ui.data;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lombok.Data;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
+import net.nikdo53.neobackports.io.StreamCodec;
 
 /**
  * Immutable 2D translation with per-axis px/percent support.
@@ -18,7 +17,7 @@ public final class Translate2D {
             LengthPercent.CODEC.fieldOf("y").forGetter(Translate2D::getY)
     ).apply(instance, Translate2D::new));
 
-    public static final StreamCodec<FriendlyByteBuf, Translate2D> STREAM_CODEC = StreamCodec.of(
+    public static final StreamCodec<Translate2D> STREAM_CODEC = StreamCodec.of(
             (buf, t) -> {
                 LengthPercent.STREAM_CODEC.encode(buf, t.x);
                 LengthPercent.STREAM_CODEC.encode(buf, t.y);
