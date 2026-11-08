@@ -4,15 +4,15 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
-import com.lowdragmc.lowdraglib2.gui.texture.Icons;
 import com.lowdragmc.lowdraglib2.gui.ColorPattern;
 import com.lowdragmc.lowdraglib2.gui.texture.DynamicTexture;
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
+import com.lowdragmc.lowdraglib2.gui.texture.Icons;
 import com.lowdragmc.lowdraglib2.gui.texture.TextTexture;
+import com.lowdragmc.lowdraglib2.gui.ui.Style;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvent;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
-import com.lowdragmc.lowdraglib2.gui.ui.Style;
 import com.lowdragmc.lowdraglib2.gui.ui.style.Property;
 import com.lowdragmc.lowdraglib2.gui.ui.style.PropertyRegistry;
 import com.lowdragmc.lowdraglib2.gui.ui.utils.UIElementProvider;
@@ -20,6 +20,7 @@ import com.lowdragmc.lowdraglib2.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib2.gui.util.ITreeNode;
 import com.lowdragmc.lowdraglib2.integration.kjs.KJSBindings;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegister;
+import com.lowdragmc.lowdraglib2.utils.function.LDConsumers;
 import dev.vfyjxf.taffy.style.AlignItems;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import lombok.Getter;
@@ -27,12 +28,10 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.chat.Component;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import org.apache.commons.lang3.function.Consumers;
-import org.appliedenergistics.yoga.*;
-
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
+
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -123,9 +122,9 @@ public class TreeList<NODE extends ITreeNode<?, ?>> extends UIElement {
     protected UIElementProvider<NODE> nodeUISupplier = textTemplate(value -> Component.translatable(value.toString()));
     protected BiConsumer<NODE, UIElement> onNodeUICreated = (node, ui) -> {};
     @Setter
-    protected Consumer<Set<NODE>> onSelectedChanged = Consumers.nop();
+    protected Consumer<Set<NODE>> onSelectedChanged = LDConsumers.nop();
     @Setter
-    protected Consumer<NODE> onDoubleClickNode = Consumers.nop();
+    protected Consumer<NODE> onDoubleClickNode = LDConsumers.nop();
     @Setter
     protected Predicate<NODE> selectableNodeFilter = Predicates.alwaysTrue();
     @Setter
@@ -156,7 +155,7 @@ public class TreeList<NODE extends ITreeNode<?, ?>> extends UIElement {
      * gated by {@link #reorderValidator}. Default {@code false} keeps the previous behavior.
      */
     protected boolean draggable = false;
-    protected Consumer<ReorderRequest<NODE>> onReorder = Consumers.nop();
+    protected Consumer<ReorderRequest<NODE>> onReorder = LDConsumers.nop();
     protected Predicate<ReorderRequest<NODE>> reorderValidator = Predicates.alwaysTrue();
     /**
      * Optional factory for the drag payload object (receives the pressed node). Lets consumers hand
@@ -384,7 +383,7 @@ public class TreeList<NODE extends ITreeNode<?, ?>> extends UIElement {
                 var children = node.getChildren();
                 for (int i = children.size() - 1; i >= 0; i--) {
                     var childNode = (NODE) children.get(i);
-                    displayedChildren.computeIfAbsent(node, n -> new ArrayList<>()).addFirst(childNode);
+                    displayedChildren.computeIfAbsent(node, n -> new ArrayList<>()).add(0, childNode);
                     addNodeUI(childNode, nodeIndex + 1);
                 }
             }
@@ -490,7 +489,7 @@ public class TreeList<NODE extends ITreeNode<?, ?>> extends UIElement {
             var children = node.getChildren();
             for (int i = children.size() - 1; i >= 0; i--) {
                 var childNode = (NODE) children.get(i);
-                displayedChildren.computeIfAbsent(node, n -> new ArrayList<>()).addFirst(childNode);
+                displayedChildren.computeIfAbsent(node, n -> new ArrayList<>()).add(0, childNode);
                 addNodeUI(childNode, index + 1);
             }
         }
@@ -539,7 +538,7 @@ public class TreeList<NODE extends ITreeNode<?, ?>> extends UIElement {
         this.displayedChildren.remove(node);
         for (int i = currentChildren.size() - 1; i >= 0; i--) {
             var childNode = currentChildren.get(i);
-            this.displayedChildren.computeIfAbsent(node, n -> new ArrayList<>()).addFirst(childNode);
+            this.displayedChildren.computeIfAbsent(node, n -> new ArrayList<>()).add(0, childNode);
             addNodeUI(childNode, index + 1);
         }
         for (var shown : shownBefore) {

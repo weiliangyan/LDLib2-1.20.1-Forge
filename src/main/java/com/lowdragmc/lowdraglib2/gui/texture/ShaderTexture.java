@@ -7,8 +7,8 @@ import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigSetter;
 import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
 import com.lowdragmc.lowdraglib2.configurator.ui.Configurator;
 import com.lowdragmc.lowdraglib2.configurator.ui.ConfiguratorGroup;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.Dialog;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.Dialog;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib2.integration.kjs.KJSBindings;
@@ -21,16 +21,16 @@ import dev.vfyjxf.taffy.style.AlignItems;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4f;
 
-import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -116,12 +116,14 @@ public class ShaderTexture extends TransformTexture implements AutoCloseable {
             );
             RenderSystem.disableDepthTest();
             var mat = graphics.pose().last().pose();
-            BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-            buffer.addVertex(mat, x, y + height, 0).setUv(0, 0).setColor(color);
-            buffer.addVertex(mat, x + width, y + height, 0).setUv(1, 0).setColor(color);
-            buffer.addVertex(mat, x + width, y, 0).setUv(1, 1).setColor(color);
-            buffer.addVertex(mat, x, y, 0).setUv(0, 1).setColor(color);
-            BufferUploader.drawWithShader(buffer.buildOrThrow());
+            var tesselator = Tesselator.getInstance();
+            BufferBuilder buffer = tesselator.getBuilder();
+            buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+            buffer.vertex(mat, x, y + height, 0).uv(0, 0).color(color).endVertex();
+            buffer.vertex(mat, x + width, y + height, 0).uv(1, 0).color(color).endVertex();
+            buffer.vertex(mat, x + width, y, 0).uv(1, 1).color(color).endVertex();
+            buffer.vertex(mat, x, y, 0).uv(0, 1).color(color).endVertex();
+            BufferUploader.drawWithShader(buffer.end());
 
             shaderHolder.removeDynamicUniform("U_GuiRect");
             shaderHolder.removeDynamicUniform("U_GuiMouse");
@@ -220,7 +222,7 @@ public class ShaderTexture extends TransformTexture implements AutoCloseable {
         var location = modId + ":" + shaderPath.substring(0, shaderPath.length() - 5); // remove ".json" suffix
 
         if (LDLib2.isValidResourceLocation(location)) {
-            return ResourceLocation.parse(location);
+            return new ResourceLocation(location);
         }
         return null;
     }

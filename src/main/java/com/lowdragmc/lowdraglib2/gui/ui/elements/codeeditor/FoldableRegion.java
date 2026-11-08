@@ -1,4 +1,4 @@
-//package com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor;
+package com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor;//package com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor;
 //
 //public class FoldableRegion {
 //    private final int startLine;

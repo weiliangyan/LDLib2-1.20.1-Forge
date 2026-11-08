@@ -17,9 +17,9 @@ import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.client.ClientHooks;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.ForgeHooksClient;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
@@ -385,99 +385,89 @@ public class ModularUIWindow implements OsWindowHost {
         var currentSurface = surface;
         if (current == null || currentSurface == null) return;
         var widget = modularUI.getWidget();
-        switch (event) {
-            case OsWindowEvent.CursorPos cursor -> {
-                if (gesture != Gesture.NONE) {
-                    applyGesture();
+        if (event instanceof OsWindowEvent.CursorPos cursor) {
+            if (gesture != Gesture.NONE) {
+                applyGesture();
+                return;
+            }
+            var previousX = mouseX;
+            var previousY = mouseY;
+            mouseX = toGuiX(cursor.x(), currentSurface);
+            mouseY = toGuiY(cursor.y(), currentSurface);
+            updateCursorShape();
+            // Nothing downstream hit-tests; every mouse method reads the cached hover, which is
+            // normally only recomputed during render. Resolve it here or the event lands on
+            // whatever was under the cursor last frame.
+            modularUI.refreshHoveredElementAtScreen(mouseX, mouseY);
+            widget.mouseMoved(mouseX, mouseY);
+            for (int button = GLFW.GLFW_MOUSE_BUTTON_1; button <= GLFW.GLFW_MOUSE_BUTTON_3; button++) {
+                if (isButtonHeldByUI(button)) {
+                    widget.mouseDragged(mouseX, mouseY, button, mouseX - previousX, mouseY - previousY);
+                    break;
+                }
+            }
+        } else if (event instanceof OsWindowEvent.MouseButton mouse) {
+            // Re-read the cursor rather than trusting the last CursorPos: a window created under
+            // the pointer, or one re-entered after the pointer was parked off-screen by
+            // CursorEnter, can take a click before any movement is reported.
+            mouseX = toGuiX(current.getCursorX(), currentSurface);
+            mouseY = toGuiY(current.getCursorY(), currentSurface);
+            if (mouse.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
+                if (mouse.action() == GLFW.GLFW_PRESS && beginGesture()) {
+                    return; // the press drives the window, the UI must not also see it
+                }
+                if (mouse.action() == GLFW.GLFW_RELEASE && gesture != Gesture.NONE) {
+                    gesture = Gesture.NONE;
+                    updateCursorShape();
                     return;
                 }
-                var previousX = mouseX;
-                var previousY = mouseY;
-                mouseX = toGuiX(cursor.x(), currentSurface);
-                mouseY = toGuiY(cursor.y(), currentSurface);
-                updateCursorShape();
-                // Nothing downstream hit-tests; every mouse method reads the cached hover, which is
-                // normally only recomputed during render. Resolve it here or the event lands on
-                // whatever was under the cursor last frame.
+            }
+            modularUI.refreshHoveredElementAtScreen(mouseX, mouseY);
+            if (mouse.action() == GLFW.GLFW_PRESS) {
+                setButtonHeldByUI(mouse.button(), true);
+                widget.mouseClicked(mouseX, mouseY, mouse.button());
+            } else if (mouse.action() == GLFW.GLFW_RELEASE) {
+                setButtonHeldByUI(mouse.button(), false);
+                widget.mouseReleased(mouseX, mouseY, mouse.button());
+            }
+        } else if (event instanceof OsWindowEvent.Scroll scroll) {
+            modularUI.refreshHoveredElementAtScreen(mouseX, mouseY);
+            widget.mouseScrolled(mouseX, mouseY, scroll.deltaX(), scroll.deltaY());
+        } else if (event instanceof OsWindowEvent.Key key) {
+            if (key.action() == GLFW.GLFW_RELEASE) {
+                widget.keyReleased(key.key(), key.scancode(), key.mods());
+            } else {
+                // PRESS and REPEAT both, so held arrows and backspace behave in a text field.
+                widget.keyPressed(key.key(), key.scancode(), key.mods());
+            }
+        } else if (event instanceof OsWindowEvent.Char typed) {
+            for (var character : Character.toChars(typed.codepoint())) {
+                widget.charTyped(character, typed.mods());
+            }
+        } else if (event instanceof OsWindowEvent.CursorEnter enter) {
+            if (!enter.entered()) {
+                // Park the pointer well outside so MOUSE_LEAVE fires and hover state clears;
+                // otherwise an element stays highlighted after the cursor has gone.
+                mouseX = CURSOR_OUTSIDE;
+                mouseY = CURSOR_OUTSIDE;
                 modularUI.refreshHoveredElementAtScreen(mouseX, mouseY);
                 widget.mouseMoved(mouseX, mouseY);
-                for (int button = GLFW.GLFW_MOUSE_BUTTON_1; button <= GLFW.GLFW_MOUSE_BUTTON_3; button++) {
-                    if (isButtonHeldByUI(button)) {
-                        widget.mouseDragged(mouseX, mouseY, button, mouseX - previousX, mouseY - previousY);
-                        break;
-                    }
-                }
             }
-            case OsWindowEvent.MouseButton mouse -> {
-                // Re-read the cursor rather than trusting the last CursorPos: a window created under
-                // the pointer, or one re-entered after the pointer was parked off-screen by
-                // CursorEnter, can take a click before any movement is reported.
-                mouseX = toGuiX(current.getCursorX(), currentSurface);
-                mouseY = toGuiY(current.getCursorY(), currentSurface);
-                if (mouse.button() == GLFW.GLFW_MOUSE_BUTTON_1) {
-                    if (mouse.action() == GLFW.GLFW_PRESS && beginGesture()) {
-                        return; // the press drives the window, the UI must not also see it
-                    }
-                    if (mouse.action() == GLFW.GLFW_RELEASE && gesture != Gesture.NONE) {
-                        gesture = Gesture.NONE;
-                        updateCursorShape();
-                        return;
-                    }
-                }
-                modularUI.refreshHoveredElementAtScreen(mouseX, mouseY);
-                if (mouse.action() == GLFW.GLFW_PRESS) {
-                    setButtonHeldByUI(mouse.button(), true);
-                    widget.mouseClicked(mouseX, mouseY, mouse.button());
-                } else if (mouse.action() == GLFW.GLFW_RELEASE) {
-                    setButtonHeldByUI(mouse.button(), false);
-                    widget.mouseReleased(mouseX, mouseY, mouse.button());
-                }
+        } else if (event instanceof OsWindowEvent.FramebufferSize size) {
+            currentSurface.resize(size.width(), size.height(),
+                    current.getWindowWidth(), current.getWindowHeight());
+            modularUI.init(currentSurface.guiScaledWidth(), currentSurface.guiScaledHeight());
+        } else if (event instanceof OsWindowEvent.Focus focus) {
+            if (!focus.focused()) {
+                // A button released elsewhere never reports a RELEASE here, and a button believed
+                // held for ever is a drag that never ends.
+                buttonsHeldByUI = 0;
             }
-            case OsWindowEvent.Scroll scroll -> {
-                modularUI.refreshHoveredElementAtScreen(mouseX, mouseY);
-                widget.mouseScrolled(mouseX, mouseY, scroll.deltaX(), scroll.deltaY());
-            }
-            case OsWindowEvent.Key key -> {
-                if (key.action() == GLFW.GLFW_RELEASE) {
-                    widget.keyReleased(key.key(), key.scancode(), key.mods());
-                } else {
-                    // PRESS and REPEAT both, so held arrows and backspace behave in a text field.
-                    widget.keyPressed(key.key(), key.scancode(), key.mods());
-                }
-            }
-            case OsWindowEvent.Char typed -> {
-                for (var character : Character.toChars(typed.codepoint())) {
-                    widget.charTyped(character, typed.mods());
-                }
-            }
-            case OsWindowEvent.CursorEnter enter -> {
-                if (!enter.entered()) {
-                    // Park the pointer well outside so MOUSE_LEAVE fires and hover state clears;
-                    // otherwise an element stays highlighted after the cursor has gone.
-                    mouseX = CURSOR_OUTSIDE;
-                    mouseY = CURSOR_OUTSIDE;
-                    modularUI.refreshHoveredElementAtScreen(mouseX, mouseY);
-                    widget.mouseMoved(mouseX, mouseY);
-                }
-            }
-            case OsWindowEvent.FramebufferSize size -> {
-                currentSurface.resize(size.width(), size.height(),
-                        current.getWindowWidth(), current.getWindowHeight());
-                modularUI.init(currentSurface.guiScaledWidth(), currentSurface.guiScaledHeight());
-            }
-            case OsWindowEvent.Focus focus -> {
-                if (!focus.focused()) {
-                    // A button released elsewhere never reports a RELEASE here, and a button believed
-                    // held for ever is a drag that never ends.
-                    buttonsHeldByUI = 0;
-                }
-                widget.setFocused(focus.focused());
-            }
-            case OsWindowEvent.FileDrop drop -> modularUI.onFilesDrop(drop.files(), currentSurface);
-            case OsWindowEvent.CloseRequest ignored -> onCloseRequested();
-            case OsWindowEvent.WindowPos ignored -> {
-                // Recorded on the window; nothing in the UI depends on where it sits.
-            }
+            widget.setFocused(focus.focused());
+        } else if (event instanceof OsWindowEvent.FileDrop drop) modularUI.onFilesDrop(drop.files(), currentSurface);
+        else if (event instanceof OsWindowEvent.CloseRequest) onCloseRequested();
+        else if (event instanceof OsWindowEvent.WindowPos) {
+            // Recorded on the window; nothing in the UI depends on where it sits.
         }
     }
 
@@ -723,14 +713,15 @@ public class ModularUIWindow implements OsWindowHost {
             RenderSystem.disableBlend();
 
             // The gui projection Minecraft sets up for its own frame, against our target's size.
-            var farPlane = ClientHooks.getGuiFarPlane();
+            // 1.21 返回的值比 1.20 大 11000F，所以这里要加上 11000F 才能正常渲染
+            var farPlane = ForgeHooksClient.getGuiFarPlane() + 11000F;
             var projection = new Matrix4f().setOrtho(0f,
                     (float) (target.width / guiScale),
                     (float) (target.height / guiScale),
                     0f, 1000f, farPlane);
             RenderSystem.setProjectionMatrix(projection, VertexSorting.ORTHOGRAPHIC_Z);
-            modelView.pushMatrix();
-            modelView.translation(0f, 0f, 10000f - farPlane);
+            modelView.pushPose();
+            modelView.translate(0f, 0f, 10000f - farPlane);
             RenderSystem.applyModelViewMatrix();
             Lighting.setupFor3DItems();
 
@@ -738,7 +729,7 @@ public class ModularUIWindow implements OsWindowHost {
             renderContents(graphics, partialTick);
             graphics.flush();
 
-            modelView.popMatrix();
+            modelView.popPose();
             RenderSystem.applyModelViewMatrix();
         } finally {
             RenderSystem.restoreProjectionMatrix();

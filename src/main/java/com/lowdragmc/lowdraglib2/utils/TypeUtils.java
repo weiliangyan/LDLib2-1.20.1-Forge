@@ -2,8 +2,10 @@ package com.lowdragmc.lowdraglib2.utils;
 
 import lombok.experimental.UtilityClass;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
+import java.util.Map;
 
 @UtilityClass
 public final class TypeUtils {

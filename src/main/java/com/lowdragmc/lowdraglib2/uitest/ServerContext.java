@@ -51,7 +51,7 @@ public final class ServerContext {
         if (players.isEmpty()) {
             throw new IllegalStateException("No player on the server yet");
         }
-        return players.getFirst();
+        return players.get(0);
     }
 
     /** Every connected player. In a multi-process run, one per client role. */
@@ -67,7 +67,7 @@ public final class ServerContext {
     public ServerPlayer player(String role) {
         var players = server.getPlayerList().getPlayers();
         if (players.size() == 1) {
-            return players.getFirst();
+            return players.get(0);
         }
         var username = MPRoles.usernameFor(role);
         for (var player : players) {
@@ -88,7 +88,7 @@ public final class ServerContext {
     @Nullable
     public AbstractContainerMenu menu() {
         var players = server.getPlayerList().getPlayers();
-        return players.isEmpty() ? null : players.getFirst().containerMenu;
+        return players.isEmpty() ? null : players.get(0).containerMenu;
     }
 
     /**

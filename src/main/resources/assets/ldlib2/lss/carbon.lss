@@ -45,7 +45,6 @@
 text, label {
   text-shadow: false;
   text-color: #ededed;
-  font: ldlib2:jetbrains_mono_bold;
 }
 
 // ── button ───────────────────────────────────────────────────────────────────
@@ -112,7 +111,6 @@ text-field:host,
   background: sdf(#0a0a0a, 5, 1, #16ffffff);
   focus-overlay: sdf(#00000000, 5, 1, #f0a04b);
   padding-all: 3;
-  font: ldlib2:jetbrains_mono_bold;
 }
 
 search-component:host {
@@ -160,7 +158,6 @@ progress-bar:host {
 progress-bar:host label {
   font-size: 6;
   text-color: #ededed;
-  font: ldlib2:jetbrains_mono_bold;
 }
 
 .__progress-bar_bar-container__ {
@@ -188,7 +185,6 @@ color-selector:host text-field {
   background: sdf(#0a0a0a, 5, 1, #16ffffff);
   focus-overlay: sdf(#00000000, 5, 1, #f0a04b);
   padding-all: 3;
-  font: ldlib2:jetbrains_mono_bold;
 }
 
 color-selector:host button {
@@ -244,7 +240,6 @@ toggle:on .__toggle_button__ {
 // ── text area ────────────────────────────────────────────────────────────────
 text-area {
   scroller-view-margin: 8;
-  font: ldlib2:jetbrains_mono_bold;
 }
 
 text-area:host {

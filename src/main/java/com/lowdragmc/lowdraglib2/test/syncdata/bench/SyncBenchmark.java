@@ -11,25 +11,17 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.VarInt;
-import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
-import net.neoforged.neoforge.network.connection.ConnectionType;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.nikdo53.neobackports.io.StreamCodec;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.locks.LockSupport;
 
 /**
@@ -347,16 +339,25 @@ public class SyncBenchmark {
         return updates;
     }
 
-    private static <T> long wireBytes(ServerLevel level, StreamCodec<RegistryFriendlyByteBuf, T> codec, T payload, ResourceLocation channel) {
-        var buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), level.registryAccess(), ConnectionType.NEOFORGE);
+    private static <T> long wireBytes(ServerLevel level, StreamCodec<T> codec, T payload, ResourceLocation channel) {
+        var buf = new FriendlyByteBuf(Unpooled.buffer());
         try {
             codec.encode(buf, payload);
             int id = channel.toString().length();
-            int packet = 1 + VarInt.getByteSize(id) + id + buf.readableBytes();
-            return VarInt.getByteSize(packet) + 1 + packet;
+            int packet = 1 + getByteSize(id) + id + buf.readableBytes();
+            return getByteSize(packet) + 1 + packet;
         } finally {
             buf.release();
         }
+    }
+
+    public static int getByteSize(int data) {
+        for(int i = 1; i < 5; ++i) {
+            if ((data & -1 << i * 7) == 0) {
+                return i;
+            }
+        }
+        return 5;
     }
 
     @GameTest(template = "empty", batch = "ldlib2_syncbench_3_lifecycle")
@@ -400,8 +401,8 @@ public class SyncBenchmark {
         if (!(THREADS instanceof com.sun.management.ThreadMXBean sun)) return result;
         for (var thread : Thread.getAllStackTraces().keySet()) {
             if (thread.getName().startsWith("LDLib Async Thread")) {
-                long bytes = sun.getThreadAllocatedBytes(thread.threadId());
-                if (bytes >= 0) result.put(thread.threadId(), bytes);
+                long bytes = sun.getThreadAllocatedBytes(thread.getId());
+                if (bytes >= 0) result.put(thread.getId(), bytes);
             }
         }
         return result;
@@ -411,8 +412,8 @@ public class SyncBenchmark {
         var result = new HashMap<Long, Long>();
         for (var thread : Thread.getAllStackTraces().keySet()) {
             if (thread.getName().startsWith("LDLib Async Thread")) {
-                long cpu = THREADS.getThreadCpuTime(thread.threadId());
-                if (cpu >= 0) result.put(thread.threadId(), cpu);
+                long cpu = THREADS.getThreadCpuTime(thread.getId());
+                if (cpu >= 0) result.put(thread.getId(), cpu);
             }
         }
         return result;

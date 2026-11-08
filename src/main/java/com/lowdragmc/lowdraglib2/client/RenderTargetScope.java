@@ -3,8 +3,8 @@ package com.lowdragmc.lowdraglib2.client;
 import com.lowdragmc.lowdraglib2.utils.Scope;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.opengl.GL30;
 
 /**

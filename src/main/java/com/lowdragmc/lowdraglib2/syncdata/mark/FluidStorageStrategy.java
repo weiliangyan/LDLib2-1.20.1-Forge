@@ -3,8 +3,8 @@ package com.lowdragmc.lowdraglib2.syncdata.mark;
 import com.lowdragmc.lowdraglib2.misc.FluidStorage;
 import com.lowdragmc.lowdraglib2.syncdata.utils.StackSnapshots;
 import net.minecraft.core.HolderLookup;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.templates.FluidTank;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -29,6 +29,6 @@ final class FluidStorageStrategy implements IMarkStrategy<FluidStorage, FluidSto
 
     @Override
     public boolean areDifferent(@NotNull Mark managedMark, @NotNull FluidStorage value) {
-        return managedMark.capacity != value.getCapacity() || !FluidStack.matches(managedMark.fluid, value.getFluid());
+        return managedMark.capacity != value.getCapacity() || !managedMark.fluid.isFluidStackIdentical(value.getFluid());
     }
 }

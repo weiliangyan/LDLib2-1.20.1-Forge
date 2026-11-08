@@ -1,11 +1,9 @@
 package com.lowdragmc.lowdraglib2.math;
 
-import com.google.common.base.MoreObjects;
 import com.mojang.serialization.Codec;
 import lombok.Data;
 import net.minecraft.Util;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
+import net.nikdo53.neobackports.io.StreamCodec;
 
 import java.util.List;
 import java.util.Objects;
@@ -17,7 +15,7 @@ public final class Size {
             size -> List.of(size.width, size.height)
     );
 
-    public final static StreamCodec<FriendlyByteBuf, Size> STREAM_CODEC = StreamCodec.of(
+    public final static StreamCodec<Size> STREAM_CODEC = StreamCodec.of(
             (byteBuf, size) -> {
                 byteBuf.writeVarInt(size.width);
                 byteBuf.writeVarInt(size.height);

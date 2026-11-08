@@ -2,28 +2,27 @@ package com.lowdragmc.lowdraglib2.gui.texture;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.client.shader.LDLibRenderTypes;
-import com.lowdragmc.lowdraglib2.configurator.ui.Configurator;
-import com.lowdragmc.lowdraglib2.configurator.ui.ConfiguratorGroup;
-import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
 import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigColor;
 import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigNumber;
+import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
+import com.lowdragmc.lowdraglib2.configurator.ui.Configurator;
+import com.lowdragmc.lowdraglib2.configurator.ui.ConfiguratorGroup;
 import com.lowdragmc.lowdraglib2.gui.ui.Style;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.Dialog;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.Dialog;
 import com.lowdragmc.lowdraglib2.gui.ui.style.StyleOrigin;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
 import com.lowdragmc.lowdraglib2.integration.kjs.KJSBindings;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
 import dev.vfyjxf.taffy.style.AlignItems;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * @author KilaBash
@@ -73,7 +72,7 @@ public class AnimationTexture extends TransformTexture {
     }
 
     public AnimationTexture(String imageLocation) {
-        this.imageLocation = ResourceLocation.parse(imageLocation);
+        this.imageLocation = new ResourceLocation(imageLocation);
     }
 
     public AnimationTexture(ResourceLocation imageLocation) {
@@ -87,7 +86,7 @@ public class AnimationTexture extends TransformTexture {
     }
 
     public AnimationTexture setTexture(String imageLocation) {
-        this.imageLocation = ResourceLocation.parse(imageLocation);
+        this.imageLocation = new ResourceLocation(imageLocation);
         return this;
     }
 
@@ -149,10 +148,10 @@ public class AnimationTexture extends TransformTexture {
         RenderSystem.disableDepthTest();
 
         var matrix4f = graphics.pose().last().pose();
-        buffer.addVertex(matrix4f, x, y + height, 0).setUv(imageU, imageV + cell).setColor(color);
-        buffer.addVertex(matrix4f, x + width, y + height, 0).setUv(imageU + cell, imageV + cell).setColor(color);
-        buffer.addVertex(matrix4f, x + width, y, 0).setUv(imageU + cell, imageV).setColor(color);
-        buffer.addVertex(matrix4f, x, y, 0).setUv(imageU, imageV).setColor(color);
+        buffer.vertex(matrix4f, x, y + height, 0).uv(imageU, imageV + cell).color(color).endVertex();
+        buffer.vertex(matrix4f, x + width, y + height, 0).uv(imageU + cell, imageV + cell).color(color).endVertex();
+        buffer.vertex(matrix4f, x + width, y, 0).uv(imageU + cell, imageV).color(color).endVertex();
+        buffer.vertex(matrix4f, x, y, 0).uv(imageU, imageV).color(color).endVertex();
     }
 
     @Override

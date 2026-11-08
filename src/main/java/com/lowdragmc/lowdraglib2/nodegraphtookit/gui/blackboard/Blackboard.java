@@ -15,11 +15,11 @@ import com.lowdragmc.lowdraglib2.gui.util.TreeBuilder;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.GraphView;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.IGraphTool;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.ModelElement;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.command.VariableDeclarationCommands;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.node.PortElement;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.command.NodeCommands;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.itemlibrary.NodeModelLibraryItem;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.command.VariableDeclarationCommands;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.dependency.ModelUpdateVisitor;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.itemlibrary.NodeModelLibraryItem;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.node.PortElement;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.ChangeHintList;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.Model;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.graph.GraphModel;
@@ -220,7 +220,7 @@ public class Blackboard extends BlackboardElement implements IGraphTool {
             lastClickTime = 0;
         });
         nodeUI.addEventListener(UIEvents.DRAG_ENTER, e -> {
-            if (e.dragHandler.getDraggingObject() instanceof DraggingUINode(var dragged) && dragged != node) {
+            if (e.dragHandler.getDraggingObject() instanceof DraggingUINode draggingUINode && draggingUINode.node() != node) {
                 var mode = TreeList.isMouseOverNodeAbove(e) ? 0 : TreeList.isMouseOverNodeCenter(e) ? 1 : TreeList.isMouseOverNodeBelow(e) ? 2 : -1;
                 Style.importantPipeline(e.currentElement.getStyle(), s -> s.overlayTexture(TreeList.createDraggingOverlay(mode)));
             }
@@ -230,7 +230,8 @@ public class Blackboard extends BlackboardElement implements IGraphTool {
         }, true);
         nodeUI.addEventListener(UIEvents.DRAG_END, e -> {
             Style.importantPipeline(e.currentElement.getStyle(), s -> s.overlayTexture(IGuiTexture.EMPTY));
-            if (e.dragHandler.getDraggingObject() instanceof DraggingUINode(var dragged) && graphView != null && graphView.graphView.isSelfOrChildHover()) {
+            if (e.dragHandler.getDraggingObject() instanceof DraggingUINode draggingUINode && graphView != null && graphView.graphView.isSelfOrChildHover()) {
+                var dragged = draggingUINode.node();
                 // drag into graph view
                 if (dragged.getKey() instanceof VariableDeclarationModelBase variableModel) {
                     onDragVariablesIntoGraph(e, List.of(variableModel));
@@ -238,7 +239,7 @@ public class Blackboard extends BlackboardElement implements IGraphTool {
             }
         });
         nodeUI.addEventListener(UIEvents.DRAG_UPDATE, e -> {
-            if (e.dragHandler.getDraggingObject() instanceof DraggingUINode(var dragged) && dragged != node) {
+            if (e.dragHandler.getDraggingObject() instanceof DraggingUINode draggingUINode && draggingUINode.node() != node) {
                 var mode = TreeList.isMouseOverNodeAbove(e) ? 0 : TreeList.isMouseOverNodeCenter(e) ? 1 : TreeList.isMouseOverNodeBelow(e) ? 2 : -1;
                 Style.importantPipeline(e.currentElement.getStyle(), s -> s.overlayTexture(TreeList.createDraggingOverlay(mode)));
             } else {
@@ -247,8 +248,8 @@ public class Blackboard extends BlackboardElement implements IGraphTool {
         });
         nodeUI.addEventListener(UIEvents.DRAG_PERFORM, e -> {
             Style.importantPipeline(e.currentElement.getStyle(), s -> s.overlayTexture(IGuiTexture.EMPTY));
-            if (e.dragHandler.getDraggingObject() instanceof DraggingUINode(var dragged) && dragged != node) {
-                performGroupItemDrop(dragged, node, e);
+            if (e.dragHandler.getDraggingObject() instanceof DraggingUINode draggingUINode && draggingUINode.node() != node) {
+                performGroupItemDrop(draggingUINode.node(), node, e);
             }
         });
     }
@@ -334,7 +335,7 @@ public class Blackboard extends BlackboardElement implements IGraphTool {
         // was meant, the way Unreal asks for the same gesture. Everything else drops a getter, which
         // is what this always did — several at once, a drop onto a port, or a graph that only reads.
         if (variables.size() == 1 && e.target.getFirstAncestorOfType(PortElement.class) == null) {
-            var variable = variables.getFirst();
+            var variable = variables.get(0);
             NodeModelLibraryItem setter = graphView.getGraph() == null ? null
                     : graphView.getGraph().graphModel.createVariableSetterItem(variable);
             if (setter != null) {
@@ -440,7 +441,7 @@ public class Blackboard extends BlackboardElement implements IGraphTool {
         if (!supportedTypes.isEmpty()
                 && !typeHandle.isCustomTypeHandle()
                 && !supportedTypes.contains(typeHandle)) {
-            typeHandle = supportedTypes.getFirst();
+            typeHandle = supportedTypes.get(0);
         }
 
         graphView.dispatchCommand(new VariableDeclarationCommands.CreateGraphVariableDeclarationCommand(

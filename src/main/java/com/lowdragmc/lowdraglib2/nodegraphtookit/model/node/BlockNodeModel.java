@@ -1,7 +1,6 @@
 package com.lowdragmc.lowdraglib2.nodegraphtookit.model.node;
 
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.node.BlockNode;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.GraphElement;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.node.BlockNodeElement;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.Capabilities;
 import lombok.Getter;

@@ -2,26 +2,12 @@ package com.lowdragmc.lowdraglib2.uitest;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.LDLib2Registries;
-import com.lowdragmc.lowdraglib2.uitest.mp.MPHubClient;
-import com.lowdragmc.lowdraglib2.uitest.mp.MPMessages;
-import com.lowdragmc.lowdraglib2.uitest.mp.MPRunConfig;
-import com.lowdragmc.lowdraglib2.uitest.mp.MPScenario;
-import com.lowdragmc.lowdraglib2.uitest.mp.MPScenarioBuilder;
-import com.lowdragmc.lowdraglib2.uitest.mp.MPScenarioOptions;
-import com.lowdragmc.lowdraglib2.uitest.mp.MPSegment;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import com.lowdragmc.lowdraglib2.uitest.mp.*;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * One client's side of a multi-process run: the hub connection, and the compiler that turns a

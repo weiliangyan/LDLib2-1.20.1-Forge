@@ -1,22 +1,23 @@
 package com.lowdragmc.lowdraglib2.networking.s2c;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
+import com.lowdragmc.lowdraglib2.compat.network.IPayloadContext;
+import com.lowdragmc.lowdraglib2.compat.network.custom.CustomPacketPayload;
 import com.lowdragmc.lowdraglib2.networking.PacketIntLocation;
 import com.lowdragmc.lowdraglib2.syncdata.holder.blockentity.ISyncBlockEntity;
 import lombok.Getter;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.nikdo53.neobackports.io.StreamCodec;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.BitSet;
+import java.util.Objects;
 
 /**
  * a packet that contains payload for managed fields
@@ -25,7 +26,7 @@ import java.util.*;
 public class SPacketAutoSyncBlockEntity extends PacketIntLocation {
     public static final ResourceLocation ID = LDLib2.id("auto_sync_block_entity");
     public static final Type<SPacketAutoSyncBlockEntity> TYPE = new Type<>(ID);
-    public static final StreamCodec<RegistryFriendlyByteBuf, SPacketAutoSyncBlockEntity> CODEC = StreamCodec.ofMember(SPacketAutoSyncBlockEntity::write, SPacketAutoSyncBlockEntity::decode);
+    public static final StreamCodec<SPacketAutoSyncBlockEntity> CODEC = StreamCodec.ofMember(SPacketAutoSyncBlockEntity::write, SPacketAutoSyncBlockEntity::decode);
 
     private final BlockEntityType<?> blockEntityType;
     private final BitSet changed;
@@ -62,7 +63,7 @@ public class SPacketAutoSyncBlockEntity extends PacketIntLocation {
     }
 
     @Override
-    public void write(RegistryFriendlyByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         super.write(buf);
         buf.writeResourceLocation(Objects.requireNonNull(BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(blockEntityType)));
         buf.writeByteArray(changed.toByteArray());
@@ -70,7 +71,7 @@ public class SPacketAutoSyncBlockEntity extends PacketIntLocation {
         buf.writeNbt(extra);
     }
 
-    public static SPacketAutoSyncBlockEntity decode(RegistryFriendlyByteBuf buffer) {
+    public static SPacketAutoSyncBlockEntity decode(FriendlyByteBuf buffer) {
         var pos = buffer.readBlockPos();
         var blockEntityType = BuiltInRegistries.BLOCK_ENTITY_TYPE.get(buffer.readResourceLocation());
         var changed = BitSet.valueOf(buffer.readByteArray());

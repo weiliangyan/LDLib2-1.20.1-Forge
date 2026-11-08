@@ -7,8 +7,8 @@ import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.WireElement;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire.WireModel;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The thresholds that decide whether graph content draws in full, as flat silhouettes, or as plain

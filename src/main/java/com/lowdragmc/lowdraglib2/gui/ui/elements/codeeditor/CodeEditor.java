@@ -2,24 +2,26 @@ package com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor;
 
 import com.lowdragmc.lowdraglib2.gui.LDLibFonts;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.TextArea;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor.language.*;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor.language.ILanguageDefinition;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor.language.StyleManager;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor.language.SyntaxParser;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor.language.Token;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvent;
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext;
 import com.lowdragmc.lowdraglib2.gui.ui.style.PropertyRegistry;
+import com.lowdragmc.lowdraglib2.gui.ui.utils.KeyState;
 import com.lowdragmc.lowdraglib2.integration.kjs.KJSBindings;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegister;
-import com.lowdragmc.lowdraglib2.gui.ui.utils.KeyState;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -258,7 +260,7 @@ public class CodeEditor extends TextArea {
         }
 
         // Draw placeholder if empty
-        if (styledLines.isEmpty() || (styledLines.size() == 1 && styledLines.getFirst().text().isEmpty())) {
+        if (styledLines.isEmpty() || (styledLines.size() == 1 && styledLines.get(0).text().isEmpty())) {
             drawPlaceHolder(guiContext, font, scale, x, y);
         }
     }

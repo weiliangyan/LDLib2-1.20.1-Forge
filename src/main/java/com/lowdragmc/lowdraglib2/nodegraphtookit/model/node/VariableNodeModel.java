@@ -13,6 +13,7 @@ import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.definition.NodeDefin
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.variable.ModifierFlags;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.variable.VariableDeclarationModelBase;
 import com.lowdragmc.lowdraglib2.syncdata.annotation.Persisted;
+import com.lowdragmc.lowdraglib2.utils.LDLibExtraCodecs;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
@@ -78,9 +79,9 @@ public class VariableNodeModel extends NodeModel implements ISingleInputPortNode
     public DeclarationModel getDeclarationModel() {
         if (declarationModel == null) {
             var result = PlaceholderModelHelper.tryGetPlaceholderGraphElementModel(graphModel, declarationModelUid);
-            if (result.isSuccess()) {
+            if (result.result().isPresent()) {
                 PlaceholderModelHelper.setPlaceholderCapabilities(this);
-                return (DeclarationModel) result.getOrThrow();
+                return (DeclarationModel) LDLibExtraCodecs.getOrThrow(result);
             }
         }
         return declarationModel;

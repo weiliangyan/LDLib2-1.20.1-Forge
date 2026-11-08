@@ -8,8 +8,8 @@ import com.lowdragmc.lowdraglib2.uitest.input.InputListener;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;

@@ -40,7 +40,7 @@ public interface ILDLRegister<T extends ILDLRegister<T, V>, V> {
 
     default ResourceLocation registryName() {
         if (isLDLRegister()) {
-            return ResourceLocation.parse(getRegisterUI().registry());
+            return new ResourceLocation(getRegisterUI().registry());
         }
         throw new RuntimeException("not registered %s".formatted(getClass()));
     }

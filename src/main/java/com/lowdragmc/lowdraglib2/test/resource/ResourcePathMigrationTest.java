@@ -12,8 +12,8 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.io.File;
 import java.io.IOException;
@@ -195,7 +195,7 @@ public class ResourcePathMigrationTest {
     @PrefixGameTestTemplate(false)
     public static void toResourceLocationStillDerives(GameTestHelper helper) {
         var path = new FilePath(new File(LDLib2.getAssetsDir(), "ldlib2/resources/global/x.color.nbt"));
-        var expected = ResourceLocation.fromNamespaceAndPath("ldlib2", "resources/global/x.color.nbt");
+        var expected = new ResourceLocation("ldlib2", "resources/global/x.color.nbt");
         if (!expected.equals(path.getLocation())) {
             helper.fail("Expected " + expected + ", got " + path.getLocation());
             return;

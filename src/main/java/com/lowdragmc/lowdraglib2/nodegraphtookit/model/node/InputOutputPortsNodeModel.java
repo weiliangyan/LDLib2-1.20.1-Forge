@@ -1,7 +1,8 @@
 package com.lowdragmc.lowdraglib2.nodegraphtookit.model.node;
 
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.node.INodeOption;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.api.port.*;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.api.port.PortDirection;
+import lombok.Getter;
 
 import java.util.*;
 
@@ -11,6 +12,7 @@ import java.util.*;
  * <p>This is the base class for most node types that have ports on both sides.</p>
  */
 public abstract class InputOutputPortsNodeModel extends PortNodeModel {
+    @Getter
     protected final List<NodeOption> nodeOptions = new ArrayList<>();
     protected final Map<String, NodeOption> nodeOptionsById = new HashMap<>();
 
@@ -61,14 +63,6 @@ public abstract class InputOutputPortsNodeModel extends PortNodeModel {
     // ----------------------------
     // Node options
     // ----------------------------
-    /**
-     * Gets the node options defined on this node.
-     *
-     * @return the list of node options
-     */
-    public List<NodeOption> getNodeOptions() {
-        return nodeOptions;
-    }
 
     /**
      * Gets a node option by its unique name.
@@ -104,6 +98,6 @@ public abstract class InputOutputPortsNodeModel extends PortNodeModel {
     @Override
     public PortModel getPortFitToConnectTo(PortModel portModel) {
         var compatiblePorts = getPortsFitToConnectTo(portModel);
-        return compatiblePorts.isEmpty() ? null : compatiblePorts.getFirst();
+        return compatiblePorts.isEmpty() ? null : compatiblePorts.get(0);
     }
 }

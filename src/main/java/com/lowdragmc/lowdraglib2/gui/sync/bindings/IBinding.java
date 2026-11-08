@@ -3,7 +3,6 @@ package com.lowdragmc.lowdraglib2.gui.sync.bindings;
 import com.lowdragmc.lowdraglib2.gui.sync.SyncValue;
 
 import javax.annotation.Nonnull;
-import org.jetbrains.annotations.Nullable;
 
 public interface IBinding<T> {
     /**

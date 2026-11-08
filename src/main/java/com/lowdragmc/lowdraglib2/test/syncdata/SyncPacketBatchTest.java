@@ -2,6 +2,8 @@ package com.lowdragmc.lowdraglib2.test.syncdata;
 
 import com.lowdragmc.lowdraglib2.CommonProxy;
 import com.lowdragmc.lowdraglib2.LDLib2;
+import com.lowdragmc.lowdraglib2.compat.network.IPayloadContext;
+import com.lowdragmc.lowdraglib2.compat.network.custom.CustomPacketPayload;
 import com.lowdragmc.lowdraglib2.networking.s2c.SPacketAutoSyncBlockEntities;
 import com.lowdragmc.lowdraglib2.networking.s2c.SPacketAutoSyncBlockEntities.Entry;
 import com.lowdragmc.lowdraglib2.networking.s2c.SPacketAutoSyncBlockEntity;
@@ -15,26 +17,17 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
-import net.neoforged.neoforge.network.connection.ConnectionType;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.nikdo53.neobackports.io.StreamCodec;
 
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 @GameTestHolder(LDLib2.MOD_ID)
 public class SyncPacketBatchTest {
@@ -111,8 +104,8 @@ public class SyncPacketBatchTest {
                 counterUpdate(level, helper.absolutePos(second), 7)));
 
         SPacketAutoSyncBlockEntities.execute(packet, contextOf(level));
-        SyncTestBlockEntity firstBe = helper.getBlockEntity(first);
-        SyncTestBlockEntity secondBe = helper.getBlockEntity(second);
+        SyncTestBlockEntity firstBe = (SyncTestBlockEntity) helper.getBlockEntity(first);
+        SyncTestBlockEntity secondBe = (SyncTestBlockEntity) helper.getBlockEntity(second);
         check(helper, firstBe.counter == 5, "the first block entity has counter " + firstBe.counter + ", expected 5 and not the mismatched type's 9");
         check(helper, secondBe.counter == 7, "a corrupt entry stopped the ones after it, counter " + secondBe.counter);
         helper.succeed();
@@ -145,9 +138,9 @@ public class SyncPacketBatchTest {
         var packets = SyncPacketBatch.build(level, updates);
         var positions = packets.entries().stream().map(Entry::pos).toList();
         check(helper, positions.equals(List.of(first.getBlockPos(), second.getBlockPos())), "batched " + positions);
-        check(helper, packets.entries().getFirst().extra().getString("note").equals("first"), "custom sync data lost: " + packets.entries().getFirst().extra());
+        check(helper, packets.entries().get(0).extra().getString("note").equals("first"), "custom sync data lost: " + packets.entries().get(0).extra());
         check(helper, packets.singles().size() == 2, packets.singles().size() + " single packets for the players who can't take a batch");
-        check(helper, packets.custom().size() == 1 && packets.custom().getFirst().payload().type().id().equals(LDLib2.id("managed_codec_test")),
+        check(helper, packets.custom().size() == 1 && packets.custom().get(0).getIdentifier().equals(LDLib2.id("managed_codec_test")),
                 "the holder's own payload was not passed through: " + packets.custom());
         helper.succeed();
     }
@@ -166,7 +159,7 @@ public class SyncPacketBatchTest {
 
         @Override
         public void send(Packet<?> packet) {
-            received.add(((ClientboundCustomPayloadPacket) packet).payload());
+            //received.add(((ClientboundCustomPayloadPacket) packet).payload());
         }
     }
 
@@ -187,8 +180,8 @@ public class SyncPacketBatchTest {
         var none = new FakeReceiver(false);
         SyncPacketBatch.send(List.of(broken, batching, singleOnly, none), packets);
 
-        check(helper, batching.received().size() == 2 && batching.received().getFirst() instanceof SPacketAutoSyncBlockEntities batch
-                && batch.entries().size() == 2 && batching.received().getLast().type().equals(customType),
+        check(helper, batching.received().size() == 2 && batching.received().get(0) instanceof SPacketAutoSyncBlockEntities batch
+                && batch.entries().size() == 2 && batching.received().get(batching.received.size() - 1).type().equals(customType),
                 "a player taking batches got " + batching.received());
         check(helper, singleOnly.received().size() == 3 && singleOnly.received().stream().filter(SPacketAutoSyncBlockEntity.class::isInstance).count() == 2,
                 "a player without the batch channel got " + singleOnly.received());
@@ -201,7 +194,7 @@ public class SyncPacketBatchTest {
         source.counter = counter;
         var fields = source.getSyncStorage().getSyncFields();
         int index = syncIndex("counter");
-        var data = ByteBufUtil.writeCustomData(buf -> fields[index].readSyncToStream(buf), level.registryAccess());
+        var data = ByteBufUtil.writeCustomData(buf -> fields[index].readSyncToStream(buf));
         return new Entry(pos, CommonProxy.SYNC_TEST_BE_TYPE.get(), bits(index), data, new CompoundTag());
     }
 
@@ -234,8 +227,8 @@ public class SyncPacketBatchTest {
         return bits;
     }
 
-    private static <T> RegistryFriendlyByteBuf buffer(ServerLevel level, StreamCodec<RegistryFriendlyByteBuf, T> codec, T value) {
-        var buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), level.registryAccess(), ConnectionType.NEOFORGE);
+    private static <T> FriendlyByteBuf buffer(ServerLevel level, StreamCodec<T> codec, T value) {
+        var buf = new FriendlyByteBuf(Unpooled.buffer());
         codec.encode(buf, value);
         return buf;
     }

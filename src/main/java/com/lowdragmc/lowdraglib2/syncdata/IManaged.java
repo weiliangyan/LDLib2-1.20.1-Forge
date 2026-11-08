@@ -1,9 +1,9 @@
 package com.lowdragmc.lowdraglib2.syncdata;
 
 import com.lowdragmc.lowdraglib2.syncdata.field.ManagedFieldHolder;
+import com.lowdragmc.lowdraglib2.syncdata.ref.IRef;
 import com.lowdragmc.lowdraglib2.syncdata.storage.IFieldUpdateListener;
 import com.lowdragmc.lowdraglib2.syncdata.storage.IManagedStorage;
-import com.lowdragmc.lowdraglib2.syncdata.ref.IRef;
 
 public interface IManaged {
 

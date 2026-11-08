@@ -9,7 +9,6 @@ import com.lowdragmc.lowdraglib2.integration.xei.rei.handler.REIRecipeIngredient
 import com.lowdragmc.lowdraglib2.integration.xei.rei.handler.REIRecipeWidgetHandler;
 import com.lowdragmc.lowdraglib2.test.xei.TestREIPlugin;
 import dev.architectury.event.CompoundEventResult;
-import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
@@ -145,8 +144,8 @@ LDLibREIPlugin implements REIClientPlugin {
                                                               Consumer<EntryStack<I>> onPlace) {
         element.addEventListener(REIUIEvents.ACCEPT_DRAGGABLE_STACK, event -> {
             if (event.customData instanceof REIDraggableStackBoundsHandler handler &&
-                    handler.context.getCurrentPosition() instanceof Point point &&
-                    element.isMouseOverElement(point.x, point.y)) {
+                    handler.context.getCurrentPosition() != null &&
+                    element.isMouseOverElement(handler.context.getCurrentPosition().x, handler.context.getCurrentPosition().y)) {
                 var target = handler.stack.get();
                 if (target == type && mayPlace.test(target.cast())) {
                     onPlace.accept(target.cast());

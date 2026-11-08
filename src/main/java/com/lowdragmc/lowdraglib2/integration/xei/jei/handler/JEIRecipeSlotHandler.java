@@ -10,10 +10,7 @@ import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 public final class JEIRecipeSlotHandler {
@@ -26,7 +23,8 @@ public final class JEIRecipeSlotHandler {
         event.target = modularUI.ui.rootElement;
         event.customData = handler;
         UIEventDispatcher.dispatchAllChildren(event);
-        var pendingBindings = new ArrayList<>(handler.bindings.values()).reversed();
+        var pendingBindings = new ArrayList<>(handler.bindings.values());
+        Collections.reverse(pendingBindings);
         var result = new ArrayList<Binding>(pendingBindings.size());
         for (var binding : pendingBindings) {
             result.add(binding.build(result.size()));

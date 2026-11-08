@@ -1,13 +1,12 @@
 package com.lowdragmc.lowdraglib2.gui.factory;
 
 
+import com.lowdragmc.lowdraglib2.gui.holder.ModularUIContainerMenu;
+import com.lowdragmc.lowdraglib2.gui.holder.ModularUIContainerScreen;
 import com.lowdragmc.lowdraglib2.gui.sync.UISyncManager;
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.world.entity.player.Player;
-
-import com.lowdragmc.lowdraglib2.gui.holder.ModularUIContainerMenu;
-import com.lowdragmc.lowdraglib2.gui.holder.ModularUIContainerScreen;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 

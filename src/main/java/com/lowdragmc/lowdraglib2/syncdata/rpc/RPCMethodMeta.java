@@ -1,13 +1,12 @@
 package com.lowdragmc.lowdraglib2.syncdata.rpc;
 
-import com.lowdragmc.lowdraglib2.Platform;
 import com.lowdragmc.lowdraglib2.networking.rpc.RPCPacketHandler;
 import com.lowdragmc.lowdraglib2.syncdata.AccessorRegistries;
 import com.lowdragmc.lowdraglib2.syncdata.accessor.direct.IDirectAccessor;
 import com.lowdragmc.lowdraglib2.syncdata.var.ManagedHolderVar;
 import com.lowdragmc.lowdraglib2.utils.ByteBufUtil;
 import lombok.Getter;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -56,7 +55,7 @@ public final class RPCMethodMeta implements RPCPacketHandler {
     }
 
     @SuppressWarnings("unchecked")
-    public void invoke(Object instance, RPCSender sender, RegistryFriendlyByteBuf buf) {
+    public void invoke(Object instance, RPCSender sender, FriendlyByteBuf buf) {
         Object[] args;
         if (isFirstArgSender) {
             args = new Object[argsAccessor.length + 1];
@@ -83,7 +82,7 @@ public final class RPCMethodMeta implements RPCPacketHandler {
     }
 
     @SuppressWarnings("unchecked")
-    public void serializeArgs(RegistryFriendlyByteBuf buf, Object[] args) {
+    public void serializeArgs(FriendlyByteBuf buf, Object[] args) {
         if(argsAccessor.length != args.length) {
             throw new IllegalArgumentException("Invalid number of arguments, expected " + argsAccessor.length + " but got " + args.length);
         }
@@ -105,8 +104,7 @@ public final class RPCMethodMeta implements RPCPacketHandler {
 
     @Override
     public byte[] args2Bytes(Object... args) {
-        return ByteBufUtil.writeCustomData(buf ->
-                serializeArgs(buf, args), Platform.getFrozenRegistry());
+        return ByteBufUtil.writeCustomData(buf -> serializeArgs(buf, args));
     }
 
     @Override
@@ -118,7 +116,7 @@ public final class RPCMethodMeta implements RPCPacketHandler {
                 ((IDirectAccessor)argsAccessor[i]).writeDirectVarFromStream(buf, holder);
                 args[i] = holder.value();
             }
-        }, Platform.getFrozenRegistry());
+        });
         return args;
     }
 

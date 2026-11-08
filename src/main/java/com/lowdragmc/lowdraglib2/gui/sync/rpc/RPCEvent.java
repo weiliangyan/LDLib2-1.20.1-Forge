@@ -1,9 +1,9 @@
 package com.lowdragmc.lowdraglib2.gui.sync.rpc;
 
 import com.lowdragmc.lowdraglib2.syncdata.SyncValueHolder;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-
+import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.Nullable;
+
 import java.util.function.Function;
 
 public record RPCEvent(
@@ -18,7 +18,7 @@ public record RPCEvent(
         }
     }
 
-    public void writeParametersToBuffer(RegistryFriendlyByteBuf buffer, Object[] args) {
+    public void writeParametersToBuffer(FriendlyByteBuf buffer, Object[] args) {
         checkArgs(args);
         for (int i = 0; i < args.length; i++) {
             var argHolder = argHolders[i];
@@ -28,7 +28,7 @@ public record RPCEvent(
         }
     }
 
-    public Object[] readParametersFromBuffer(RegistryFriendlyByteBuf buffer) {
+    public Object[] readParametersFromBuffer(FriendlyByteBuf buffer) {
         var args = new Object[argHolders.length];
         for (int i = 0; i < argHolders.length; i++) {
             var argHolder = argHolders[i];
@@ -38,7 +38,7 @@ public record RPCEvent(
         return args;
     }
 
-    public void writeReturnValueToBuffer(RegistryFriendlyByteBuf buffer, Object returnValue) {
+    public void writeReturnValueToBuffer(FriendlyByteBuf buffer, Object returnValue) {
         if (returnHolder != null) {
             returnHolder.setValue(returnValue);
             returnHolder.ref.update();
@@ -46,7 +46,7 @@ public record RPCEvent(
         }
     }
 
-    public Object readReturnValueFromBuffer(RegistryFriendlyByteBuf buffer) {
+    public Object readReturnValueFromBuffer(FriendlyByteBuf buffer) {
         if (returnHolder != null) {
             returnHolder.ref.writeSyncFromStream(buffer);
             return returnHolder.getValue();

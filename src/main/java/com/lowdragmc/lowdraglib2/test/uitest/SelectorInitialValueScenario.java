@@ -55,12 +55,12 @@ public class SelectorInitialValueScenario implements UIScenario {
     private static String previewText(TestContext ctx, String sel) {
         var children = selector(ctx, sel).preview.getChildren();
         if (children.isEmpty()) return "<no preview child>";
-        return children.getFirst() instanceof TextElement text ? text.getText().getString() : "<not text>";
+        return children.get(0) instanceof TextElement text ? text.getText().getString() : "<not text>";
     }
 
     private static boolean labelFills(TestContext ctx, String sel) {
         var preview = selector(ctx, sel).preview;
         if (preview.getChildren().isEmpty()) return false;
-        return Math.abs(preview.getChildren().getFirst().getSizeWidth() - preview.getContentWidth()) < 0.5f;
+        return Math.abs(preview.getChildren().get(0).getSizeWidth() - preview.getContentWidth()) < 0.5f;
     }
 }

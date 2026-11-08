@@ -1,8 +1,8 @@
 package com.lowdragmc.lowdraglib2.uitest.input;
 
 import com.lowdragmc.lowdraglib2.uitest.InputMode;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * {@link InputMode#SYNTHETIC}: refresh the hover for the target position, then call the matching
@@ -83,7 +83,7 @@ public class SyntheticInputDriver extends InputDriver {
         placeCursor(x, y);
         var screen = screen();
         if (screen != null) {
-            screen.mouseScrolled(x, y, 0d, amount);
+            screen.mouseScrolled(x, y, amount);
         }
         if (listener != null) listener.scroll(x, y, amount);
     }

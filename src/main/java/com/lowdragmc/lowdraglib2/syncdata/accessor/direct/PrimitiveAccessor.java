@@ -2,16 +2,15 @@ package com.lowdragmc.lowdraglib2.syncdata.accessor.direct;
 
 import com.lowdragmc.lowdraglib2.syncdata.accessor.IMarkFunction;
 import com.lowdragmc.lowdraglib2.syncdata.field.ManagedKey;
-import com.lowdragmc.lowdraglib2.syncdata.var.FieldVar;
 import com.lowdragmc.lowdraglib2.syncdata.ref.DirectRef;
-import com.lowdragmc.lowdraglib2.syncdata.var.IVar;
 import com.lowdragmc.lowdraglib2.syncdata.ref.UniqueDirectRef;
+import com.lowdragmc.lowdraglib2.syncdata.var.FieldVar;
+import com.lowdragmc.lowdraglib2.syncdata.var.IVar;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.PrimitiveCodec;
-import io.netty.buffer.ByteBuf;
 import lombok.Getter;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.FriendlyByteBuf;
+import net.nikdo53.neobackports.io.StreamCodec;
 import org.jetbrains.annotations.NotNull;
 
 @Getter
@@ -19,15 +18,15 @@ public final class PrimitiveAccessor<TYPE> implements IDirectAccessor<TYPE>, IMa
 
     private final Class<?>[] operandTypes;
     private final PrimitiveCodec<TYPE> codec;
-    private final StreamCodec<ByteBuf, TYPE> streamCodec;
+    private final StreamCodec<TYPE> streamCodec;
 
-    private PrimitiveAccessor(PrimitiveCodec<TYPE> codec, StreamCodec<ByteBuf, TYPE> streamCodec, Class<?> ...operandTypes) {
+    private PrimitiveAccessor(PrimitiveCodec<TYPE> codec, StreamCodec<TYPE> streamCodec, Class<?> ...operandTypes) {
         this.operandTypes = operandTypes;
         this.codec = codec;
         this.streamCodec = streamCodec;
     }
 
-    public static <T> PrimitiveAccessor<T> of(PrimitiveCodec<T> codec, StreamCodec<ByteBuf, T> streamCodec, Class<?> ...operandTypes) {
+    public static <T> PrimitiveAccessor<T> of(PrimitiveCodec<T> codec, StreamCodec<T> streamCodec, Class<?> ...operandTypes) {
         return new PrimitiveAccessor<>(codec, streamCodec, operandTypes);
     }
 
@@ -57,12 +56,12 @@ public final class PrimitiveAccessor<TYPE> implements IDirectAccessor<TYPE>, IMa
     }
 
     @Override
-    public void readDirectVarToStream(RegistryFriendlyByteBuf buffer, IVar<TYPE> var) {
+    public void readDirectVarToStream(FriendlyByteBuf buffer, IVar<TYPE> var) {
         streamCodec.encode(buffer, var.value());
     }
 
     @Override
-    public void writeDirectVarFromStream(RegistryFriendlyByteBuf buffer, IVar<TYPE> var) {
+    public void writeDirectVarFromStream(FriendlyByteBuf buffer, IVar<TYPE> var) {
         var.set(streamCodec.decode(buffer));
     }
 

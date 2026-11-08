@@ -4,8 +4,8 @@ import com.lowdragmc.lowdraglib2.nodegraphtookit.api.type.TypeHandle;
 import lombok.Getter;
 import lombok.Setter;
 
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Concrete implementation of {@link IOptionDefinitionContext}.
@@ -24,7 +24,7 @@ public class OptionDefinitionContext implements IOptionDefinitionContext {
         if (pool.isEmpty()) {
             builder = new OptionBuilder();
         } else {
-            builder = pool.removeLast();
+            builder = pool.remove(pool.size() - 1);
         }
         active.add(builder);
         return builder;
@@ -44,14 +44,14 @@ public class OptionDefinitionContext implements IOptionDefinitionContext {
 
     public void finish() {
         while (!active.isEmpty()) {
-            active.getFirst().build();
+            active.get(0).build();
         }
     }
 
     /** Done with this node's definition: free for the next one. */
     public void release() {
         while (!active.isEmpty()) {
-            freeBuilder(active.getFirst());
+            freeBuilder(active.get(0));
         }
         scope = null;
     }

@@ -6,8 +6,9 @@ import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigSetter;
 import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
 import com.lowdragmc.lowdraglib2.editor.ClipboardManager;
 import com.lowdragmc.lowdraglib2.gui.ColorPattern;
-import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib2.gui.LDLibFonts;
+import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
+import com.lowdragmc.lowdraglib2.gui.ui.Style;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Cursor;
 import com.lowdragmc.lowdraglib2.gui.ui.data.ScrollDisplay;
@@ -16,42 +17,38 @@ import com.lowdragmc.lowdraglib2.gui.ui.event.CommandEvents;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvent;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext;
-import com.lowdragmc.lowdraglib2.gui.ui.Style;
 import com.lowdragmc.lowdraglib2.gui.ui.style.Property;
 import com.lowdragmc.lowdraglib2.gui.ui.style.PropertyRegistry;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
+import com.lowdragmc.lowdraglib2.gui.ui.utils.KeyState;
 import com.lowdragmc.lowdraglib2.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib2.integration.kjs.KJSBindings;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib2.utils.HistoryStack;
 import com.lowdragmc.lowdraglib2.utils.TextUtilities;
 import com.lowdragmc.lowdraglib2.utils.XmlUtils;
-import com.lowdragmc.lowdraglib2.gui.ui.utils.KeyState;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import dev.vfyjxf.taffy.style.TaffyDisplay;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import net.minecraft.Util;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.util.StringUtil;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import org.appliedenergistics.yoga.YogaEdge;
-import org.appliedenergistics.yoga.YogaOverflow;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.w3c.dom.Element;
 import oshi.util.tuples.Pair;
 
-import org.jetbrains.annotations.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,9 +68,9 @@ public class TextArea extends BindableUIElement<String[]> {
     public record History(String[] lines, Cursor cursor) {
         @Override
         public boolean equals(Object obj) {
-            return obj instanceof History(String[] lines1, Cursor cursor1) &&
-                    Arrays.deepEquals(lines1, lines) &&
-                    Objects.equals(cursor1, cursor);
+            return obj instanceof History history &&
+                    Arrays.deepEquals(history.lines(), lines) &&
+                    Objects.equals(history.cursor(), cursor);
         }
     }
 
@@ -745,7 +742,8 @@ public class TextArea extends BindableUIElement<String[]> {
     }
 
     protected void onDragSource(UIEvent event) {
-        if (event.dragHandler.draggingObject instanceof CursorDragStart(Cursor anchor)) {
+        if (event.dragHandler.draggingObject instanceof CursorDragStart cursorDragStart) {
+            var anchor = cursorDragStart.anchor();
             var localMouse = getLocalMouse(event.x, event.y);
             var pos = getCursorUnderMouse(localMouse.x, localMouse.y);
             setCursor(pos.line(), pos.col());
@@ -788,7 +786,7 @@ public class TextArea extends BindableUIElement<String[]> {
 
     protected void onCharTyped(UIEvent event) {
         if (!isEditable()) return;
-        if (StringUtil.isAllowedChatCharacter(event.codePoint) && charValidator.test(event.codePoint)) {
+        if (SharedConstants.isAllowedChatCharacter(event.codePoint) && charValidator.test(event.codePoint)) {
             insertText(Character.toString(event.codePoint));
         }
     }
@@ -1072,11 +1070,11 @@ public class TextArea extends BindableUIElement<String[]> {
                 String before = s.substring(0, cursorCol);
                 String after = s.substring(cursorCol);
                 if (incoming.size() == 1) {
-                    lines.set(cursorLine, before + incoming.getFirst() + after);
-                    setCursor(cursorLine, cursorCol + incoming.getFirst().length());
+                    lines.set(cursorLine, before + incoming.get(0) + after);
+                    setCursor(cursorLine, cursorCol + incoming.get(0).length());
                 } else {
-                    String first = before + incoming.getFirst();
-                    String last = incoming.getLast() + after;
+                    String first = before + incoming.get(0);
+                    String last = incoming.get(incoming.size() - 1) + after;
                     lines.set(cursorLine, first);
                     for (int i = 1; i < incoming.size() - 1; i++) {
                         lines.add(cursorLine + i, incoming.get(i));
@@ -1231,7 +1229,7 @@ public class TextArea extends BindableUIElement<String[]> {
         }
 
         // Placeholder
-        if (lines.size() == 1 && lines.getFirst().isEmpty()) {
+        if (lines.size() == 1 && lines.get(0).isEmpty()) {
             drawPlaceHolder(guiContext, font, scale, x, y);
         }
     }

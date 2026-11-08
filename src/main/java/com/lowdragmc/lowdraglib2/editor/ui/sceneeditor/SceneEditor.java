@@ -1,9 +1,15 @@
 package com.lowdragmc.lowdraglib2.editor.ui.sceneeditor;
 
+import com.lowdragmc.lowdraglib2.editor.ui.sceneeditor.sceneobject.IScene;
+import com.lowdragmc.lowdraglib2.editor.ui.sceneeditor.sceneobject.ISceneInteractable;
+import com.lowdragmc.lowdraglib2.editor.ui.sceneeditor.sceneobject.ISceneObject;
+import com.lowdragmc.lowdraglib2.editor.ui.sceneeditor.sceneobject.ISceneRendering;
+import com.lowdragmc.lowdraglib2.editor.ui.sceneeditor.sceneobject.utils.ScenePicking;
+import com.lowdragmc.lowdraglib2.editor.ui.sceneeditor.sceneobject.utils.TransformGizmo;
 import com.lowdragmc.lowdraglib2.gui.ColorPattern;
-import com.lowdragmc.lowdraglib2.gui.texture.Icons;
 import com.lowdragmc.lowdraglib2.gui.texture.GuiTextureGroup;
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
+import com.lowdragmc.lowdraglib2.gui.texture.Icons;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Vertical;
@@ -13,15 +19,9 @@ import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext;
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.UISurface;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
-import com.lowdragmc.lowdraglib2.math.Ray;
 import com.lowdragmc.lowdraglib2.math.ITransform;
+import com.lowdragmc.lowdraglib2.math.Ray;
 import com.lowdragmc.lowdraglib2.math.Transform;
-import com.lowdragmc.lowdraglib2.editor.ui.sceneeditor.sceneobject.IScene;
-import com.lowdragmc.lowdraglib2.editor.ui.sceneeditor.sceneobject.ISceneInteractable;
-import com.lowdragmc.lowdraglib2.editor.ui.sceneeditor.sceneobject.utils.ScenePicking;
-import com.lowdragmc.lowdraglib2.editor.ui.sceneeditor.sceneobject.ISceneObject;
-import com.lowdragmc.lowdraglib2.editor.ui.sceneeditor.sceneobject.ISceneRendering;
-import com.lowdragmc.lowdraglib2.editor.ui.sceneeditor.sceneobject.utils.TransformGizmo;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import dev.vfyjxf.taffy.style.TaffyPosition;
@@ -31,18 +31,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.util.Mth;
-import org.appliedenergistics.yoga.*;
+import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4f;
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
-import org.jetbrains.annotations.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A scene which provides editable features as a unity scene.
@@ -98,7 +95,7 @@ public class SceneEditor extends UIElement implements IScene {
         });
         this.scene.setAfterWorldRender(scene -> {
             var mc = Minecraft.getInstance();
-            var partialTicks = mc.getTimer().getGameTimeDeltaPartialTick(false);
+            var partialTicks = mc.getPartialTick();
             SceneEditor.this.renderAfterWorld(mc.renderBuffers().bufferSource(), partialTicks);
         });
 

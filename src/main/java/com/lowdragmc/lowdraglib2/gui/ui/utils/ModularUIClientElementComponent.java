@@ -5,8 +5,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -29,7 +29,7 @@ public record ModularUIClientElementComponent(ModularUITooltipComponent modularU
         graphics.pose().pushPose();
         graphics.pose().translate(x, y, 0);
         modularUITooltipComponent.modularUI.getWidget()
-                .render(graphics, 0, 0, Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false));
+                .render(graphics, 0, 0, Minecraft.getInstance().getPartialTick());
         graphics.pose().popPose();
     }
 }

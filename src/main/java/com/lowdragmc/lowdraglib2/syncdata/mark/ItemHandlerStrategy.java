@@ -3,7 +3,7 @@ package com.lowdragmc.lowdraglib2.syncdata.mark;
 import com.lowdragmc.lowdraglib2.syncdata.utils.StackSnapshots;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 
 /**

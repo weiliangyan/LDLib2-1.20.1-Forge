@@ -1,6 +1,9 @@
 package com.lowdragmc.lowdraglib2.nodegraphtookit.model.group;
 
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.*;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.model.Capabilities;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.model.GraphElementModel;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.model.IGraphElementContainer;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.model.IHasName;
 import lombok.Getter;
 import lombok.Setter;
 

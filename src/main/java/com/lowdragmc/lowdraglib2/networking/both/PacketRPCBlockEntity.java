@@ -1,20 +1,20 @@
 package com.lowdragmc.lowdraglib2.networking.both;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
+import com.lowdragmc.lowdraglib2.compat.network.IPayloadContext;
+import com.lowdragmc.lowdraglib2.compat.network.custom.CustomPacketPayload;
 import com.lowdragmc.lowdraglib2.networking.PacketIntLocation;
 import com.lowdragmc.lowdraglib2.syncdata.holder.blockentity.IRPCBlockEntity;
 import com.lowdragmc.lowdraglib2.syncdata.rpc.RPCSender;
 import lombok.NoArgsConstructor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.nikdo53.neobackports.io.StreamCodec;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -26,7 +26,7 @@ import java.util.Objects;
 public class PacketRPCBlockEntity extends PacketIntLocation implements CustomPacketPayload {
     public static final ResourceLocation ID = LDLib2.id("rpc_method_payload");
     public static final Type<PacketRPCBlockEntity> TYPE = new Type<>(ID);
-    public static final StreamCodec<RegistryFriendlyByteBuf, PacketRPCBlockEntity> CODEC = StreamCodec.ofMember(PacketRPCBlockEntity::write, PacketRPCBlockEntity::decode);
+    public static final StreamCodec<PacketRPCBlockEntity> CODEC = StreamCodec.ofMember(PacketRPCBlockEntity::write, PacketRPCBlockEntity::decode);
 
     private BlockEntityType<?> blockEntityType;
 
@@ -55,13 +55,13 @@ public class PacketRPCBlockEntity extends PacketIntLocation implements CustomPac
     }
 
     @Override
-    public void write(RegistryFriendlyByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         super.write(buf);
         buf.writeResourceLocation(Objects.requireNonNull(BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(blockEntityType)));
         buf.writeByteArray(data);
     }
 
-    public static PacketRPCBlockEntity decode(RegistryFriendlyByteBuf buffer) {
+    public static PacketRPCBlockEntity decode(FriendlyByteBuf buffer) {
         var pos = buffer.readBlockPos();
         var blockEntityType = BuiltInRegistries.BLOCK_ENTITY_TYPE.get(buffer.readResourceLocation());
         var data = buffer.readByteArray();

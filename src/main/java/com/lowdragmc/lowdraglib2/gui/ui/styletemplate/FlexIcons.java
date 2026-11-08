@@ -97,9 +97,9 @@ public final class FlexIcons {
 
     public static IGuiTexture getFlexWrapIcon(FlexWrap wrap) {
         return switch (wrap) {
-            case FlexWrap.NO_WRAP -> Icons.NOWRAP;
-            case FlexWrap.WRAP -> Icons.WRAP;
-            case FlexWrap.WRAP_REVERSE -> Icons.WRAP_REVERSE;
+            case NO_WRAP -> Icons.NOWRAP;
+            case WRAP -> Icons.WRAP;
+            case WRAP_REVERSE -> Icons.WRAP_REVERSE;
         };
     }
 
@@ -216,12 +216,13 @@ public final class FlexIcons {
 
     public static SpriteTexture getAlignSelfIcon(FlexDirection flexDirection, AlignItems alignSelf) {
         var isRow = flexDirection == FlexDirection.ROW || flexDirection == FlexDirection.ROW_REVERSE;
+        if (alignSelf == null) return isRow ? AUTO_ROW : AUTO_COLUMN;
         return isRow ? switch (alignSelf) {
             case FLEX_START, START -> ALIGN_SELF_FLEX_START_ROW;
             case FLEX_END, END -> ALIGN_SELF_FLEX_END_ROW;
             case CENTER -> ALIGN_SELF_CENTER_ROW;
             case STRETCH -> ALIGN_SELF_STRETCH_ROW;
-            case null, default -> AUTO_ROW;
+            case AUTO, BASELINE -> AUTO_ROW;
         } : switch (alignSelf) {
             case FLEX_START, START -> ALIGN_SELF_FLEX_START_COLUMN;
             case FLEX_END, END -> ALIGN_SELF_FLEX_END_COLUMN;

@@ -1,23 +1,24 @@
 package com.lowdragmc.lowdraglib2.core.mixins;
 
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.llamalad7.mixinextras.sugar.Local;
-import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.client.renderer.IBlockRendererProvider;
 import com.lowdragmc.lowdraglib2.client.renderer.IItemRendererProvider;
 import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.client.resources.model.*;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author KilaBash
@@ -26,7 +27,11 @@ import java.util.Collection;
 @Mixin(ModelBakery.class)
 public abstract class ModelBakeryMixin {
 
-    @Shadow abstract UnbakedModel getModel(ResourceLocation modelPath);
+    @Shadow @Final private Map<ResourceLocation, UnbakedModel> unbakedCache;
+
+    @Shadow @Final private Map<ResourceLocation, UnbakedModel> topLevelModels;
+
+    @Shadow public abstract UnbakedModel getModel(ResourceLocation modelLocation);
 
     @WrapOperation(method = "getModel",
               at = @At(value = "INVOKE",
@@ -46,21 +51,23 @@ public abstract class ModelBakeryMixin {
         original.call(instance, s, objects);
     }
 
-    @ModifyExpressionValue(method = "registerModelAndLoadDependencies",
-                           at = @At(value = "INVOKE",
-                                    target = "Lnet/minecraft/client/resources/model/UnbakedModel;getDependencies()Ljava/util/Collection;"))
-    protected Collection<ResourceLocation> ldlib2$changeLoadedModel(Collection<ResourceLocation> original,
-                                                                   @Local(argsOnly = true) ModelResourceLocation modelResourceLocation,
-                                                                   @Local(argsOnly = true) LocalRef<UnbakedModel> model) {
-        if (!modelResourceLocation.getVariant().equals(ModelResourceLocation.STANDALONE_VARIANT)) {
-            ResourceLocation resourceLocation = modelResourceLocation.id();
-            var block = BuiltInRegistries.BLOCK.get(resourceLocation);
-            if (block instanceof IBlockRendererProvider) {
-                UnbakedModel newModel = getModel(LDLib2.id("block/renderer_model"));
-                model.set(newModel);
-                return newModel.getDependencies();
-            }
+    @Inject(method = "loadTopLevel", at = @At("HEAD"), cancellable = true)
+    protected void ldlib2$loadRendererModelForBlockRendererProvider(ModelResourceLocation location, CallbackInfo ci) {
+        if (location.getVariant().equals("standalone")) {
+            ResourceLocation resourceLocation = new ResourceLocation(location.getNamespace(), location.getPath());
+            UnbakedModel model = getModel(resourceLocation);
+            unbakedCache.put(location, model);
+            topLevelModels.put(location, model);
+            ci.cancel();
+            return;
         }
-        return original;
+        ResourceLocation resourceLocation = new ResourceLocation(location.getNamespace(), location.getPath());
+        var block = BuiltInRegistries.BLOCK.get(resourceLocation);
+        if (block instanceof IBlockRendererProvider) {
+            UnbakedModel newModel = getModel(LDLib2.id("block/renderer_model"));
+            unbakedCache.put(location, newModel);
+            topLevelModels.put(location, newModel);
+            ci.cancel();
+        }
     }
 }

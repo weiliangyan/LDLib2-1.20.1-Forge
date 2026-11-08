@@ -6,11 +6,10 @@ import com.lowdragmc.lowdraglib2.client.renderer.block.RendererBlock;
 import com.lowdragmc.lowdraglib2.client.renderer.block.RendererBlockEntity;
 import com.lowdragmc.lowdraglib2.client.renderer.impl.IModelRenderer;
 import com.lowdragmc.lowdraglib2.client.renderer.impl.UIResourceRenderer;
-import com.lowdragmc.lowdraglib2.client.scene.FBOWorldSceneRenderer;
 import com.lowdragmc.lowdraglib2.client.scene.ImmediateWorldSceneRenderer;
 import com.lowdragmc.lowdraglib2.editor.ui.resource.ResourceProviderContainer;
-import com.lowdragmc.lowdraglib2.gui.texture.Icons;
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
+import com.lowdragmc.lowdraglib2.gui.texture.Icons;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.integration.kjs.KJSBindings;
@@ -19,21 +18,13 @@ import com.lowdragmc.lowdraglib2.utils.virtuallevel.TrackedDummyWorld;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.function.Consumer;
 
 @KJSBindings
@@ -87,7 +78,7 @@ public class IRendererResource extends Resource<IRenderer> {
             var path = location.getPath();
             if (path.startsWith("models/")) path = path.substring("models/".length());
             if (path.endsWith(".json")) path = path.substring(0, path.length() - ".json".length());
-            context.complete(new IModelRenderer(ResourceLocation.fromNamespaceAndPath(location.getNamespace(), path)));
+            context.complete(new IModelRenderer(new ResourceLocation(location.getNamespace(), path)));
             reloadResourcesAndRefreshOpenedContainers();
         }, context::cancel);
     }
@@ -146,7 +137,7 @@ public class IRendererResource extends Resource<IRenderer> {
         }
     }
 
-    public void onAdditionalModel(Consumer<ModelResourceLocation> registry) {
+    public void onAdditionalModel(Consumer<ResourceLocation> registry) {
         for (var renderer : getLoadedResourceRenderers()) {
             renderer.onAdditionalModel(registry);
         }

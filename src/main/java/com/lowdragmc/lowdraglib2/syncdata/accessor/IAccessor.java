@@ -3,7 +3,7 @@ package com.lowdragmc.lowdraglib2.syncdata.accessor;
 import com.lowdragmc.lowdraglib2.syncdata.field.ManagedKey;
 import com.lowdragmc.lowdraglib2.syncdata.ref.IRef;
 import com.mojang.serialization.DynamicOps;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 
 import javax.annotation.Nonnull;
 import java.util.function.Predicate;
@@ -37,14 +37,14 @@ public interface IAccessor<TYPE> extends Predicate<Class<?>> {
      * @param buffer The buffer to write.
      * @param ref The field to read.
      */
-    void readFieldToStream(RegistryFriendlyByteBuf buffer, IRef<TYPE> ref);
+    void readFieldToStream(FriendlyByteBuf buffer, IRef<TYPE> ref);
 
     /**
      * Write the field value from the buffer.
      * @param buffer The buffer to read.
      * @param ref The field to write.
      */
-    void writeFieldFromStream(RegistryFriendlyByteBuf buffer, IRef<TYPE> ref);
+    void writeFieldFromStream(FriendlyByteBuf buffer, IRef<TYPE> ref);
 
     /**
      * Create a reference. Which is called by the {@link ManagedKey#createRef(Object)}

@@ -5,21 +5,15 @@ import com.lowdragmc.lowdraglib2.nodegraphtookit.api.type.TypeHandle;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.type.TypeHandleHelpers;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.variable.VariableKind;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.graph.CustomGraphModelImpl;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.AbstractNodeModel;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.ConstantNodeModel;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.CustomNodeModelImpl;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.NodeOption;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.VariableNodeModel;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.*;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.variable.VariableDeclarationModel;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire.WireModel;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.api.type.TypeHandleHelpers;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.variable.VariableDeclarationModel;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import org.joml.Vector2f;
 
 @GameTestHolder(LDLib2.MOD_ID)
@@ -882,9 +876,9 @@ public class GraphSerializationTest {
         var graph2 = new TestGraph();
         graph2.graphModel.deserializeNBT(provider, serialized);
 
-        com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.CustomNodeModelImpl restored = null;
+        CustomNodeModelImpl restored = null;
         for (var n : graph2.graphModel.getNodeModels()) {
-            if (n instanceof com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.CustomNodeModelImpl cn && cn.getUid().equals(node.getUid())) {
+            if (n instanceof CustomNodeModelImpl cn && cn.getUid().equals(node.getUid())) {
                 restored = cn;
                 break;
             }
@@ -1250,10 +1244,10 @@ public class GraphSerializationTest {
         }
     }
 
-    private static com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.CustomNodeModelImpl findRestoredNode(
+    private static CustomNodeModelImpl findRestoredNode(
             TestGraph graph, java.util.UUID nodeUid) {
         for (var n : graph.graphModel.getNodeModels()) {
-            if (n instanceof com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.CustomNodeModelImpl cn
+            if (n instanceof CustomNodeModelImpl cn
                     && cn.getUid().equals(nodeUid)) {
                 return cn;
             }
@@ -1301,7 +1295,7 @@ public class GraphSerializationTest {
         return null;
     }
 
-    private static int countMissingPorts(com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.NodeModel node) {
+    private static int countMissingPorts(NodeModel node) {
         if (node == null) return -1;
         int count = 0;
         for (var p : node.getInputsById().values()) {

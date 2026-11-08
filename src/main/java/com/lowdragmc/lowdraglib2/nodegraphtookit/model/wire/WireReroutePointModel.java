@@ -2,13 +2,7 @@ package com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire;
 
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.GraphElement;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.WireReroutePointElement;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.Capabilities;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.ChangeHint;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.ContextualMenuHelpers;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.ContextualMenuItem;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.GraphElementModel;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.IGraphElementUIModel;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.IMovable;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.model.*;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.PortModel;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;

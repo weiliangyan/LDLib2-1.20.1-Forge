@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(GameRenderer.class)
 public class GameRendererMixin {
     @Inject(method = "reloadShaders", at = {@At(value = "HEAD")})
-    private static void ldlib$reloadShaders(ResourceProvider resourceProvider, CallbackInfo ci) {
+    private void ldlib$reloadShaders(ResourceProvider resourceProvider, CallbackInfo ci) {
         LDLibShaders.GEOMETRY_TYPE.getPrograms().values().forEach(Program::close);
     }
 }

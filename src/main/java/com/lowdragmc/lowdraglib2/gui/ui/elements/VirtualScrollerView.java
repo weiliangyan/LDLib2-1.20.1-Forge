@@ -224,7 +224,7 @@ public class VirtualScrollerView<T> extends ScrollerView {
         if (rowHeight > 0 || row.getChildren().isEmpty()) {
             return rowHeight;
         }
-        var child = row.getChildren().getFirst();
+        var child = row.getChildren().get(0);
         var childHeight = child.getSizeHeight();
         return childHeight + child.getMarginTop() + child.getMarginBottom();
     }

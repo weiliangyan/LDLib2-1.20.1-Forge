@@ -6,11 +6,15 @@ import lombok.Getter;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.*;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -33,6 +37,15 @@ public class ModularUIContainerMenu extends AbstractContainerMenu {
 
     public IModularUIHolderMenu asModularUIHolderMenu() {
         return (IModularUIHolderMenu) this;
+    }
+
+    public void syncModularSlotPositions() {
+        for (var slot : this.slots) {
+            var itemSlot = asModularUIHolderMenu().getItemSlot(slot);
+            if (itemSlot != null) {
+                itemSlot.updateSlotPosition();
+            }
+        }
     }
 
     @Override

@@ -5,6 +5,8 @@ import com.google.common.collect.Sets;
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.Platform;
 import com.lowdragmc.lowdraglib2.configurator.EditAction;
+import com.lowdragmc.lowdraglib2.editor.keymap.EditorActions;
+import com.lowdragmc.lowdraglib2.editor.keymap.Keymaps;
 import com.lowdragmc.lowdraglib2.gui.ColorPattern;
 import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.SupplierDataSource;
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
@@ -16,14 +18,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.data.ScrollDisplay;
 import com.lowdragmc.lowdraglib2.gui.ui.data.ScrollerMode;
 import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Vertical;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.Menu;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.ScrollerView;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.Toggle;
-import com.lowdragmc.lowdraglib2.editor.keymap.EditorActions;
-import net.minecraft.resources.ResourceLocation;
-import com.lowdragmc.lowdraglib2.editor.keymap.Keymaps;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.*;
 import com.lowdragmc.lowdraglib2.gui.ui.event.CommandEvents;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvent;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
@@ -36,42 +31,37 @@ import com.lowdragmc.lowdraglib2.nodegraphtookit.api.port.PortType;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.editor.GraphEditorView;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.editor.GraphResourceProviderContainer;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.blackboard.Blackboard;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.command.CreateForeignLocalSubgraphCommand;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.command.CreateSubgraphFromSelectionCommand;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.command.ElementRenameColorCommands;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.command.GraphCommands;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.command.GraphCommandListener;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.command.IGraphCommand;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.command.ImportExternalSubgraphCommand;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.command.NodeCommands;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.command.WireCommands;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.command.*;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.dependency.ElementUpdateVisitor;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.dependency.ModelUpdateVisitor;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.command.LayoutCommands;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.itemlibrary.ItemLibrary;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.itemlibrary.NodeModelLibraryItem;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.layout.GraphLayoutAlgorithm;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.node.NodeElement;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.snap.SnapEngine;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.snap.SnapGuide;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.snap.SnapSettings;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.wire.WireRouteStyle;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.itemlibrary.NodeModelLibraryItem;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.node.NodeElement;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.wiget.PlacematElement;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.wiget.StickyNoteElement;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.wire.WireRouteStyle;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.*;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.*;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wiget.PlacematModel;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.graph.GraphModel;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.AbstractNodeModel;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.NodePlaceholder;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.NodePreviewModel;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.PortModel;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wiget.PlacematModel;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire.IGhostWireModel;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire.PortMigrationResult;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire.WireModel;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire.WirePlaceHolder;
+import com.lowdragmc.lowdraglib2.utils.function.LDConsumers;
 import dev.vfyjxf.taffy.style.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.chat.Component;
-import org.apache.commons.lang3.function.Consumers;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
@@ -106,7 +96,7 @@ public class GraphView extends UIElement {
      * Optional instance-level veto consulted by {@link #dispatchCommand} before a command runs;
      * return {@code false} to block. Layered on top of the graph's own
      * {@link GraphModel#canExecuteCommand} policy (both must allow). For policy tied to the graph
-     * definition, override {@link com.lowdragmc.lowdraglib2.nodegraphtookit.api.graph.Graph#canExecuteCommand} instead.
+     * definition, override {@link Graph#canExecuteCommand} instead.
      */
     @Nullable @Setter @Getter
     private Predicate<IGraphCommand> commandInterceptor;
@@ -248,7 +238,7 @@ public class GraphView extends UIElement {
         addEventListener(UIEvents.VALIDATE_COMMAND, this::onValidateCommand);
         addEventListener(UIEvents.EXECUTE_COMMAND, this::onExecuteCommand);
 
-        setEnforceFocus(Consumers.nop());
+        setEnforceFocus(LDConsumers.nop());
 
         // ItemLibrary is hidden until explicitly shown — popup visibility is state-driven.
         Style.importantPipeline(itemLibrary.getLayout(), l -> l.display(TaffyDisplay.NONE));
@@ -575,7 +565,7 @@ public class GraphView extends UIElement {
             return;
         }
 
-        var first = graphLogEntries.getFirst();
+        var first = graphLogEntries.get(0);
         graphLogSummary.setText(formatGraphLogEntry(first));
         Style.importantPipeline(graphLogSummary.getTextStyle(), s -> s.textColor(graphLogLevelColor(first.level())));
         graphLogCount.setText(graphLogEntries.size() > 1
@@ -703,15 +693,13 @@ public class GraphView extends UIElement {
         graphModel.getCurrentGraphChangeDescription().clear();
         // placeholders
         for (var placeholder : graphModel.getPlaceholders()) {
-            switch (placeholder) {
-                case DeclarationModel declarationModel: continue;
-                case WirePlaceHolder wirePlaceHolder:
-                    createWireUI(wirePlaceHolder);
-                    continue;
-                case NodePlaceholder nodePlaceholder:
-                    createAndAddModelElement(nodePlaceholder);
-                    break;
-                default: break;
+            if (placeholder instanceof DeclarationModel) {
+                continue;
+            } else if (placeholder instanceof WirePlaceHolder wirePlaceHolder) {
+                createWireUI(wirePlaceHolder);
+                continue;
+            } else if (placeholder instanceof NodePlaceholder nodePlaceholder) {
+                createAndAddModelElement(nodePlaceholder);
             }
         }
 
@@ -973,7 +961,7 @@ public class GraphView extends UIElement {
                 .toList());
         for (var sel : new ArrayList<>(movablesList)) {
             if (sel instanceof PlacematModel pm) {
-                java.util.function.Function<com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.AbstractNodeModel, Vector2f> sizeLookup = node -> {
+                java.util.function.Function<AbstractNodeModel, Vector2f> sizeLookup = node -> {
                     var nodeEl = getModelElement(node);
                     return nodeEl != null ? new Vector2f(nodeEl.getSizeWidth(), nodeEl.getSizeHeight()) : null;
                 };
@@ -1380,7 +1368,10 @@ public class GraphView extends UIElement {
     }
 
     protected void onDragEnd(UIEvent event) {
-        if (event.dragHandler.draggingObject instanceof DragMove(var targetWasSelected, var target, var movables)) {
+        if (event.dragHandler.draggingObject instanceof DragMove dragMove) {
+            var targetWasSelected = dragMove.targetWasSelected();
+            var target = dragMove.target();
+            var movables = dragMove.movables();
             var offset = new Vector2f(event.x - event.dragStartX, event.y - event.dragStartY);
             clearSnapGuides();
             if (offset.lengthSquared() < 1f) {
@@ -1538,7 +1529,8 @@ public class GraphView extends UIElement {
     }
 
     protected void onGraphViewDragSourceUpdate(UIEvent event) {
-        if (event.dragHandler.getDraggingObject() instanceof DragRegionSelection(var selectionRect)) {
+        if (event.dragHandler.getDraggingObject() instanceof DragRegionSelection dragSelection) {
+            var selectionRect = dragSelection.selectionRect();
             var minX = Math.min(event.dragStartX, event.x);
             var minY = Math.min(event.dragStartY, event.y);
             var localMouse = graphView.getLocalMouse(minX, minY);
@@ -1560,15 +1552,16 @@ public class GraphView extends UIElement {
     }
 
     protected void onGraphViewDragEnd(UIEvent event) {
-        if (event.dragHandler.getDraggingObject() instanceof DragRegionSelection(var selectionRect)) {
+        if (event.dragHandler.getDraggingObject() instanceof DragRegionSelection dragSelection) {
+            var selectionRect = dragSelection.selectionRect();
             selectionRect.removeSelf();
-            if (dragRegionSelection != null) {
+            if (this.dragRegionSelection != null) {
                 batchSelection(() -> {
                     // select all
                     for (var entry : modelElements.entrySet()) {
                         var model = entry.getKey();
                         var element = entry.getValue();
-                        if (element.isSelectable() && element.canBeRegionSelected(dragRegionSelection)) {
+                        if (element.isSelectable() && element.canBeRegionSelected(this.dragRegionSelection)) {
                             addSelected(model);
                         }
                     }
@@ -1620,7 +1613,7 @@ public class GraphView extends UIElement {
 
     /**
      * Adds an "Add Subgraph" submenu listing every loaded {@link com.lowdragmc.lowdraglib2.nodegraphtookit.editor.GraphResource} whose graph type is
-     * accepted by this host graph via {@link com.lowdragmc.lowdraglib2.nodegraphtookit.api.graph.Graph#acceptsSubgraphGraph}.
+     * accepted by this host graph via {@link Graph#acceptsSubgraphGraph}.
      * Selecting one creates an empty inline local subgraph of that foreign type plus a node bound to
      * it (via {@link CreateForeignLocalSubgraphCommand}). No-op when the host disallows subgraphs or
      * accepts no foreign types.
@@ -1631,8 +1624,8 @@ public class GraphView extends UIElement {
         if (editor == null) return;
 
         // (display name, graph type), deduped by graph class.
-        var seen = new java.util.HashSet<Class<?>>();
-        var compatible = new java.util.ArrayList<com.lowdragmc.lowdraglib2.nodegraphtookit.editor.GraphResource<?>>();
+        var seen = new HashSet<Class<?>>();
+        var compatible = new ArrayList<com.lowdragmc.lowdraglib2.nodegraphtookit.editor.GraphResource<?>>();
         for (var entry : editor.resourceView.getResources().entrySet()) {
             if (!(entry.getKey() instanceof com.lowdragmc.lowdraglib2.nodegraphtookit.editor.GraphResource<?> resource)) continue;
             var sample = resource.createGraph();
@@ -1644,7 +1637,7 @@ public class GraphView extends UIElement {
 
         menuBuilder.branch("graph.commands.create_foreign_local_subgraph", branch -> {
             for (var resource : compatible) {
-                Class<? extends com.lowdragmc.lowdraglib2.nodegraphtookit.api.graph.Graph> type = resource.createGraph().getClass();
+                Class<? extends Graph> type = resource.createGraph().getClass();
                 var name = resource.getName();
                 branch.leaf(resource.getDisplayName(), () ->
                         dispatchCommand(new CreateForeignLocalSubgraphCommand(type, name, localPosition)));
@@ -1753,7 +1746,7 @@ public class GraphView extends UIElement {
      * Appends "Add Block" (when a single ContextNodeModel is selected) and
      * "Delete Block" / "Move Up" / "Move Down" (when only sibling BlockNodeModels are selected).
      */
-    private void appendContextBlockMenuItems(com.lowdragmc.lowdraglib2.gui.util.TreeBuilder.Menu menuBuilder,
+    private void appendContextBlockMenuItems(TreeBuilder.Menu menuBuilder,
                                              List<GraphElementModel> selectedModels,
                                              float mouseX, float mouseY) {
         // Add Block: shown when the selection is a single context node with at least one
@@ -1765,7 +1758,7 @@ public class GraphView extends UIElement {
                 menuBuilder.leaf("graph.add_block", () ->
                         itemLibrary.showBlocksForContext(mouseX, mouseY, ctxModel, item -> {
                             if (item instanceof com.lowdragmc.lowdraglib2.nodegraphtookit.gui.itemlibrary.BlockLibraryItem blockItem) {
-                                dispatchCommand(new com.lowdragmc.lowdraglib2.nodegraphtookit.gui.command.BlockCommands.InsertBlockCommand(
+                                dispatchCommand(new BlockCommands.InsertBlockCommand(
                                         ctxModel, blockItem.getBlockClass(), -1));
                             }
                         }));
@@ -1782,11 +1775,11 @@ public class GraphView extends UIElement {
                 int idx = parent.indexOf(block);
                 if (idx > 0) {
                     menuBuilder.leaf("graph.move_block_up", () -> dispatchCommand(
-                            new com.lowdragmc.lowdraglib2.nodegraphtookit.gui.command.BlockCommands.MoveBlockCommand(parent, idx, idx - 1)));
+                            new BlockCommands.MoveBlockCommand(parent, idx, idx - 1)));
                 }
                 if (idx >= 0 && idx < parent.getBlockCount() - 1) {
                     menuBuilder.leaf("graph.move_block_down", () -> dispatchCommand(
-                            new com.lowdragmc.lowdraglib2.nodegraphtookit.gui.command.BlockCommands.MoveBlockCommand(parent, idx, idx + 1)));
+                            new BlockCommands.MoveBlockCommand(parent, idx, idx + 1)));
                 }
             }
         }
@@ -1862,9 +1855,9 @@ public class GraphView extends UIElement {
                 if (graph != null && graph.graphModel.allowSubgraphCreation()
                         && !selectedModels.isEmpty()
                         && selectedModels.stream().allMatch(m ->
-                                m instanceof com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire.WireModel
+                                m instanceof WireModel
                                         || (m instanceof AbstractNodeModel an && an.isCopiable())
-                                        || m instanceof com.lowdragmc.lowdraglib2.nodegraphtookit.model.wiget.PlacematModel
+                                        || m instanceof PlacematModel
                                         || m instanceof com.lowdragmc.lowdraglib2.nodegraphtookit.model.wiget.StickyNoteModel)) {
                     var selection = new ArrayList<>(selectedModels);
                     yield item.withAction(() -> dispatchCommand(new CreateSubgraphFromSelectionCommand(selection)));
@@ -1974,7 +1967,8 @@ public class GraphView extends UIElement {
             var allModels = new ArrayList<>(changeset.getNewModels());
             allModels.addAll(changeset.getDeletedModels());
             for (var uid : allModels) {
-                if (graphModel.getModel(uid) instanceof GraphElementModel model && model.getContainer() instanceof GraphElementModel container) {
+                var model = graphModel.getModel(uid);
+                if (model != null && model.getContainer() instanceof GraphElementModel container) {
                     // Whatever change hint was there is superseded by Unspecified.
                     changedModels.put(container.getUid(), ChangeHintList.UNSPECIFIED);
                 }
@@ -2112,29 +2106,29 @@ public class GraphView extends UIElement {
      * PlacematElement). Other element types currently have no inline edit affordance, so this
      * is a no-op for them — users can rename them via the inspector when single-selected.
      */
-    public void startInlineRenameFor(com.lowdragmc.lowdraglib2.nodegraphtookit.model.GraphElementModel model) {
+    public void startInlineRenameFor(GraphElementModel model) {
         var element = modelElements.get(model);
-        if (element instanceof com.lowdragmc.lowdraglib2.nodegraphtookit.gui.node.NodeElement nodeElement) {
+        if (element instanceof NodeElement nodeElement) {
             if (nodeElement.getNodeTittle() != null) {
                 nodeElement.getNodeTittle().startInlineRename();
             }
-        } else if (element instanceof com.lowdragmc.lowdraglib2.nodegraphtookit.gui.wiget.PlacematElement placematElement) {
+        } else if (element instanceof PlacematElement placematElement) {
             placematElement.startInlineRename();
         }
     }
 
     /**
-     * Opens a small floating {@link com.lowdragmc.lowdraglib2.gui.ui.elements.ColorSelector} at
+     * Opens a small floating {@link ColorSelector} at
      * {@code localPosition}. Color changes dispatch via {@code SetElementColorCommand} so they
      * land on the undo stack. Loses focus → closes (mirrors the menu lifecycle).
      */
     protected void openColorPopup(Vector2f localPosition,
-                                  com.lowdragmc.lowdraglib2.nodegraphtookit.model.GraphElementModel target,
-                                  com.lowdragmc.lowdraglib2.nodegraphtookit.model.IHasElementColor colored) {
+                                  GraphElementModel target,
+                                  IHasElementColor colored) {
         var mui = getModularUI();
         if (mui == null) return;
 
-        var colorSelector = new com.lowdragmc.lowdraglib2.gui.ui.elements.ColorSelector();
+        var colorSelector = new ColorSelector();
         colorSelector.addClass("__node-graph-view_color-popup__");
         colorSelector.addClass("panel_bg");
         Style.defaultPipeline(colorSelector.getStyle(), s -> s.backgroundTexture(Sprites.RECT_SOLID));

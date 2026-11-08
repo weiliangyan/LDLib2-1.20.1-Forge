@@ -12,7 +12,10 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 public final class WireCommands {
     public static List<WireModel> getDropWireModelsToDelete(PortModel portModel,

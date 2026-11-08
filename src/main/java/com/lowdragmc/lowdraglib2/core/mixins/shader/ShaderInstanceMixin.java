@@ -1,25 +1,24 @@
 package com.lowdragmc.lowdraglib2.core.mixins.shader;
 
-import com.google.gson.JsonObject;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.sugar.Local;
 import com.lowdragmc.lowdraglib2.client.shader.ILDShaderInstance;
 import com.lowdragmc.lowdraglib2.client.shader.LDProgramDefineManager;
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.shaders.Program;
-import com.mojang.blaze3d.shaders.Uniform;
+import com.mojang.blaze3d.shaders.ProgramManager;
+import com.mojang.blaze3d.shaders.Shader;
+import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceProvider;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.util.GsonHelper;
 import org.joml.Matrix4f;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -27,21 +26,14 @@ import java.io.IOException;
 
 @Mixin(ShaderInstance.class)
 public abstract class ShaderInstanceMixin implements ILDShaderInstance {
-    @Shadow @Final @Nullable public Uniform SCREEN_SIZE;
-
-    @Inject(method = "<init>(Lnet/minecraft/server/packs/resources/ResourceProvider;Lnet/minecraft/resources/ResourceLocation;Lcom/mojang/blaze3d/vertex/VertexFormat;)V",
-            require = 1,
-            at = {@At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/client/renderer/ShaderInstance;getOrCreate(Lnet/minecraft/server/packs/resources/ResourceProvider;Lcom/mojang/blaze3d/shaders/Program$Type;Ljava/lang/String;)Lcom/mojang/blaze3d/shaders/Program;",
-                    ordinal = 1
-            )})
-    public void ldlib2$onCreateShader(ResourceProvider resourceProvider,
-                                      ResourceLocation shaderLocation,
-                                      VertexFormat vertexFormat,
-                                      CallbackInfo ci,
-                                      @Local JsonObject json) throws IOException {
-        this.onCreateShader(resourceProvider, shaderLocation, vertexFormat, json);
+    @Redirect(method = "<init>(Lnet/minecraft/server/packs/resources/ResourceProvider;Lnet/minecraft/resources/ResourceLocation;Lcom/mojang/blaze3d/vertex/VertexFormat;)V",
+            at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/shaders/ProgramManager;linkShader(Lcom/mojang/blaze3d/shaders/Shader;)V"))
+    private void ldlib2$linkShader(Shader shader, ResourceProvider resourceProvider, ResourceLocation shaderLocation, VertexFormat vertexFormat) throws IOException {
+        var jsonLocation = new ResourceLocation(shaderLocation.getNamespace(), "shaders/core/" + shaderLocation.getPath() + ".json");
+        try (var reader = resourceProvider.openAsReader(jsonLocation)) {
+            this.onCreateShader(resourceProvider, shaderLocation, vertexFormat, GsonHelper.parse(reader));
+        }
+        ProgramManager.linkShader(shader);
     }
 
     @Inject(method = "getOrCreate", at = {@At(value = "HEAD")}, cancellable = true)
@@ -69,16 +61,22 @@ public abstract class ShaderInstanceMixin implements ILDShaderInstance {
     private static Object ldlib2$skipPlainCacheWhenDefinesActive(Object original) {
         return LDProgramDefineManager.hasProgramDefines() ? null : original;
     }
+}
+
+@Mixin(VertexBuffer.class)
+abstract class VertexBufferMixin {
+    @Shadow
+    private VertexFormat.Mode mode;
 
     /**
      * rendertype_lines widens lines by LineWidth / ScreenSize in NDC, which spans the viewport; vanilla passes the
      * window size, so lines drawn into a smaller viewport (scene widgets, other windows) came out thinner per axis.
      */
-    @Inject(method = "setDefaultUniforms", at = @At("TAIL"))
-    private void ldlib2$lineScreenSizeFromViewport(VertexFormat.Mode mode, Matrix4f frustumMatrix, Matrix4f projectionMatrix,
-                                                   Window window, CallbackInfo ci) {
-        if (SCREEN_SIZE != null && (mode == VertexFormat.Mode.LINES || mode == VertexFormat.Mode.LINE_STRIP)) {
-            SCREEN_SIZE.set((float) GlStateManager.Viewport.width(), (float) GlStateManager.Viewport.height());
+    @Inject(method = "_drawWithShader", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ShaderInstance;apply()V"))
+    private void ldlib2$lineScreenSizeFromViewport(Matrix4f modelViewMatrix, Matrix4f projectionMatrix, ShaderInstance shader, CallbackInfo ci) {
+        if (shader.SCREEN_SIZE != null && (mode == VertexFormat.Mode.LINES || mode == VertexFormat.Mode.LINE_STRIP)) {
+            shader.SCREEN_SIZE.set((float) GlStateManager.Viewport.width(), (float) GlStateManager.Viewport.height());
         }
     }
+
 }

@@ -1,11 +1,11 @@
 package com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor
 
-import com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor.language.ILanguageDefinition
-import com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor.language.Languages
-import com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor.language.StyleManager
 import com.lowdragmc.lowdraglib2.gui.ui.UIContainer
 import com.lowdragmc.lowdraglib2.gui.ui.elements.TextAreaElement
 import com.lowdragmc.lowdraglib2.gui.ui.elements.TextAreaSpec
+import com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor.language.ILanguageDefinition
+import com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor.language.Languages
+import com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor.language.StyleManager
 
 /**
  * Specification for CodeEditor element (extends TextAreaSpec)

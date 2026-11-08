@@ -16,6 +16,7 @@ import com.lowdragmc.lowdraglib2.integration.kjs.KJSBindings;
 import com.lowdragmc.lowdraglib2.registry.AutoRegistry;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib2.utils.TagBuilder;
+import com.lowdragmc.lowdraglib2.utils.function.LDConsumers;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,13 +25,11 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import org.apache.commons.lang3.function.Consumers;
-import org.appliedenergistics.yoga.YogaEdge;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import org.jetbrains.annotations.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -48,7 +47,7 @@ public class TabView extends UIElement {
     @Getter
     private final BiMap<Tab, UIElement> tabContents = HashBiMap.create();
     @Setter
-    private Consumer<Tab> onTabSelected = Consumers.nop();
+    private Consumer<Tab> onTabSelected = LDConsumers.nop();
     private final UIEventListener tabPressListener = event -> {
         if (event.button == 0 && event.currentElement instanceof Tab tab) {
             UISoundUtils.playButtonClickSound();

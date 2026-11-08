@@ -17,46 +17,34 @@ import com.lowdragmc.lowdraglib2.gui.holder.ModularUIContainerScreen;
 import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
 import com.lowdragmc.lowdraglib2.gui.ui.utils.ModularUIClientElementComponent;
 import com.lowdragmc.lowdraglib2.gui.ui.utils.ModularUITooltipComponent;
-import com.lowdragmc.lowdraglib2.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib2.integration.kjs.ui.LDKJSMenuTypes;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.client.resources.model.*;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.event.config.ModConfigEvent;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
-import net.neoforged.neoforge.client.event.*;
-import net.neoforged.neoforge.client.gui.ConfigurationScreen;
-import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.*;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientProxy {
+    public static final Minecraft minecraft = Minecraft.getInstance();
 
-    public ClientProxy(IEventBus eventBus, ModContainer modContainer) {
+    public ClientProxy(IEventBus eventBus, ModLoadingContext modContainer) {
         eventBus.register(this);
         modContainer.registerConfig(ModConfig.Type.CLIENT, LDLibClientConfig.SPEC);
         // Without a screen factory NeoForge shows no Config button for the mod in the mod list, leaving the
         // file as the only way in. ConfigurationScreen builds the screen from the spec.
-        modContainer.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
-    }
-
-    @SubscribeEvent
-    public void onRegisterMenuScreensEvent(final RegisterMenuScreensEvent event) {
-        event.register(LDMenuTypes.PLAYER_UI.get(), ModularUIContainerScreen::new);
-        event.register(LDMenuTypes.HELD_ITEM_UI.get(), ModularUIContainerScreen::new);
-        event.register(LDMenuTypes.BLOCK_UI.get(), ModularUIContainerScreen::new);
-        if (LDLib2.isKubejsLoaded()) {
-            LDKJSMenuTypes.onRegisterMenuScreensEvent(event);
-        }
+        // modContainer.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
     }
 
     @SubscribeEvent
@@ -75,13 +63,19 @@ public class ClientProxy {
     @SubscribeEvent
     public void clientSetup(final FMLClientSetupEvent e) {
         e.enqueueWork(() -> {
+            MenuScreens.register(LDMenuTypes.PLAYER_UI.get(), ModularUIContainerScreen::new);
+            MenuScreens.register(LDMenuTypes.HELD_ITEM_UI.get(), ModularUIContainerScreen::new);
+            MenuScreens.register(LDMenuTypes.BLOCK_UI.get(), ModularUIContainerScreen::new);
+            if (LDLib2.isKubejsLoaded()) {
+                LDKJSMenuTypes.registerMenuScreens();
+            }
             LDLibShaders.init();
         });
     }
 
     @SubscribeEvent
     public void modelRegistry(final ModelEvent.RegisterGeometryLoaders e) {
-        e.register(LDLib2.id("renderer"), LDLRendererModel.Loader.INSTANCE);
+        e.register("renderer", LDLRendererModel.Loader.INSTANCE);
     }
 
     @SubscribeEvent
@@ -99,7 +93,7 @@ public class ClientProxy {
     @SubscribeEvent
     public void onConfigReloaded(ModConfigEvent.Reloading event) {
         if (event.getConfig().getSpec() == LDLibClientConfig.SPEC) {
-            Minecraft.getInstance().execute(LDFontManager.INSTANCE::invalidate);
+            minecraft.execute(LDFontManager.INSTANCE::invalidate);
         }
     }
 
@@ -108,9 +102,9 @@ public class ClientProxy {
      * hidden by the rest of the HUD.
      */
     @SubscribeEvent
-    public void registerFontStatsOverlay(RegisterGuiLayersEvent event) {
+    public static void registerFontStatsOverlay(RenderGuiEvent.Post event) {
         if (Platform.isDevEnv()) {
-            event.registerAboveAll(LDLib2.id("font_stats"), LDFontStatsOverlay.INSTANCE);
+            LDFontStatsOverlay.INSTANCE.render((ForgeGui) minecraft.gui, event.getGuiGraphics(), event.getPartialTick(), minecraft.getWindow().getScreenWidth(), minecraft.getWindow().getScreenHeight());
         }
     }
 
@@ -127,12 +121,12 @@ public class ClientProxy {
         for (var entry : Minecraft.getInstance().getResourceManager().listResources("models",
                 id -> id.getNamespace().equals(LDLib2.MOD_ID) && id.getPath().endsWith(".json")).entrySet()) {
             if (entry.getValue().sourcePackId().equals(LDLib2.MOD_ID)) {
-                var modelLocation = ResourceLocation.fromNamespaceAndPath(
+                var modelLocation = new ResourceLocation(
                         entry.getKey().getNamespace(),
                         entry.getKey().getPath()
                                 .replace("models/", "")
                                 .replace(".json", ""));
-                event.register(ModelResourceLocation.standalone(modelLocation));
+                event.register(modelLocation);
             }
         }
         IRendererResource.INSTANCE.onAdditionalModel(event::register);

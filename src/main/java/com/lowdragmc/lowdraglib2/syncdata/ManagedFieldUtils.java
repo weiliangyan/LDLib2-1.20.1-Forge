@@ -3,19 +3,14 @@ package com.lowdragmc.lowdraglib2.syncdata;
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.syncdata.annotation.*;
 import com.lowdragmc.lowdraglib2.syncdata.field.ManagedKey;
-import com.lowdragmc.lowdraglib2.syncdata.rpc.RPCMethodMeta;
 import com.lowdragmc.lowdraglib2.syncdata.ref.IRef;
+import com.lowdragmc.lowdraglib2.syncdata.rpc.RPCMethodMeta;
 import net.minecraft.nbt.Tag;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ManagedFieldUtils {
 

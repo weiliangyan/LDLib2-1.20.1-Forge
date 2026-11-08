@@ -1,10 +1,6 @@
 package com.lowdragmc.lowdraglib2.test.uitest;
 
-import com.lowdragmc.lowdraglib2.editor.resource.BuiltinResourceProvider;
-import com.lowdragmc.lowdraglib2.editor.resource.IResourcePath;
-import com.lowdragmc.lowdraglib2.editor.resource.ResourceInstance;
-import com.lowdragmc.lowdraglib2.editor.resource.UIResource;
-import com.lowdragmc.lowdraglib2.editor.resource.UIResourceProviderContainer;
+import com.lowdragmc.lowdraglib2.editor.resource.*;
 import com.lowdragmc.lowdraglib2.editor.ui.Editor;
 import com.lowdragmc.lowdraglib2.editor.ui.View;
 import com.lowdragmc.lowdraglib2.editor.ui.resource.ResourceProviderContainer;
@@ -73,7 +69,7 @@ public class ResourceEditorReopenScenario implements UIScenario {
         s.step("reach one resource from two containers, as the resource panel and the asset browser do", setup)
                 .step("open it from the panel", ctx -> container(ctx, PANEL).editResource(ctx.get(PATH)))
                 .waitUntil("its editor is open", ctx -> openedViews(ctx, viewType).size() == 1)
-                .step("note it", ctx -> ctx.put(OPENED, openedViews(ctx, viewType).getFirst()))
+                .step("note it", ctx -> ctx.put(OPENED, openedViews(ctx, viewType).get(0)))
                 .check("it opens in front of the tab already there", ctx -> isSelected(ctx.get(OPENED)))
                 .step("switch to another tab", ctx -> {
                     var view = ctx.<View>get(OPENED);

@@ -5,9 +5,9 @@ import com.lowdragmc.lowdraglib2.syncdata.accessor.IAccessor;
 import com.lowdragmc.lowdraglib2.syncdata.field.ManagedKey;
 import com.mojang.serialization.DynamicOps;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-
+import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.Nullable;
+
 import java.util.function.Predicate;
 
 /**
@@ -136,14 +136,14 @@ public interface IRef<TYPE> {
     /** 
      * This method is used to read the sync changed data.
      */
-    default void readSyncToStream(RegistryFriendlyByteBuf buffer) {
+    default void readSyncToStream(FriendlyByteBuf buffer) {
         getAccessor().readFieldToStream(buffer, this);
     }
 
     /**
      * This method is used to write the sync changed data.
      */
-    default void writeSyncFromStream(RegistryFriendlyByteBuf buffer) {
+    default void writeSyncFromStream(FriendlyByteBuf buffer) {
         getAccessor().writeFieldFromStream(buffer, this);
     }
 }

@@ -13,19 +13,11 @@ import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import com.lowdragmc.lowdraglib2.gui.ui.UI;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.Dialog;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.Inspector;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.Menu;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.SearchComponent;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.TextElement;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.*;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.registry.RegistrationEnvironment;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
-import com.lowdragmc.lowdraglib2.uitest.ElementBounds;
-import com.lowdragmc.lowdraglib2.uitest.ScenarioBuilder;
-import com.lowdragmc.lowdraglib2.uitest.ScenarioOptions;
-import com.lowdragmc.lowdraglib2.uitest.TestContext;
-import com.lowdragmc.lowdraglib2.uitest.UIScenario;
+import com.lowdragmc.lowdraglib2.uitest.*;
 import com.lowdragmc.lowdraglib2.uitest.input.Keys;
 
 import java.util.ArrayList;
@@ -99,8 +91,8 @@ public class DisabledPanelEditsScenario implements UIScenario {
                 .step("press the first list item's handle", ctx -> {
                     ctx.put(ORDER, List.copyOf(fields(ctx).list));
                     var items = ctx.query().type(ArrayConfiguratorGroup.ItemConfigurator.class).list();
-                    var handle = ElementBounds.of(items.getFirst().as(ArrayConfiguratorGroup.ItemConfigurator.class).label);
-                    var last = items.getLast().bounds();
+                    var handle = ElementBounds.of(items.get(0).as(ArrayConfiguratorGroup.ItemConfigurator.class).label);
+                    var last = items.get(items.size() - 1).bounds();
                     drag[0] = handle.centerX();
                     drag[1] = handle.centerY();
                     drag[2] = last.y() + last.height() + 4;

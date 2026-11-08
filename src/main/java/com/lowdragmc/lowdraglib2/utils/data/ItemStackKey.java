@@ -51,7 +51,9 @@ public final class ItemStackKey {
         for (ItemStack stack : itemStack) {
             itemsHash += stack.getItem().hashCode();
             itemsHash += stack.getDamageValue();
-            itemsHash += stack.getComponents().hashCode();
+            if (stack.getTag() != null) {
+                itemsHash += stack.getTag().hashCode();
+            }
         }
         return itemsHash;
     }

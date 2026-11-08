@@ -1,9 +1,9 @@
 package com.lowdragmc.lowdraglib2.gui.sync.bindings;
 
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
-import org.jetbrains.annotations.Nullable;
 
 public interface IBindable<T> extends IDataSource<T> {
     /**

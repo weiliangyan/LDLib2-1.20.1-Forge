@@ -22,7 +22,7 @@ import org.appliedenergistics.yoga.style.StyleLength;
 import org.appliedenergistics.yoga.style.StyleSizeLength;
 import org.appliedenergistics.yoga.style.YogaStyle;
 
-import java.util.*;
+import java.util.ArrayList;
 
 @RemapPrefixForJS("kjs$")
 public final class LayoutStyle extends Style {

@@ -1,0 +1,34 @@
+modLoader = "javafml"
+loaderVersion = "[${loader_version},)"
+license = "${mod_license}"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${version}"
+displayName = "${mod_name}"
+authors = "KilaBash"
+description = "${mod_description}"
+logoFile = "icon.png"
+displayURL = "https://github.com/Amotassic/LDLib2"
+issueTrackerURL = "https://github.com/Amotassic/LDLib2/issues"
+
+[[dependencies.${mod_id}]]
+    modId = "forge"
+    mandatory = true
+    versionRange = "[${loader_version},)"
+    ordering = "NONE"
+    side = "BOTH"
+
+[[dependencies.${mod_id}]]
+    modId = "minecraft"
+    mandatory = true
+    versionRange = "[${minecraft_version}]"
+    ordering = "NONE"
+    side = "BOTH"
+
+[[dependencies.${mod_id}]]
+    modId = "kotlinforforge"
+    mandatory = true
+    versionRange = "[${kotlin_for_forge_version},)"
+    ordering = "NONE"
+    side = "BOTH"

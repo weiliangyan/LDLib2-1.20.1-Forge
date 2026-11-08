@@ -1,13 +1,11 @@
 package com.lowdragmc.lowdraglib2.gui.ui.elements
 
-import com.lowdragmc.lowdraglib2.gui.ui.Element
 import com.lowdragmc.lowdraglib2.gui.ui.ElementSpec
 import com.lowdragmc.lowdraglib2.gui.ui.UIContainer
-import com.lowdragmc.lowdraglib2.gui.ui.elements.inventory.InventorySlots
 import com.lowdragmc.lowdraglib2.integration.xei.IngredientIO
 import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
-import net.neoforged.neoforge.items.IItemHandlerModifiable
+import net.minecraftforge.items.IItemHandlerModifiable
 
 /**
  * Extension function for ItemSlot.SlotStyle DSL

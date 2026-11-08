@@ -1,10 +1,6 @@
 package com.lowdragmc.lowdraglib2.uitest;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <b>Splits a scenario list across parallel test processes.</b>

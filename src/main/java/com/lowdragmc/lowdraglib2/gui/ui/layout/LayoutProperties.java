@@ -8,7 +8,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.style.properties.*;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.FlexIcons;
 import dev.vfyjxf.taffy.style.*;
 import lombok.experimental.UtilityClass;
-import org.appliedenergistics.yoga.*;
+import org.appliedenergistics.yoga.YogaOverflow;
 import org.appliedenergistics.yoga.numeric.FloatOptional;
 
 import java.util.Arrays;

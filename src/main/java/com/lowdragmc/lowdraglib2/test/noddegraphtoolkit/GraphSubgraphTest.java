@@ -4,22 +4,20 @@ import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.editor.resource.FilePath;
 import com.lowdragmc.lowdraglib2.editor.resource.IResourcePath;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.graph.Graph;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.api.type.TypeHandle;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.type.TypeHandles;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.variable.VariableKind;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.editor.IGraphReferenceResolver;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.editor.SubgraphRegistry;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.SpawnFlags;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.graph.CustomGraphModelImpl;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.graph.GraphModel;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.SubgraphNodeModel;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.variable.ModifierFlags;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.variable.VariableDeclarationModel;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import org.joml.Vector2f;
 
 @GameTestHolder(LDLib2.MOD_ID)
@@ -409,13 +407,13 @@ public class GraphSubgraphTest {
         var floatType = com.lowdragmc.lowdraglib2.nodegraphtookit.api.type.TypeHandleHelpers.fromType(Float.class);
 
         // Outer constants (external_OUT side)
-        var c1 = gm.createConstantNode("c1", new org.joml.Vector2f(0, 0), floatType, 1f);
-        var c2 = gm.createConstantNode("c2", new org.joml.Vector2f(0, 50), floatType, 2f);
+        var c1 = gm.createConstantNode("c1", new Vector2f(0, 0), floatType, 1f);
+        var c2 = gm.createConstantNode("c2", new Vector2f(0, 50), floatType, 2f);
         // Selection candidates
-        var addA = gm.createNodeModel(new TestAddNode(), new org.joml.Vector2f(200, 0));
-        var addB = gm.createNodeModel(new TestAddNode(), new org.joml.Vector2f(400, 0));
+        var addA = gm.createNodeModel(new TestAddNode(), new Vector2f(200, 0));
+        var addB = gm.createNodeModel(new TestAddNode(), new Vector2f(400, 0));
         // Outer consumer (external_IN side)
-        var addC = gm.createNodeModel(new TestAddNode(), new org.joml.Vector2f(600, 0));
+        var addC = gm.createNodeModel(new TestAddNode(), new Vector2f(600, 0));
 
         var c1Out = ((com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.ConstantNodeModel) c1.getNodeModel()).getOutputPort();
         var c2Out = ((com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.ConstantNodeModel) c2.getNodeModel()).getOutputPort();
@@ -522,13 +520,13 @@ public class GraphSubgraphTest {
         var floatType = com.lowdragmc.lowdraglib2.nodegraphtookit.api.type.TypeHandleHelpers.fromType(Float.class);
 
         // Place two TestAddNodes; surround them with a placemat that contains both.
-        var addA = gm.createNodeModel(new TestAddNode(), new org.joml.Vector2f(10, 10));
-        var addB = gm.createNodeModel(new TestAddNode(), new org.joml.Vector2f(80, 10));
+        var addA = gm.createNodeModel(new TestAddNode(), new Vector2f(10, 10));
+        var addB = gm.createNodeModel(new TestAddNode(), new Vector2f(80, 10));
         // Placemat covers (0,0)-(200,150); both nodes inside its bounds.
-        var pm = gm.createPlacemat("pm", new org.joml.Vector2f(0, 0), new org.joml.Vector2f(200, 150));
-        var sn = gm.createStickyNote(new org.joml.Vector2f(20, 60));
+        var pm = gm.createPlacemat("pm", new Vector2f(0, 0), new Vector2f(200, 150));
+        var sn = gm.createStickyNote(new Vector2f(20, 60));
         // Outer constant feeding into addA so we get one crossing wire
-        var c1 = gm.createConstantNode("c1", new org.joml.Vector2f(-100, 10), floatType, 1f);
+        var c1 = gm.createConstantNode("c1", new Vector2f(-100, 10), floatType, 1f);
         var c1Out = ((com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.ConstantNodeModel) c1.getNodeModel()).getOutputPort();
         var aIn1 = addA.getInputsById().get("in1");
         var crossing = gm.createWire(aIn1, c1Out);
@@ -572,9 +570,9 @@ public class GraphSubgraphTest {
         var graph = new TestGraph();
         var gm = graph.graphModel;
         // Two nodes inside a placemat
-        var addA = gm.createNodeModel(new TestAddNode(), new org.joml.Vector2f(10, 10));
-        var addB = gm.createNodeModel(new TestAddNode(), new org.joml.Vector2f(80, 10));
-        var pm = gm.createPlacemat("pm", new org.joml.Vector2f(0, 0), new org.joml.Vector2f(200, 150));
+        var addA = gm.createNodeModel(new TestAddNode(), new Vector2f(10, 10));
+        var addB = gm.createNodeModel(new TestAddNode(), new Vector2f(80, 10));
+        var pm = gm.createPlacemat("pm", new Vector2f(0, 0), new Vector2f(200, 150));
 
         // Select only one node + the placemat — the other contained node is NOT selected
         var selection = java.util.List.<com.lowdragmc.lowdraglib2.nodegraphtookit.model.GraphElementModel>of(addA, pm);
@@ -608,9 +606,9 @@ public class GraphSubgraphTest {
         // Outer has a local subgraph "innerOld" + a SubgraphNodeModel referencing it
         var innerOld = gm.createLocalSubgraphInstance();
         gm.addLocalSubgraph(innerOld);
-        innerOld.createVariable("v", int.class, 0, com.lowdragmc.lowdraglib2.nodegraphtookit.api.variable.VariableKind.INPUT);
+        innerOld.createVariable("v", int.class, 0, VariableKind.INPUT);
         var refNode = gm.createNodeWithType(SubgraphNodeModel.class, "ref",
-                new org.joml.Vector2f(0, 0), null,
+                new Vector2f(0, 0), null,
                 n -> n.setLocalSubgraph(innerOld), SpawnFlags.DEFAULT);
 
         if (countNonNull(gm.getLocalSubGraphs()) != 1) {
@@ -710,9 +708,9 @@ public class GraphSubgraphTest {
 
         var inner = gm.createLocalSubgraphInstance();
         gm.addLocalSubgraph(inner);
-        inner.createVariable("v", int.class, 0, com.lowdragmc.lowdraglib2.nodegraphtookit.api.variable.VariableKind.INPUT);
+        inner.createVariable("v", int.class, 0, VariableKind.INPUT);
         var origNode = gm.createNodeWithType(SubgraphNodeModel.class, "n",
-                new org.joml.Vector2f(0, 0), null,
+                new Vector2f(0, 0), null,
                 n -> n.setLocalSubgraph(inner), SpawnFlags.DEFAULT);
 
         if (countNonNull(gm.getLocalSubGraphs()) != 1) {
@@ -721,7 +719,7 @@ public class GraphSubgraphTest {
 
         // Copy + paste in the same graph
         var copyData = gm.copyElements(java.util.List.of(origNode), provider);
-        var pasted = gm.pasteElementsWithMap(copyData, new org.joml.Vector2f(50, 50));
+        var pasted = gm.pasteElementsWithMap(copyData, new Vector2f(50, 50));
         SubgraphNodeModel pastedNode = null;
         for (var n : pasted.elements()) {
             if (n instanceof SubgraphNodeModel s && !s.getUid().equals(origNode.getUid())) {
@@ -755,7 +753,7 @@ public class GraphSubgraphTest {
 
         // Mutating the pasted inner graph must not affect the original.
         ((CustomGraphModelImpl) pastedInner).createVariable("v2", int.class, 0,
-                com.lowdragmc.lowdraglib2.nodegraphtookit.api.variable.VariableKind.LOCAL);
+                VariableKind.LOCAL);
         if (countNonNull(origInner.getGraphVariableModels()) != 1) {
             helper.fail("original inner graph leaked the new variable from the clone");
             return;
@@ -785,9 +783,9 @@ public class GraphSubgraphTest {
         var inner = src.graphModel.createLocalSubgraphInstance();
         src.graphModel.addLocalSubgraph(inner);
         inner.createVariable("v", int.class, 0,
-                com.lowdragmc.lowdraglib2.nodegraphtookit.api.variable.VariableKind.INPUT);
+                VariableKind.INPUT);
         var srcNode = src.graphModel.createNodeWithType(SubgraphNodeModel.class, "n",
-                new org.joml.Vector2f(0, 0), null,
+                new Vector2f(0, 0), null,
                 n -> n.setLocalSubgraph(inner), SpawnFlags.DEFAULT);
 
         // Empty destination graph
@@ -798,7 +796,7 @@ public class GraphSubgraphTest {
         }
 
         var copyData = src.graphModel.copyElements(java.util.List.of(srcNode), provider);
-        var pasted = dst.graphModel.pasteElementsWithMap(copyData, new org.joml.Vector2f(0, 0));
+        var pasted = dst.graphModel.pasteElementsWithMap(copyData, new Vector2f(0, 0));
 
         // Destination now has 1 local subgraph
         if (dst.graphModel.getLocalSubGraphs() == null

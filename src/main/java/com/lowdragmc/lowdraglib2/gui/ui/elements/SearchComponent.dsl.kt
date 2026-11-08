@@ -4,7 +4,6 @@ import com.lowdragmc.lowdraglib2.gui.ui.ElementSpec
 import com.lowdragmc.lowdraglib2.gui.ui.UIContainer
 import com.lowdragmc.lowdraglib2.gui.ui.utils.UIElementProvider
 import com.lowdragmc.lowdraglib2.utils.search.IResultHandler
-import com.lowdragmc.lowdraglib2.utils.search.ISearch
 import java.util.function.Consumer
 
 /**

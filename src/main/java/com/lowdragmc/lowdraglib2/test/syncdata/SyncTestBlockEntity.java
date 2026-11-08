@@ -1,20 +1,19 @@
 package com.lowdragmc.lowdraglib2.test.syncdata;
 
 import com.lowdragmc.lowdraglib2.CommonProxy;
+import com.lowdragmc.lowdraglib2.compat.network.codec.ByteBufCodecs;
 import com.lowdragmc.lowdraglib2.syncdata.annotation.*;
 import com.lowdragmc.lowdraglib2.syncdata.holder.blockentity.ISyncPersistRPCBlockEntity;
 import com.lowdragmc.lowdraglib2.syncdata.rpc.RPCSender;
 import com.lowdragmc.lowdraglib2.syncdata.storage.FieldManagedStorage;
 import com.mojang.serialization.Codec;
-import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.nikdo53.neobackports.io.StreamCodec;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -79,7 +78,7 @@ public class SyncTestBlockEntity extends BlockEntity implements ISyncPersistRPCB
     }
 
     // upper-cases on decode, so a test can tell a sync packet's label from the codec's
-    private static StreamCodec<ByteBuf, String> labelStream() {
+    private static StreamCodec<String> labelStream() {
         return ByteBufCodecs.STRING_UTF8.map(s -> s.toUpperCase(Locale.ROOT), s -> s);
     }
 

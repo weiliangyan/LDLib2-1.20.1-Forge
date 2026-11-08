@@ -2,9 +2,8 @@ package com.lowdragmc.lowdraglib2.misc;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.IFluidTank;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.IFluidTank;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -50,12 +49,12 @@ public class CycleFluidStorage implements IFluidTank, IFluidHandlerModifiable {
     }
 
     @Override
-    public int fill(FluidStack resource, IFluidHandler.FluidAction action) {
+    public int fill(FluidStack resource, FluidAction action) {
         return 0;
     }
 
     @Override
-    public FluidStack drain(int maxDrain, IFluidHandler.FluidAction action) {
+    public FluidStack drain(int maxDrain, FluidAction action) {
         return FluidStack.EMPTY;
     }
 
@@ -66,7 +65,7 @@ public class CycleFluidStorage implements IFluidTank, IFluidHandlerModifiable {
 
     @NotNull
     @Override
-    public FluidStack drain(FluidStack resource, IFluidHandler.FluidAction action) {
+    public FluidStack drain(FluidStack resource, FluidAction action) {
         return FluidStack.EMPTY;
     }
 
