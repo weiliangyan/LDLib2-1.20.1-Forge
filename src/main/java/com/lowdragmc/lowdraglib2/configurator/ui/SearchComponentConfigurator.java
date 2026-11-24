@@ -1,16 +1,15 @@
 package com.lowdragmc.lowdraglib2.configurator.ui;
 
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
+import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Vertical;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.SearchComponent;
-import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
 import com.lowdragmc.lowdraglib2.gui.ui.utils.UIElementProvider;
 import com.lowdragmc.lowdraglib2.utils.search.IResultHandler;
 import com.lowdragmc.lowdraglib2.utils.search.ISearch;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.chat.Component;
-import org.appliedenergistics.yoga.YogaOverflow;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

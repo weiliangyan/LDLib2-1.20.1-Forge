@@ -12,7 +12,10 @@ import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.dependency.ModelUpdateVisit
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.ChangeHint;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.GraphElementModel;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.IPlaceHolder;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.*;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.ISingleInputPortNodeModel;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.ISingleOutputPortNodeModel;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.PortModel;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.PortNodeModel;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.variable.ModifierFlags;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.variable.VariableDeclarationModelBase;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire.WireModel;
@@ -200,14 +203,12 @@ public class PortElement extends GraphElement<PortModel> {
 
     public boolean canAcceptDrop(GraphElementModel droppedElement) {
         // The elements that can be dropped: a variable declaration from the Blackboard and any node with a single input or output (eg.: variable and constant nodes).
-        return switch (droppedElement) {
-            case VariableDeclarationModelBase variableDeclaration -> canAcceptDroppedVariable(variableDeclaration);
-            case ISingleInputPortNodeModel ignored ->
-                    droppedElement instanceof PortNodeModel portNodeModel && (portNodeModel.getPortFitToConnectTo(getModel()) != null);
-            case ISingleOutputPortNodeModel ignored ->
-                    droppedElement instanceof PortNodeModel portNodeModel && (portNodeModel.getPortFitToConnectTo(getModel()) != null);
-            default -> false;
-        };
+        if (droppedElement instanceof VariableDeclarationModelBase variableDeclaration) {
+            return canAcceptDroppedVariable(variableDeclaration);
+        } else if (droppedElement instanceof ISingleInputPortNodeModel || droppedElement instanceof ISingleOutputPortNodeModel) {
+            return droppedElement instanceof PortNodeModel portNodeModel && (portNodeModel.getPortFitToConnectTo(getModel()) != null);
+        }
+        return false;
     }
 
     protected boolean canAcceptDroppedVariable(VariableDeclarationModelBase variableDeclaration) {

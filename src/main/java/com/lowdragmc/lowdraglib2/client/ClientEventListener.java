@@ -3,29 +3,33 @@ package com.lowdragmc.lowdraglib2.client;
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.Platform;
 import com.lowdragmc.lowdraglib2.client.font.LDFontManager;
+import com.lowdragmc.lowdraglib2.client.font.LDFontStatsOverlay;
 import com.lowdragmc.lowdraglib2.editor.resource.EditorResourceEvent;
 import com.lowdragmc.lowdraglib2.editor.resource.ResourceInstance;
 import com.lowdragmc.lowdraglib2.editor.resource.TexturesResource;
 import com.lowdragmc.lowdraglib2.gui.holder.IModularUIHolder;
+import com.lowdragmc.lowdraglib2.gui.holder.ModularUIContainerScreen;
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
-import com.lowdragmc.lowdraglib2.gui.ui.utils.CursorOverlay;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.MCSprites;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.OreSprites;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
+import com.lowdragmc.lowdraglib2.gui.ui.utils.CursorOverlay;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import lombok.Getter;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.commands.CommandSourceStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
-import com.lowdragmc.lowdraglib2.client.font.LDFontStatsOverlay;
-import net.minecraft.client.Minecraft;
-import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.RegisterClientCommandsEvent;
+import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 import java.util.List;
+
+import static com.lowdragmc.lowdraglib2.client.ClientProxy.minecraft;
 
 /**
  * @author KilaBash
@@ -35,6 +39,8 @@ import java.util.List;
 @EventBusSubscriber(modid = LDLib2.MOD_ID, value = Dist.CLIENT)
 @OnlyIn(Dist.CLIENT)
 public class ClientEventListener {
+    @Getter
+    private static long clientTickCount;
 
     /**
      * The two things about the text renderer that can only be noticed by looking: the font related video
@@ -42,9 +48,12 @@ public class ClientEventListener {
      * based by nature. Both free textures, so both belong between frames rather than inside one.
      */
     @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event) {
-        LDFontManager.INSTANCE.refreshVanillaFontOptions();
-        LDFontManager.INSTANCE.evictStaleRasterSizes();
+    public static void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) {
+            clientTickCount++;
+            LDFontManager.INSTANCE.refreshVanillaFontOptions();
+            LDFontManager.INSTANCE.evictStaleRasterSizes();
+        }
     }
 
     /**
@@ -55,7 +64,7 @@ public class ClientEventListener {
     @SubscribeEvent
     public static void onScreenRendered(ScreenEvent.Render.Post event) {
         if (Platform.isDevEnv()) {
-            LDFontStatsOverlay.INSTANCE.render(event.getGuiGraphics(), Minecraft.getInstance().getTimer());
+            LDFontStatsOverlay.INSTANCE.render((ForgeGui) minecraft.gui, event.getGuiGraphics(), event.getPartialTick(), minecraft.getWindow().getScreenWidth(), minecraft.getWindow().getScreenHeight());
         }
         // Only draws while something is driving the cursor from inside the process; see the class doc.
         CursorOverlay.render(event.getGuiGraphics(), event.getPartialTick());
@@ -71,6 +80,9 @@ public class ClientEventListener {
     @SubscribeEvent
     public static void onRegisterClientCommands(ScreenEvent.Init.Pre event) {
         var screen = event.getScreen();
+        if (screen instanceof ModularUIContainerScreen) {
+            return;
+        }
         if (screen instanceof AbstractContainerScreen<?> containerScreen && containerScreen.getMenu() instanceof IModularUIHolder holder) {
             var mui = holder.getModularUI();
             if (mui != null) {

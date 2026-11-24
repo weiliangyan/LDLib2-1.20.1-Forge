@@ -22,14 +22,15 @@ final class ServerPace {
     private long baseTicks = -1;
     private double baseSeconds;
 
+    // todo: 1.20.1 还没有自带的tickRateManager，考虑是否引入carpet的移植模组
     void await(@Nullable MinecraftServer server, boolean paused, double videoSeconds) {
         if (server == null) return;
-        var rate = server.tickRateManager();
+/*        var rate = server.tickRateManager();
         if (baseTicks < 0 || paused || rate.isFrozen() || rate.isSprinting()) {
             rebase(server, videoSeconds);
             return;
-        }
-        long expected = baseTicks + (long) ((videoSeconds - baseSeconds) * rate.tickrate());
+        }*/
+        long expected = baseTicks + (long) ((videoSeconds - baseSeconds) * /*rate.tickrate()*/20);
         if (expected - server.getTickCount() > MAX_BEHIND) {
             rebase(server, videoSeconds);
             return;

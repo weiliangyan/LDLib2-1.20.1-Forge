@@ -11,8 +11,8 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.NbtIo;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.io.File;
 import java.io.IOException;
@@ -167,7 +167,7 @@ public class ReleasedResourceTest {
         var tag = new CompoundTag();
         tag.putString("type", "color");
         tag.put("data", IntTag.valueOf(value));
-        NbtIo.write(tag, file.toPath());
+        NbtIo.write(tag, file);
     }
 
     private static void deleteRecursively(File file) {

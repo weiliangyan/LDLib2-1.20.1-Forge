@@ -1,7 +1,6 @@
 package com.lowdragmc.lowdraglib2.nodegraphtookit.model;
 
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.node.INodeOption;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.api.node.Node;
 
 import java.util.List;
 

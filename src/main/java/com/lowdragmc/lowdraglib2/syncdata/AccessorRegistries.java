@@ -1,7 +1,10 @@
 package com.lowdragmc.lowdraglib2.syncdata;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
+import com.lowdragmc.lowdraglib2.Platform;
 import com.lowdragmc.lowdraglib2.client.renderer.IRenderer;
+import com.lowdragmc.lowdraglib2.compat.network.chat.ComponentSerialization;
+import com.lowdragmc.lowdraglib2.compat.network.codec.ByteBufCodecs;
 import com.lowdragmc.lowdraglib2.editor.resource.IResourcePath;
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib2.gui.ui.UITemplate;
@@ -13,32 +16,29 @@ import com.lowdragmc.lowdraglib2.math.HDRColor;
 import com.lowdragmc.lowdraglib2.math.Position;
 import com.lowdragmc.lowdraglib2.math.Range;
 import com.lowdragmc.lowdraglib2.math.Size;
-import com.lowdragmc.lowdraglib2.syncdata.mark.MarkStrategies;
-import com.lowdragmc.lowdraglib2.syncdata.utils.StackSnapshots;
 import com.lowdragmc.lowdraglib2.syncdata.accessor.IAccessor;
 import com.lowdragmc.lowdraglib2.syncdata.accessor.arraylike.ArrayAccessor;
 import com.lowdragmc.lowdraglib2.syncdata.accessor.arraylike.CollectionAccessor;
-import com.lowdragmc.lowdraglib2.syncdata.accessor.maplike.MapAccessor;
 import com.lowdragmc.lowdraglib2.syncdata.accessor.direct.CustomDirectAccessor;
 import com.lowdragmc.lowdraglib2.syncdata.accessor.direct.EnumAccessor;
 import com.lowdragmc.lowdraglib2.syncdata.accessor.direct.PrimitiveAccessor;
 import com.lowdragmc.lowdraglib2.syncdata.accessor.direct.RegistryAccessor;
+import com.lowdragmc.lowdraglib2.syncdata.accessor.maplike.MapAccessor;
 import com.lowdragmc.lowdraglib2.syncdata.accessor.readonly.IManagedObjectAccessor;
 import com.lowdragmc.lowdraglib2.syncdata.accessor.readonly.INBTSerializableReadOnlyAccessor;
 import com.lowdragmc.lowdraglib2.syncdata.annotation.ManagedCodec;
-import com.lowdragmc.lowdraglib2.utils.*;
+import com.lowdragmc.lowdraglib2.syncdata.mark.MarkStrategies;
+import com.lowdragmc.lowdraglib2.syncdata.utils.StackSnapshots;
+import com.lowdragmc.lowdraglib2.utils.LDLibExtraCodecs;
+import com.lowdragmc.lowdraglib2.utils.ReflectionUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.EntityType;
@@ -46,7 +46,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -54,21 +53,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.crafting.SizedIngredient;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.crafting.FluidIngredient;
-import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
+import net.minecraftforge.fluids.FluidStack;
+import net.nikdo53.neobackports.io.StreamCodec;
 import org.jetbrains.annotations.Nullable;
 import org.joml.*;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.InaccessibleObjectException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
@@ -278,17 +268,17 @@ public class AccessorRegistries {
         if (!(value instanceof Codec<?> codec)) {
             throw managedCodecError(field, managedCodec.value() + "() returns neither a Codec nor an IAccessor", null);
         }
-        StreamCodec<? super RegistryFriendlyByteBuf, ?> streamCodec;
+        StreamCodec<?> streamCodec;
         if (managedCodec.streamCodec().isEmpty()) {
             streamCodec = ByteBufCodecs.fromCodecWithRegistries(codec);
-        } else if (callManagedCodecMethod(field, managedCodec, managedCodec.streamCodec(), holder) instanceof StreamCodec<?, ?> named) {
-            streamCodec = (StreamCodec<? super RegistryFriendlyByteBuf, ?>) named;
+        } else if (callManagedCodecMethod(field, managedCodec, managedCodec.streamCodec(), holder) instanceof StreamCodec<?> named) {
+            streamCodec = named;
         } else {
             throw managedCodecError(field, managedCodec.streamCodec() + "() does not return a StreamCodec", null);
         }
         return CustomDirectAccessor.builder((Class<Object>) field.getType(), true)
                 .codec((Codec<Object>) codec)
-                .streamCodec((StreamCodec<? super RegistryFriendlyByteBuf, Object>) streamCodec)
+                .streamCodec((StreamCodec<Object>) streamCodec)
                 .codecMark()
                 .build();
     }
@@ -355,11 +345,11 @@ public class AccessorRegistries {
         registerAccessor(RegistryAccessor.of((Class<BlockEntityType<?>>)(Class<?>)BlockEntityType.class, BuiltInRegistries.BLOCK_ENTITY_TYPE));
         registerAccessor(CustomDirectAccessor.builder(UUID.class)
                 .codec(LDLibExtraCodecs.UUID)
-                .streamCodec(UUIDUtil.STREAM_CODEC)
+                .streamCodec(StreamCodec.of(FriendlyByteBuf::writeUUID, FriendlyByteBuf::readUUID))
                 .build());
         registerAccessor(CustomDirectAccessor.builder(BlockState.class)
                 .codec(BlockState.CODEC)
-                .streamCodec(ByteBufCodecs.fromCodecWithRegistries(BlockState.CODEC))
+                .streamCodec(ByteBufCodecs.fromCodec(BlockState.CODEC))
                 .build());
         registerAccessor(CustomDirectAccessor.builder(UIEvent.class)
                 .codec(UIEvent.CODEC)
@@ -396,7 +386,7 @@ public class AccessorRegistries {
                 .build());
         registerAccessor(CustomDirectAccessor.builder(ResourceLocation.class)
                 .codec(ResourceLocation.CODEC)
-                .streamCodec(ResourceLocation.STREAM_CODEC)
+                .streamCodec(ByteBufCodecs.RESOURCE_LOCATION)
                 .build());
 
         setPriority(1000);
@@ -423,7 +413,7 @@ public class AccessorRegistries {
                 .copyMark(Vector3i::new)
                 .build());
         registerAccessor(CustomDirectAccessor.builder(Vector4f.class)
-                .codec(ExtraCodecs.VECTOR4F)
+                .codec(LDLibExtraCodecs.VECTOR4F)
                 .streamCodec(StreamCodec.of(
                         (byteBuf, vector) -> {
                             byteBuf.writeFloat(vector.x);
@@ -464,8 +454,8 @@ public class AccessorRegistries {
                 .build());
         registerAccessor(CustomDirectAccessor.builder(AABB.class)
                 .codec(RecordCodecBuilder.create(instance -> instance.group(
-                        Vec3.CODEC.fieldOf("min").forGetter(AABB::getMinPosition),
-                        Vec3.CODEC.fieldOf("max").forGetter(AABB::getMaxPosition)
+                        Vec3.CODEC.fieldOf("min").forGetter(aabb -> new Vec3(aabb.minX, aabb.minY, aabb.minZ)),
+                        Vec3.CODEC.fieldOf("max").forGetter(aabb -> new Vec3(aabb.maxX, aabb.maxY, aabb.maxZ))
                 ).apply(instance, AABB::new)))
                 .streamCodec(StreamCodec.of(
                         (byteBuf, aabb) -> {
@@ -483,8 +473,8 @@ public class AccessorRegistries {
                 .build());
         registerAccessor(CustomDirectAccessor.builder(BlockPos.class)
                 .codec(BlockPos.CODEC)
-                .streamCodec(BlockPos.STREAM_CODEC)
-                .copyMark(BlockPos::new)
+                .streamCodec(ByteBufCodecs.BLOCK_POS)
+                .copyMark(pos -> new BlockPos(pos.getX(), pos.getY(), pos.getZ()))
                 .build());
         registerAccessor(CustomDirectAccessor.builder(ChunkPos.class)
                 .codec(Codec.LONG.xmap(ChunkPos::new, ChunkPos::toLong))
@@ -492,13 +482,13 @@ public class AccessorRegistries {
                 .copyMark(chunkPos -> new ChunkPos(chunkPos.x, chunkPos.z))
                 .build());
         registerAccessor(CustomDirectAccessor.builder(FluidStack.class)
-                .codec(FluidStack.OPTIONAL_CODEC)
-                .streamCodec(FluidStack.OPTIONAL_STREAM_CODEC)
-                .customMark(StackSnapshots::of, FluidStack::matches)
+                .codec(FluidStack.CODEC)
+                .streamCodec(ByteBufCodecs.OPTIONAL_FLUID_STACK)
+                .customMark(StackSnapshots::of, FluidStack::isFluidStackIdentical)
                 .build());
         registerAccessor(CustomDirectAccessor.builder(ItemStack.class)
                 .codec(LDLibExtraCodecs.ITEM_STACK)
-                .streamCodec(ItemStack.OPTIONAL_STREAM_CODEC)
+                .streamCodec(ByteBufCodecs.OPTIONAL_ITEM_STACK)
                 .customMark(StackSnapshots::of, ItemStack::matches)
                 .build());
         if (LDLib2.isClient()) {
@@ -512,16 +502,18 @@ public class AccessorRegistries {
                     .streamCodec(ByteBufCodecs.fromCodec(IRenderer.CODEC))
                     .build());
         }
-        registerAccessor(CustomDirectAccessor.builder(RecipeHolder.class)
-                .codec(RecordCodecBuilder.create(instance -> instance.group(
-                        ResourceLocation.CODEC.fieldOf("id").forGetter(RecipeHolder::id),
-                        Recipe.CODEC.fieldOf("recipe").forGetter(RecipeHolder::value)
-                ).apply(instance, RecipeHolder::new)))
-                .streamCodec((StreamCodec<RegistryFriendlyByteBuf, RecipeHolder>) (Object)RecipeHolder.STREAM_CODEC)
-                .build());
         registerAccessor(CustomDirectAccessor.builder(Recipe.class, true)
-                .codec((Codec<Recipe>) (Object) Recipe.CODEC)
-                .streamCodec((StreamCodec<RegistryFriendlyByteBuf, Recipe>) (Object)Recipe.STREAM_CODEC)
+                .codec(LDLibExtraCodecs.RECIPE_ID)
+                .streamCodec(StreamCodec.of(
+                        (buf, recipe) -> buf.writeResourceLocation(recipe.getId()),
+                        buf -> {
+                            var server = Platform.getMinecraftServer();
+                            if (server == null) {
+                                throw new IllegalStateException("No recipe manager available while reading recipe from stream");
+                            }
+                            return server.getRecipeManager().byKey(buf.readResourceLocation()).orElseThrow();
+                        }
+                ))
                 .build());
         registerAccessor(CustomDirectAccessor.builder(IResourcePath.class, true)
                 .codec(IResourcePath.CODEC)
@@ -535,7 +527,7 @@ public class AccessorRegistries {
                 .codec(Ingredient.CODEC)
                 .streamCodec(Ingredient.CONTENTS_STREAM_CODEC)
                 .build());
-        registerAccessor(CustomDirectAccessor.builder(FluidIngredient.class)
+/*        registerAccessor(CustomDirectAccessor.builder(FluidIngredient.class)
                 .codec(FluidIngredient.CODEC)
                 .streamCodec(FluidIngredient.STREAM_CODEC)
                 .build());
@@ -546,7 +538,7 @@ public class AccessorRegistries {
         registerAccessor(CustomDirectAccessor.builder(SizedFluidIngredient.class)
                 .codec(SizedFluidIngredient.FLAT_CODEC)
                 .streamCodec(SizedFluidIngredient.STREAM_CODEC)
-                .build());
+                .build());*/
 
         setPriority(1500);
 

@@ -6,7 +6,7 @@ import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.wire.WireRouteStyle;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.neoforged.fml.loading.FMLLoader;
+import net.minecraftforge.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;

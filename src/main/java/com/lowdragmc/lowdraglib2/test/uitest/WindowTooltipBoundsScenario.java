@@ -233,6 +233,6 @@ public class WindowTooltipBoundsScenario implements UIScenario {
     }
 
     private static int clamp(int value, int limit) {
-        return Math.clamp(value, 0, limit);
+        return Math.max(Math.min(value, limit - 1), 0);
     }
 }

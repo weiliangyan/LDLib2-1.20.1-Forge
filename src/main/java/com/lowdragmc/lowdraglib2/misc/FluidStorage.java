@@ -1,14 +1,15 @@
 package com.lowdragmc.lowdraglib2.misc;
 
 import com.google.common.util.concurrent.Runnables;
+import com.lowdragmc.lowdraglib2.Platform;
 import com.lowdragmc.lowdraglib2.syncdata.IContentChangeAware;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.neoforged.neoforge.common.util.INBTSerializable;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
+import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.templates.FluidTank;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Predicate;
@@ -50,23 +51,31 @@ public class FluidStorage extends FluidTank implements INBTSerializable<Compound
         return storage;
     }
 
-    @Override
     public CompoundTag serializeNBT(@NotNull HolderLookup.Provider provider) {
         var tag = new CompoundTag();
         if (!fluid.isEmpty()) {
-            tag.put("fluid", fluid.save(provider));
+            tag.put("fluid", fluid.writeToNBT(new CompoundTag()));
         }
         tag.putInt("capacity", capacity);
         return tag;
     }
 
     @Override
+    public CompoundTag serializeNBT() {
+        return serializeNBT(Platform.getFrozenRegistry());
+    }
+
     public void deserializeNBT(@NotNull HolderLookup.Provider provider, CompoundTag nbt) {
         capacity = nbt.getInt("capacity");
         if (nbt.contains("fluid")) {
-            setFluid(FluidStack.parseOptional(provider, nbt.getCompound("fluid")));
+            setFluid(FluidStack.loadFluidStackFromNBT(nbt.getCompound("fluid")));
         } else {
             setFluid(FluidStack.EMPTY);
         }
+    }
+
+    @Override
+    public void deserializeNBT(CompoundTag nbt) {
+        deserializeNBT(Platform.getFrozenRegistry(), nbt);
     }
 }

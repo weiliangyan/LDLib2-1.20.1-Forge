@@ -1,4 +1,4 @@
 {
-  "parent": "neoforge:block/default",
+  "parent": "forge:block/default",
   "loader": "ldlib2:renderer"
 }

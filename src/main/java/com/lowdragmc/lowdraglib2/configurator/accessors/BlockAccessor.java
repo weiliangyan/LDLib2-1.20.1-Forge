@@ -24,7 +24,7 @@ public class BlockAccessor extends TypesAccessor<Block> {
     @Override
     public Block defaultValue(@Nullable Field field, @Nullable Class<?> type) {
         if (field != null && field.isAnnotationPresent(DefaultValue.class)) {
-            return BuiltInRegistries.BLOCK.get(ResourceLocation.parse(field.getAnnotation(DefaultValue.class).stringValue()[0]));
+            return BuiltInRegistries.BLOCK.get(new ResourceLocation(field.getAnnotation(DefaultValue.class).stringValue()[0]));
         }
         return Blocks.AIR;
     }

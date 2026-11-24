@@ -7,12 +7,12 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelState;
-import net.neoforged.neoforge.client.model.IModelBuilder;
-import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
-import net.neoforged.neoforge.client.model.obj.ObjMaterialLibrary;
-import net.neoforged.neoforge.client.model.obj.ObjModel;
-import net.neoforged.neoforge.client.model.renderable.CompositeRenderable;
-import net.neoforged.neoforge.client.textures.UnitTextureAtlasSprite;
+import net.minecraftforge.client.model.IModelBuilder;
+import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
+import net.minecraftforge.client.model.obj.ObjMaterialLibrary;
+import net.minecraftforge.client.model.obj.ObjModel;
+import net.minecraftforge.client.model.renderable.CompositeRenderable;
+import net.minecraftforge.client.textures.UnitTextureAtlasSprite;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
-@Mixin(targets = "net.neoforged.neoforge.client.model.obj.ObjModel$ModelMesh")
+@Mixin(targets = "net.minecraftforge.client.model.obj.ObjModel$ModelMesh", remap = false)
 public abstract class ObjModelMixin {
 
     @Shadow @Final ObjModel this$0;
@@ -35,14 +35,15 @@ public abstract class ObjModelMixin {
     @Shadow @Nullable public ObjMaterialLibrary.@Nullable Material mat;
 
     @Inject(method = "bake", at = @At(value = "INVOKE",
-            target = "Lnet/neoforged/neoforge/client/model/obj/ObjModel;makeQuad([[IILorg/joml/Vector4f;Lorg/joml/Vector4f;Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;Lcom/mojang/math/Transformation;)Lorg/apache/commons/lang3/tuple/Pair;"))
+            target = "Lnet/minecraftforge/client/model/obj/ObjModel;makeQuad([[IILorg/joml/Vector4f;Lorg/joml/Vector4f;Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;Lcom/mojang/math/Transformation;)Lorg/apache/commons/lang3/tuple/Pair;"),
+            remap = false)
     private void ldlib2$bake(CompositeRenderable.PartBuilder<?> builder,
                              IGeometryBakingContext configuration,
                              CallbackInfo ci,
-                             @Local List<BakedQuad> quads,
-                             @Local int[][] faces) {
+                             @Local(name = "quads") List<BakedQuad> quads,
+                             @Local(name = "face") int[][] face) {
         if (this$0 instanceof ObjModelAccessor model) {
-            var left = ldlib2$getLeftFaces(faces);
+            var left = ldlib2$getLeftFaces(face);
             if (left.length >= 3) {
                 ObjMaterialLibrary.Material mat = this.mat;
                 assert mat != null;
@@ -57,17 +58,18 @@ public abstract class ObjModelMixin {
     }
 
     @Inject(method = "addQuads", at = @At(value = "INVOKE",
-            target = "Lnet/neoforged/neoforge/client/model/obj/ObjModel;makeQuad([[IILorg/joml/Vector4f;Lorg/joml/Vector4f;Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;Lcom/mojang/math/Transformation;)Lorg/apache/commons/lang3/tuple/Pair;"))
+            target = "Lnet/minecraftforge/client/model/obj/ObjModel;makeQuad([[IILorg/joml/Vector4f;Lorg/joml/Vector4f;Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;Lcom/mojang/math/Transformation;)Lorg/apache/commons/lang3/tuple/Pair;"),
+            remap = false)
     private void ldlib2$addQuads(IGeometryBakingContext owner,
                                  IModelBuilder<?> modelBuilder,
                                  Function<Material, TextureAtlasSprite> spriteGetter,
                                  ModelState modelTransform,
                                  CallbackInfo ci,
-                                 @Local int[][] faces,
-                                 @Local TextureAtlasSprite texture,
+                                 @Local(name = "face") int[][] face,
+                                 @Local(name = "texture") TextureAtlasSprite texture,
                                  @Local(name = "transform") Transformation transform) {
         if (this$0 instanceof ObjModelAccessor model) {
-            var left = ldlib2$getLeftFaces(faces);
+            var left = ldlib2$getLeftFaces(face);
             if (left.length >= 3) {
                 ObjMaterialLibrary.Material mat = this.mat;
                 assert mat != null;

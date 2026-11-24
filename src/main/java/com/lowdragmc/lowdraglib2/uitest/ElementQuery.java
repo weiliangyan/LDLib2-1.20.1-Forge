@@ -142,7 +142,7 @@ public final class ElementQuery {
     public Optional<ElementRef> optional() {
         var matches = matches();
         return matches.size() == 1
-                ? Optional.of(new ElementRef(matches.getFirst(), describeSelf()))
+                ? Optional.of(new ElementRef(matches.get(0), describeSelf()))
                 : Optional.empty();
     }
 
@@ -161,7 +161,7 @@ public final class ElementQuery {
                     + " but found " + matches.size() + ": " + preview(matches)
                     + ". Narrow it with .nth(i) or another filter.");
         }
-        return new ElementRef(matches.getFirst(), describeSelf());
+        return new ElementRef(matches.get(0), describeSelf());
     }
 
     // endregion

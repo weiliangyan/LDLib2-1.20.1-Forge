@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib2.utils.animation;
 
 import com.lowdragmc.lowdraglib2.syncdata.ISubscription;
+import net.minecraft.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -8,7 +9,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Predicate;
-import net.minecraft.Util;
 
 public class AnimationEngine {
 

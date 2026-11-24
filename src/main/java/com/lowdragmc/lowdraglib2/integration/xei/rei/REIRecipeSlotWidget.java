@@ -5,7 +5,6 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
-import me.shedaniel.rei.impl.client.util.OriginalRetainingCyclingList;
 import net.minecraft.client.gui.GuiGraphics;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -44,12 +43,6 @@ public class REIRecipeSlotWidget extends EntryWidget {
 
         noHighlight();
         noBackground();
-    }
-
-    @Override
-    public OriginalRetainingCyclingList<EntryStack<?>> getCyclingEntries() {
-        // TODO: it will be used to scroll candidates. This slot doesn't allow it.
-        return super.getCyclingEntries();
     }
 
     @Override

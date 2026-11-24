@@ -1,10 +1,10 @@
 package com.lowdragmc.lowdraglib2.misc;
 
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 
 /**
- * Extensions to NeoForge's {@link IFluidHandler}
+ * Extensions to Forge's {@link IFluidHandler}
  */
 public interface IFluidHandlerModifiable extends IFluidHandler {
 

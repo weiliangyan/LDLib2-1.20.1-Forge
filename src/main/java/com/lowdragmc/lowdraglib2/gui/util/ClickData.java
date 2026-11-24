@@ -2,11 +2,11 @@ package com.lowdragmc.lowdraglib2.gui.util;
 
 import com.lowdragmc.lowdraglib2.core.mixins.accessor.MouseHandlerAccessor;
 import com.mojang.blaze3d.platform.InputConstants;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.glfw.GLFW;
 
 public class ClickData {

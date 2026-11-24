@@ -1,4 +1,4 @@
-//package com.lowdragmc.lowdraglib2.integration.moddevmcp;
+package com.lowdragmc.lowdraglib2.integration.moddevmcp;
 //
 //import dev.vfyjxf.mcp.api.event.RegisterClientMcpToolsEvent;
 //import dev.vfyjxf.mcp.api.registrar.ClientMcpRegistrar;

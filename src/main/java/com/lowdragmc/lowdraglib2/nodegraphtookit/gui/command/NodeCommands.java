@@ -16,10 +16,10 @@ import com.lowdragmc.lowdraglib2.nodegraphtookit.model.variable.VariableDeclarat
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire.IGhostWireModel;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire.WireModel;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire.WireSide;
+import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
-import it.unimi.dsi.fastutil.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -238,7 +238,7 @@ public final class NodeCommands {
                             elementsToSelect.add(newWire);
                         }
                     }
-                    case ConnectionsToMake.INSERT_ON_WIRE -> {
+                    case INSERT_ON_WIRE -> {
                         if (portNodeModel instanceof InputOutputPortsNodeModel newModelToConnect) {
                             var wireInput = nodeData.wireToInsertOn.getToPort();
                             var wireOutput = nodeData.wireToInsertOn.getFromPort();
@@ -255,7 +255,7 @@ public final class NodeCommands {
                             var outputWire = outputPortModel == null ? null : graphModel.createWire(wireInput, outputPortModel);
                         }
                     }
-                    case ConnectionsToMake.EXISTING_WIRES -> {
+                    case EXISTING_WIRES -> {
                         for (var wire : nodeData.wiresToConnect) {
                             var wireModel = wire.left();
                             var wireSide = wire.right();

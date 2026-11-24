@@ -10,15 +10,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import org.appliedenergistics.yoga.YogaDisplay;
-import org.appliedenergistics.yoga.YogaEdge;
-import org.appliedenergistics.yoga.YogaGutter;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault

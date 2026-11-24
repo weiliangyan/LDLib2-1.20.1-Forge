@@ -5,20 +5,18 @@ import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import com.lowdragmc.lowdraglib2.math.Rect;
 import com.lowdragmc.lowdraglib2.utils.ColorUtils;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.lwjgl.opengl.GL30;
 
 import java.util.function.Consumer;
-
-import org.lwjgl.opengl.GL30;
 
 public class GUIContext {
     @OnlyIn(Dist.CLIENT)
@@ -58,7 +56,7 @@ public class GUIContext {
     public final ObjectArrayList<Rect> scissorStack = new ObjectArrayList<>();
     @OnlyIn(Dist.CLIENT)
     private final ObjectArrayList<PostCall> postRenderingCalls = new ObjectArrayList<>();
-    private record PostCall(Consumer<GUIContext> call, PoseStack.Pose pose) {}
+    private record PostCall(Consumer<GUIContext> call, Matrix4f pose) {}
     private int lastFBO = -1;
     
     @OnlyIn(Dist.CLIENT)
@@ -170,7 +168,7 @@ public class GUIContext {
     }
 
     public void postRendering(Consumer<GUIContext> call) {
-        postRenderingCalls.add(new PostCall(call, pose.last().copy()));
+        postRenderingCalls.add(new PostCall(call, new Matrix4f(pose.last().pose())));
     }
 
     public void callPostRendering() {
@@ -180,7 +178,7 @@ public class GUIContext {
             final PostCall postRenderingCall = (PostCall) postCallsElements[i];
             pose.pushPose();
             pose.setIdentity();
-            pose.mulPose(postRenderingCall.pose.pose());
+            pose.mulPose(postRenderingCall.pose());
             postRenderingCall.call.accept(this);
             pose.popPose();
         }

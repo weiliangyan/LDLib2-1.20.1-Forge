@@ -2,13 +2,13 @@ package com.lowdragmc.lowdraglib2.editor.resource;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.Platform;
+import com.lowdragmc.lowdraglib2.utils.FileUtility;
 import lombok.Getter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import com.lowdragmc.lowdraglib2.utils.FileUtility;
 import net.minecraft.nbt.NbtIo;
-
 import org.jetbrains.annotations.Nullable;
+
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.Map;
@@ -154,7 +154,7 @@ public final class DirectFileResourceProvider<T> {
             if (!file.getParentFile().exists()) {
                 file.getParentFile().mkdirs();
             }
-            NbtIo.write(nbt, file.toPath());
+            NbtIo.write(nbt, file);
         } catch (Exception e) {
             LDLib2.LOGGER.error("Failed to write resource file {} as {}: ", file, resourceInstance.resource.getName(), e);
             return false;

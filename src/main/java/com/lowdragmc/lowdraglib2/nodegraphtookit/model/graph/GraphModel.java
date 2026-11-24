@@ -8,23 +8,23 @@ import com.lowdragmc.lowdraglib2.nodegraphtookit.api.node.Node;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.port.PortCapacity;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.port.PortDirection;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.port.PortType;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.editor.IGraphReferenceResolver;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.command.IGraphCommand;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.itemlibrary.NodeModelLibraryItem;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.type.TypeHandle;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.type.TypeHandleHelpers;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.type.TypeHandles;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.utils.ReorderType;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.variable.VariableKind;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.editor.IGraphReferenceResolver;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.command.IGraphCommand;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.itemlibrary.NodeModelLibraryItem;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.*;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.constant.Constant;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.constant.TypeConstant;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.model.group.GroupModel;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.group.GroupModelBase;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.group.IGroupItemModel;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.group.SectionModel;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.*;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.definition.SubPortDefinitionScope;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.group.GroupModel;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.variable.*;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wiget.PlacematModel;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wiget.StickyNoteModel;
@@ -244,7 +244,7 @@ public abstract class GraphModel extends GraphElementModel implements IGraphElem
     /**
      * Vetoes an editor command before it executes; default {@code true} (allow). Consulted by
      * {@code GraphView.dispatchCommand}. {@link CustomGraphModelImpl} delegates to
-     * {@link com.lowdragmc.lowdraglib2.nodegraphtookit.api.graph.Graph#canExecuteCommand}.
+     * {@link Graph#canExecuteCommand}.
      */
     public boolean canExecuteCommand(IGraphCommand command) {
         return true;
@@ -252,7 +252,7 @@ public abstract class GraphModel extends GraphElementModel implements IGraphElem
 
     /**
      * Called after an editor command has executed; default no-op. {@link CustomGraphModelImpl}
-     * delegates to {@link com.lowdragmc.lowdraglib2.nodegraphtookit.api.graph.Graph#onCommandExecuted}.
+     * delegates to {@link Graph#onCommandExecuted}.
      */
     public void onCommandExecuted(IGraphCommand command) {
     }
@@ -576,11 +576,11 @@ public abstract class GraphModel extends GraphElementModel implements IGraphElem
 
     /**
      * Registers a block node (and recursively its ports) in the graph's UID map. Called by
-     * {@link com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.ContextNodeModel#insertBlock}
+     * {@link ContextNodeModel#insertBlock}
      * after the block has been attached to its parent context. Blocks are <em>not</em> added
      * to {@link #nodeModels} — they remain reachable only through their parent context.
      */
-    public void registerBlockNode(com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.BlockNodeModel block) {
+    public void registerBlockNode(BlockNodeModel block) {
         if (block == null) return;
         registerElement(block);
     }
@@ -588,7 +588,7 @@ public abstract class GraphModel extends GraphElementModel implements IGraphElem
     /**
      * Unregisters a block node (and recursively its ports) from the graph's UID map.
      */
-    public void unregisterBlockNode(com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.BlockNodeModel block) {
+    public void unregisterBlockNode(BlockNodeModel block) {
         if (block == null) return;
         unregisterElement(block);
     }
@@ -704,50 +704,25 @@ public abstract class GraphModel extends GraphElementModel implements IGraphElem
      */
     protected void removeElements(Collection<? extends GraphElementModel> elements) {
         for (var element : elements) {
-            switch (element) {
-                case IPlaceHolder placeHolder:
-                    removePlaceholder(placeHolder);
-                    break;
-                case StickyNoteModel stickyNoteModel:
-                    removeStickyNote(stickyNoteModel);
-                    break;
-                case PlacematModel placematModel:
-                    removePlacemat(placematModel);
-                    break;
-                case VariableDeclarationModelBase variableDeclarationModel:
-                    removeVariableDeclaration(variableDeclarationModel);
-                    break;
-                case WireModel wireModel:
-                    removeWire(wireModel);
-                    break;
-                case WireReroutePointModel reroutePoint:
-                    removeWireReroutePoint(reroutePoint);
-                    break;
-                case com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.BlockNodeModel blockNodeModel:
-                    // Blocks live inside a context, not in the top-level nodeModels list.
-                    // Route through the parent so its block list and wires stay consistent.
-                    if (blockNodeModel.getContextNodeModel() != null) {
-                        blockNodeModel.getContextNodeModel().removeBlock(blockNodeModel);
-                    } else {
-                        unregisterBlockNode(blockNodeModel);
-                    }
-                    break;
-                case AbstractNodeModel nodeModel:
-                    removeNode(nodeModel);
-                    break;
-                case PortModel portModel:
-                    unregisterPort(portModel);
-                    break;
-                case SectionModel sectionModel:
-                    removeSection(sectionModel);
-                    break;
-                case GroupModel groupModel:
-                    removeGroup(groupModel);
-                    break;
-                default:
-                    unregisterElement(element);
-                    break;
-            }
+            if (element instanceof IPlaceHolder placeHolder) removePlaceholder(placeHolder);
+            else if (element instanceof StickyNoteModel stickyNoteModel) removeStickyNote(stickyNoteModel);
+            else if (element instanceof PlacematModel placematModel) removePlacemat(placematModel);
+            else if (element instanceof VariableDeclarationModelBase variableDeclarationModel) removeVariableDeclaration(variableDeclarationModel);
+            else if (element instanceof WireModel wireModel) removeWire(wireModel);
+            else if (element instanceof WireReroutePointModel reroutePoint) removeWireReroutePoint(reroutePoint);
+            else if (element instanceof BlockNodeModel blockNodeModel) {
+                // Blocks live inside a context, not in the top-level nodeModels list.
+                // Route through the parent so its block list and wires stay consistent.
+                if (blockNodeModel.getContextNodeModel() != null) {
+                    blockNodeModel.getContextNodeModel().removeBlock(blockNodeModel);
+                } else {
+                    unregisterBlockNode(blockNodeModel);
+                }
+            } else if (element instanceof AbstractNodeModel nodeModel) removeNode(nodeModel);
+            else if (element instanceof PortModel portModel) unregisterPort(portModel);
+            else if (element instanceof SectionModel sectionModel) removeSection(sectionModel);
+            else if (element instanceof GroupModel groupModel) removeGroup(groupModel);
+            else unregisterElement(element);
         }
     }
 
@@ -1379,14 +1354,16 @@ public abstract class GraphModel extends GraphElementModel implements IGraphElem
             }
 
             // Remove missing port with no connections.
-            if (wireModel.getToPort() instanceof PortModel to && to.getPortType().equals(PortType.MISSING_PORT) && to.getConnectedWires().isEmpty()) {
+            var to = wireModel.getToPort();
+            if (to.getPortType().equals(PortType.MISSING_PORT) && to.getConnectedWires().isEmpty()) {
                 var nodeModel = to.getNodeModel();
                 if (nodeModel != null) {
                     nodeModel.removeUnusedMissingPort(to);
                 }
             }
 
-            if (wireModel.getFromPort() instanceof PortModel from && from.getPortType().equals(PortType.MISSING_PORT) && from.getConnectedWires().isEmpty()) {
+            var from = wireModel.getFromPort();
+            if (from.getPortType().equals(PortType.MISSING_PORT) && from.getConnectedWires().isEmpty()) {
                 var nodeModel = from.getNodeModel();
                 if (nodeModel != null) {
                     nodeModel.removeUnusedMissingPort(from);
@@ -1416,11 +1393,13 @@ public abstract class GraphModel extends GraphElementModel implements IGraphElem
             if (wireToDelete instanceof WirePlaceHolder placeHolder) {
                 removePlaceholder(placeHolder);
             } else {
-                if (wireToDelete.getToPort() instanceof PortModel port && port.getNodeModel() instanceof NodeModel nodeModel) {
-                    nodeModel.onDisconnection(wireToDelete.getToPort(), wireToDelete.getFromPort());
+                var to = wireToDelete.getToPort();
+                if (to.getNodeModel() instanceof NodeModel nodeModel) {
+                    nodeModel.onDisconnection(to, wireToDelete.getFromPort());
                 }
-                if (wireToDelete.getFromPort() instanceof PortModel port && port.getNodeModel() instanceof NodeModel nodeModel) {
-                    nodeModel.onDisconnection(wireToDelete.getFromPort(), wireToDelete.getToPort());
+                var from = wireToDelete.getFromPort();
+                if (from.getNodeModel() instanceof NodeModel nodeModel) {
+                    nodeModel.onDisconnection(from, wireToDelete.getToPort());
                 }
 
                 getCurrentGraphChangeDescription().addChangedModel(wireToDelete.getToPort(), ChangeHint.GRAPH_TOPOLOGY);
@@ -2519,7 +2498,7 @@ public abstract class GraphModel extends GraphElementModel implements IGraphElem
      * Factory for a new empty local subgraph of a (possibly different) graph type. When
      * {@code graphType} is {@code null} or equal to this graph's own type, behaves like
      * {@link #createLocalSubgraphInstance()}. Cross-type instances are gated by
-     * {@link com.lowdragmc.lowdraglib2.nodegraphtookit.api.graph.Graph#acceptsSubgraphGraph}.
+     * {@link Graph#acceptsSubgraphGraph}.
      * Returns {@code null} if the type can't be instantiated or isn't accepted.
      */
     @Nullable
@@ -3178,7 +3157,7 @@ public abstract class GraphModel extends GraphElementModel implements IGraphElem
         var selectedNodes = elements.stream()
                 .filter(e -> e instanceof AbstractNodeModel)
                 .map(e -> (AbstractNodeModel) e)
-                .filter(n -> !(n instanceof com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.BlockNodeModel))
+                .filter(n -> !(n instanceof BlockNodeModel))
                 .toList();
         var selectedNodeUids = selectedNodes.stream()
                 .map(GraphElementModel::getUid)
@@ -3189,7 +3168,7 @@ public abstract class GraphModel extends GraphElementModel implements IGraphElem
         // between a selected top-level node and a block of a selected context) survives the copy.
         var coveredNodeUids = new HashSet<>(selectedNodeUids);
         for (var node : selectedNodes) {
-            if (node instanceof com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.ContextNodeModel ctx) {
+            if (node instanceof ContextNodeModel ctx) {
                 for (var block : ctx.getBlocks()) {
                     if (block != null) coveredNodeUids.add(block.getUid());
                 }

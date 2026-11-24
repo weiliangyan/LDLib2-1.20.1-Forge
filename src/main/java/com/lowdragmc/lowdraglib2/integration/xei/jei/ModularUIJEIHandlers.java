@@ -5,7 +5,6 @@ import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvent;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEventDispatcher;
 import com.lowdragmc.lowdraglib2.integration.xei.jei.handler.JEITargetsTypedHandler;
 import lombok.experimental.UtilityClass;
-import mezz.jei.api.gui.builder.IClickableIngredientFactory;
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
 import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import mezz.jei.api.ingredients.ITypedIngredient;
@@ -37,7 +36,7 @@ public final class ModularUIJEIHandlers {
         }
 
         @Override
-        public Optional<? extends IClickableIngredient<?>> getClickableIngredientUnderMouse(IClickableIngredientFactory builder, AbstractContainerScreen<?> containerScreen, double mouseX, double mouseY) {
+        public Optional<IClickableIngredient<?>> getClickableIngredientUnderMouse(AbstractContainerScreen<?> containerScreen, double mouseX, double mouseY) {
             for (var child : containerScreen.children()) {
                 if (child instanceof IModularUIHolder holder && holder.getModularUI() != null) {
                     var lastHovered = holder.getModularUI().getLastHoveredElement();
@@ -46,7 +45,6 @@ public final class ModularUIJEIHandlers {
                     event.target = lastHovered;
                     event.x = (float) mouseX;
                     event.y = (float) mouseY;
-                    event.customData = builder;
                     UIEventDispatcher.dispatchEvent(event);
                     if (event.customData instanceof Optional<?> clickableIngredient) {
                         if (clickableIngredient.isEmpty()) return Optional.empty();
@@ -54,9 +52,21 @@ public final class ModularUIJEIHandlers {
                     }
                 }
             }
-            return IGuiContainerHandler.super.getClickableIngredientUnderMouse(builder, containerScreen, mouseX, mouseY);
+            return IGuiContainerHandler.super.getClickableIngredientUnderMouse(containerScreen, mouseX, mouseY);
         }
     };
+
+    public record SimpleClickableIngredient<I>(ITypedIngredient<I> typedIngredient, Rect2i area) implements IClickableIngredient<I> {
+        @Override
+        public ITypedIngredient<I> getTypedIngredient() {
+            return typedIngredient;
+        }
+
+        @Override
+        public Rect2i getArea() {
+            return area;
+        }
+    }
 
 
     public static final IGhostIngredientHandler GHOST_INGREDIENT_HANDLER = new IGhostIngredientHandler<>() {

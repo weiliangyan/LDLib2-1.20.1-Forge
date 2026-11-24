@@ -1,8 +1,8 @@
 package com.lowdragmc.lowdraglib2.test;
 
 import com.lowdragmc.lowdraglib2.editor.project.IProject;
-import com.lowdragmc.lowdraglib2.editor.resource.*;
 import com.lowdragmc.lowdraglib2.editor.project.ProjectType;
+import com.lowdragmc.lowdraglib2.editor.resource.*;
 import com.lowdragmc.lowdraglib2.test.noddegraphtoolkit.TestGraphResource;
 import lombok.Getter;
 import net.minecraft.core.HolderLookup;

@@ -1,6 +1,8 @@
 package com.lowdragmc.lowdraglib2.test.syncdata;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
+import com.lowdragmc.lowdraglib2.compat.network.codec.ByteBufCodecs;
+import com.lowdragmc.lowdraglib2.compat.network.custom.CustomPacketPayload;
 import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
 import com.lowdragmc.lowdraglib2.syncdata.IManaged;
 import com.lowdragmc.lowdraglib2.syncdata.IPersistedSerializable;
@@ -16,7 +18,6 @@ import com.lowdragmc.lowdraglib2.syncdata.storage.FieldManagedStorage;
 import com.lowdragmc.lowdraglib2.syncdata.storage.IManagedStorage;
 import com.lowdragmc.lowdraglib2.utils.ByteBufUtil;
 import com.mojang.serialization.Codec;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -24,13 +25,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.LongTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.nikdo53.neobackports.io.StreamCodec;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
@@ -47,7 +46,7 @@ public class ManagedCodecTest {
             return Codec.STRING;
         }
 
-        static StreamCodec<ByteBuf, String> shoutStream() {
+        static StreamCodec<String> shoutStream() {
             return ByteBufCodecs.STRING_UTF8.map(s -> s.toUpperCase(Locale.ROOT), s -> s);
         }
 
@@ -201,7 +200,7 @@ public class ManagedCodecTest {
             return Codec.LONG.xmap(BlockPos::of, BlockPos::asLong);
         }
 
-        protected StreamCodec<ByteBuf, BlockPos> posStream() {
+        protected StreamCodec<BlockPos> posStream() {
             return ByteBufCodecs.VAR_LONG.map(BlockPos::of, BlockPos::asLong);
         }
 
@@ -255,7 +254,7 @@ public class ManagedCodecTest {
         }
 
         @Override
-        protected StreamCodec<ByteBuf, BlockPos> posStream() {
+        protected StreamCodec<BlockPos> posStream() {
             return ByteBufCodecs.VAR_LONG.map(value -> BlockPos.of(value).above(), BlockPos::asLong);
         }
     }
@@ -386,12 +385,11 @@ public class ManagedCodecTest {
     @GameTest(template = "empty")
     @PrefixGameTestTemplate(false)
     public static void streamCodecSyncsValue(GameTestHelper helper) {
-        var provider = helper.getLevel().registryAccess();
         var src = filled(new CodecHolder());
-        byte[] bytes = ByteBufUtil.writeCustomData(src::writeToBuff, provider);
+        byte[] bytes = ByteBufUtil.writeCustomData(src::writeToBuff);
 
         var dst = new CodecHolder();
-        ByteBufUtil.readCustomData(bytes, dst::readFromBuff, provider);
+        ByteBufUtil.readCustomData(bytes, dst::readFromBuff);
         check(helper, src.pos.equals(dst.pos), "pos synced through its codec: " + dst.pos);
         check(helper, dst.name.equals("STEVE"), "name synced through its stream codec: " + dst.name);
         check(helper, dst.tags.equals(List.of("a", "b")), "tags synced: " + dst.tags);

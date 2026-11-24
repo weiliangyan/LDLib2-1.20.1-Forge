@@ -4,8 +4,8 @@ import com.lowdragmc.lowdraglib2.math.Ray;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import org.jetbrains.annotations.Nullable;
 

@@ -7,17 +7,14 @@ import com.lowdragmc.lowdraglib2.nodegraphtookit.model.graph.GraphModel;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.AbstractNodeModel;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.VariableNodeModel;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.variable.VariableDeclarationModel;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire.WireModel;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import org.joml.Vector2f;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 @GameTestHolder(LDLib2.MOD_ID)
 public class GraphCopyPasteTest {

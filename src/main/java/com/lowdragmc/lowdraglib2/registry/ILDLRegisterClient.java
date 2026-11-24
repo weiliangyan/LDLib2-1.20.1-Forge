@@ -36,7 +36,7 @@ public interface ILDLRegisterClient<T extends ILDLRegisterClient<T, V>, V> {
 
     default ResourceLocation registryName() {
         if (isLDLRegister()) {
-            return ResourceLocation.parse(getRegisterUIClient().registry());
+            return new ResourceLocation(getRegisterUIClient().registry());
         }
         throw new RuntimeException("not registered %s".formatted(getClass()));
     }

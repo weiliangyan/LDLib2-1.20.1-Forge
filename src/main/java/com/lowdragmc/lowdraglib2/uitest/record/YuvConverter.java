@@ -1,8 +1,8 @@
 package com.lowdragmc.lowdraglib2.uitest.record;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.system.MemoryStack;
 
 import static org.lwjgl.opengl.GL32C.*;

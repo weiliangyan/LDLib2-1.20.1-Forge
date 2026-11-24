@@ -4,39 +4,29 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.client.LDLibClientConfig;
-import com.lowdragmc.lowdraglib2.client.font.glyph.BitmapSdfSource;
-import com.lowdragmc.lowdraglib2.client.font.glyph.GlyphSource;
-import com.lowdragmc.lowdraglib2.client.font.glyph.SpaceSource;
-import com.lowdragmc.lowdraglib2.client.font.glyph.TrueTypeSdfSource;
-import com.lowdragmc.lowdraglib2.client.font.glyph.UnihexSdfSource;
+import com.lowdragmc.lowdraglib2.client.font.glyph.*;
 import com.lowdragmc.lowdraglib2.client.shader.LDLibRenderTypes;
+import com.lowdragmc.lowdraglib2.compat.font.FontOption;
 import com.mojang.blaze3d.font.SpaceProvider;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.font.FontOption;
 import net.minecraft.client.gui.font.FontSet;
-import net.minecraft.client.gui.font.providers.BitmapProvider;
-import net.minecraft.client.gui.font.providers.GlyphProviderDefinition;
-import net.minecraft.client.gui.font.providers.GlyphProviderType;
-import net.minecraft.client.gui.font.providers.ProviderReferenceDefinition;
-import net.minecraft.client.gui.font.providers.TrueTypeGlyphProviderDefinition;
+import net.minecraft.client.gui.font.glyphs.SpecialGlyphs;
+import net.minecraft.client.gui.font.providers.*;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -60,7 +50,7 @@ public class LDFontManager implements Function<ResourceLocation, FontSet>, Resou
     /**
      * The vanilla font holding the unicode fallback, appended to the end of every chain.
      */
-    public static final ResourceLocation UNIFONT = ResourceLocation.withDefaultNamespace("include/unifont");
+    public static final ResourceLocation UNIFONT = new ResourceLocation("include/unifont");
     private static final ResourceLocation ATLAS_NAME = LDLib2.id("font/sdf");
     private static final ResourceLocation RASTER_ATLAS_NAME = LDLib2.id("font/raster");
 
@@ -69,6 +59,15 @@ public class LDFontManager implements Function<ResourceLocation, FontSet>, Resou
      * its fields behind private members.
      */
     private record ProviderEntry(GlyphProviderDefinition definition, JsonObject raw, FontOption.Filter filter) {
+    }
+
+    public static final MapCodec<GlyphProviderDefinition> MAP_CODEC =
+            GlyphProviderType.CODEC.dispatchMap(GlyphProviderDefinition::type, (type) -> type.mapCodec().codec());
+
+    @OnlyIn(Dist.CLIENT)
+    public record Conditional(GlyphProviderDefinition definition, FontOption.Filter filter) {
+        public static final Codec<Conditional> CODEC = RecordCodecBuilder.create((instance) ->
+                instance.group(MAP_CODEC.forGetter(Conditional::definition), FontOption.Filter.CODEC.optionalFieldOf("filter", FontOption.Filter.ALWAYS_PASS).forGetter(Conditional::filter)).apply(instance, Conditional::new));
     }
 
     private final Map<ResourceLocation, List<ProviderEntry>> definitions = new HashMap<>();
@@ -81,6 +80,11 @@ public class LDFontManager implements Function<ResourceLocation, FontSet>, Resou
     @Nullable
     private Font font;
     /**
+     * Cached answer of {@link #isUsable()}, reset whenever the atlases and font sets are rebuilt.
+     */
+    @Nullable
+    private Boolean usable;
+    /**
      * The vanilla font options the current fallback chains were built with.
      * <p>
      * These are polled rather than reacted to because vanilla offers nothing to react to: {@code
@@ -89,7 +93,7 @@ public class LDFontManager implements Function<ResourceLocation, FontSet>, Resou
      * alternative, and is not worth the intrusion for two booleans that change once in a blue moon.
      */
     private boolean builtWithUniform;
-    private boolean builtWithJapaneseVariants;
+    //private boolean builtWithJapaneseVariants;
 
     private LDFontManager() {
     }
@@ -102,6 +106,25 @@ public class LDFontManager implements Function<ResourceLocation, FontSet>, Resou
             font = new Font(this, false);
         }
         return font;
+    }
+
+    /**
+     * Whether LDLib's own text pipeline can actually produce glyphs on this client.
+     * <p>
+     * A font definition whose providers cannot be loaded (a missing ttf, a broken resource pack, a rasterizer
+     * whose native library is not on the classpath) leaves the fallback chain empty, and every codepoint would
+     * be drawn as the missing glyph box. Rather than paint the whole UI in tofu, callers fall back to
+     * Minecraft's font in that case; {@link #font()} itself stays usable so nothing has to null check it.
+     */
+    public boolean isUsable() {
+        if (usable == null) {
+            // 'A' is covered by every chain LDLib builds, because the unicode font is always appended
+            usable = apply(Style.DEFAULT_FONT).getGlyphInfo('A', false) != SpecialGlyphs.MISSING;
+            if (!usable) {
+                LDLib2.LOGGER.warn("LDLib's smooth font resolved no glyphs, falling back to the vanilla font");
+            }
+        }
+        return usable;
     }
 
     /**
@@ -181,12 +204,12 @@ public class LDFontManager implements Function<ResourceLocation, FontSet>, Resou
     public void refreshVanillaFontOptions() {
         var options = Minecraft.getInstance().options;
         var uniform = options.forceUnicodeFont().get();
-        var japaneseVariants = options.japaneseGlyphVariants().get();
-        if (uniform == builtWithUniform && japaneseVariants == builtWithJapaneseVariants) {
+//        var japaneseVariants = options.japaneseGlyphVariants().get();
+        if (uniform == builtWithUniform/* && japaneseVariants == builtWithJapaneseVariants*/) {
             return;
         }
         builtWithUniform = uniform;
-        builtWithJapaneseVariants = japaneseVariants;
+        //builtWithJapaneseVariants = japaneseVariants;
         invalidate();
     }
 
@@ -238,6 +261,7 @@ public class LDFontManager implements Function<ResourceLocation, FontSet>, Resou
         rasterAtlases.values().forEach(LDGlyphAtlas::close);
         rasterAtlases.clear();
         GlyphBucket.reset();
+        usable = null;
     }
 
     @Override
@@ -255,9 +279,7 @@ public class LDFontManager implements Function<ResourceLocation, FontSet>, Resou
                     var root = JsonParser.parseReader(reader).getAsJsonObject();
                     for (var element : root.getAsJsonArray("providers")) {
                         var raw = element.getAsJsonObject();
-                        var conditional = GlyphProviderDefinition.Conditional.CODEC
-                                .parse(JsonOps.INSTANCE, raw)
-                                .getOrThrow();
+                        var conditional = Conditional.CODEC.parse(JsonOps.INSTANCE, raw).get().orThrow();
                         providers.add(new ProviderEntry(conditional.definition(), raw, conditional.filter()));
                     }
                 } catch (Exception e) {
@@ -272,7 +294,7 @@ public class LDFontManager implements Function<ResourceLocation, FontSet>, Resou
     private LDFontSet buildFontSet(ResourceLocation fontId) {
         var options = activeFontOptions();
         builtWithUniform = options.contains(FontOption.UNIFORM);
-        builtWithJapaneseVariants = options.contains(FontOption.JAPANESE_VARIANTS);
+        // builtWithJapaneseVariants = options.contains(FontOption.JAPANESE_VARIANTS);
         var sources = new ArrayList<GlyphSource>();
         collect(fontId, options, sources, new HashSet<>());
         // requirement: never show a tofu box when the unicode font could render the codepoint
@@ -343,7 +365,7 @@ public class LDFontManager implements Function<ResourceLocation, FontSet>, Resou
         } else if (definition instanceof SpaceProvider.Definition space) {
             source = new SpaceSource(space.advances());
         } else {
-            var hexFile = ResourceLocation.parse(entry.raw().get("hex_file").getAsString());
+            var hexFile = new ResourceLocation(entry.raw().get("hex_file").getAsString());
             source = UnihexSdfSource.load(resourceManager, hexFile, UnihexSdfSource.parseOverrides(entry.raw()));
         }
         sourceCache.put(key, source);
@@ -356,9 +378,9 @@ public class LDFontManager implements Function<ResourceLocation, FontSet>, Resou
         if (mcOptions.forceUnicodeFont().get()) {
             options.add(FontOption.UNIFORM);
         }
-        if (mcOptions.japaneseGlyphVariants().get()) {
+/*        if (mcOptions.japaneseGlyphVariants().get()) {
             options.add(FontOption.JAPANESE_VARIANTS);
-        }
+        }*/
         return options;
     }
 }

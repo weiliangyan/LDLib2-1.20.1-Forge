@@ -9,8 +9,8 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder(LDLib2.MOD_ID)
 public class SyncTestBlockEntityTest {
@@ -18,7 +18,7 @@ public class SyncTestBlockEntityTest {
     private static SyncTestBlockEntity placeSeeded(GameTestHelper helper) {
         var pos = new BlockPos(1, 1, 1);
         helper.setBlock(pos, SyncTestBlock.BLOCK);
-        SyncTestBlockEntity blockEntity = helper.getBlockEntity(pos);
+        SyncTestBlockEntity blockEntity = (SyncTestBlockEntity) helper.getBlockEntity(pos);
         blockEntity.anchor = new BlockPos(1, -2, 3);
         blockEntity.label = "Steve";
         blockEntity.codecTags.add("a");
@@ -36,15 +36,14 @@ public class SyncTestBlockEntityTest {
     @GameTest(template = "empty")
     @PrefixGameTestTemplate(false)
     public static void survivesChunkSave(GameTestHelper helper) {
-        var access = helper.getLevel().registryAccess();
         var saved = placeSeeded(helper);
-        var tag = saved.saveWithFullMetadata(access);
+        var tag = saved.saveWithFullMetadata();
         var managed = tag.getCompound("managed");
         check(helper, managed.get("anchor") instanceof LongTag, "anchor saved with its codec: " + managed.get("anchor"));
         check(helper, managed.get("label") instanceof StringTag label && label.getAsString().equals("Steve"), "label saved: " + managed.get("label"));
         check(helper, !managed.contains("gated") && !managed.contains("lazyValue"), "fields that are only synced were saved: " + managed);
 
-        if (!(BlockEntity.loadStatic(saved.getBlockPos(), saved.getBlockState(), tag, access) instanceof SyncTestBlockEntity loaded)) {
+        if (!(BlockEntity.loadStatic(saved.getBlockPos(), saved.getBlockState(), tag) instanceof SyncTestBlockEntity loaded)) {
             helper.fail("the block entity did not load back");
             return;
         }
@@ -54,7 +53,7 @@ public class SyncTestBlockEntityTest {
         check(helper, loaded.gated == 0 && loaded.lazyValue == 0, "fields that are only synced were loaded: " + loaded.gated + "/" + loaded.lazyValue);
 
         saved.maybeAnchor = null;
-        var reloaded = BlockEntity.loadStatic(saved.getBlockPos(), saved.getBlockState(), saved.saveWithFullMetadata(access), access);
+        var reloaded = BlockEntity.loadStatic(saved.getBlockPos(), saved.getBlockState(), saved.saveWithFullMetadata());
         check(helper, reloaded instanceof SyncTestBlockEntity be && be.maybeAnchor == null, "a null field did not load back as null");
         helper.succeed();
     }
@@ -65,7 +64,7 @@ public class SyncTestBlockEntityTest {
         var access = helper.getLevel().registryAccess();
         var server = placeSeeded(helper);
         var client = new SyncTestBlockEntity(server.getBlockPos(), server.getBlockState());
-        client.loadWithComponents(server.getUpdateTag(access), access);
+        client.load(server.getUpdateTag(access));
 
         check(helper, client.describeSynced().equals(server.describeSynced()), "client " + client.describeSynced() + ", server " + server.describeSynced());
         check(helper, client.label.equals("Steve"), "initial sync delivers the label through the codec: " + client.label);

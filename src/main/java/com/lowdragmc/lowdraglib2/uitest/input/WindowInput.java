@@ -5,8 +5,8 @@ import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.UISurface;
 import com.lowdragmc.lowdraglib2.gui.ui.window.ModularUIWindow;
 import com.lowdragmc.lowdraglib2.uitest.ElementBounds;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.glfw.GLFW;
 
 /**

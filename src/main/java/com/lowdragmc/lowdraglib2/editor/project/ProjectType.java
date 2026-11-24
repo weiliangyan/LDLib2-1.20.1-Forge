@@ -5,12 +5,12 @@ import com.lowdragmc.lowdraglib2.editor.ui.Editor;
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib2.gui.texture.Icons;
 import com.lowdragmc.lowdraglib2.gui.util.TreeBuilder;
+import com.lowdragmc.lowdraglib2.utils.FileUtility;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import com.lowdragmc.lowdraglib2.utils.FileUtility;
 import net.minecraft.nbt.NbtIo;
-
 import org.jetbrains.annotations.Nullable;
+
 import java.io.File;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -191,7 +191,7 @@ public class ProjectType {
      */
     public void saveProjectToFile(IProject project, File file) throws Exception {
         var fileData = project.serializeNBT(Platform.getFrozenRegistry());
-        NbtIo.write(fileData, file.toPath());
+        NbtIo.write(fileData, file);
     }
 
     /**

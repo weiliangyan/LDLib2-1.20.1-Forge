@@ -41,7 +41,7 @@ public final class DialogSizeStore {
         try {
             var file = file();
             file.getParentFile().mkdirs();
-            NbtIo.write(root, file.toPath());
+            NbtIo.write(root, file);
         } catch (Exception e) {
             LDLib2.LOGGER.warn("Failed to save the size of dialog {}", key, e);
         }
@@ -57,7 +57,7 @@ public final class DialogSizeStore {
             var file = file();
             if (file.exists()) {
                 try {
-                    var tag = NbtIo.read(file.toPath());
+                    var tag = NbtIo.read(file);
                     if (tag != null) cached = tag;
                 } catch (Exception ignored) {
                     // a corrupt file costs the remembered sizes, not the dialog

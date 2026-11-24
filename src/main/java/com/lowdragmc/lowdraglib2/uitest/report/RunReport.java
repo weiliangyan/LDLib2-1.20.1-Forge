@@ -65,7 +65,7 @@ public class RunReport {
 
     public static class Environment {
         public String minecraft = "";
-        public String neoforge = "";
+        public String forge = "";
         public String java = "";
         public String os = "";
         /**

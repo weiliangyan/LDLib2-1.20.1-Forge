@@ -9,9 +9,9 @@ import com.lowdragmc.lowdraglib2.syncdata.utils.TypeFabricator;
 import com.lowdragmc.lowdraglib2.syncdata.var.ManagedHolderVar;
 import com.lowdragmc.lowdraglib2.utils.LDLibExtraCodecs;
 import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.JavaOps;
 import lombok.Getter;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
@@ -64,7 +64,7 @@ public class MapAccessor<K, V> implements
 
     @Override
     public <T> void writeReadOnlyValue(DynamicOps<T> op, Map<K, V> value, T payload) {
-        var list = op.getStream(payload).getOrThrow().toList();
+        var list = LDLibExtraCodecs.getOrThrow(op.getStream(payload)).toList();
         if ((list.size() & 1) != 0) {
             throw new IllegalArgumentException(
                     "Map payload must contain an even number of [k,v] elements, got " + list.size());
@@ -91,7 +91,6 @@ public class MapAccessor<K, V> implements
             return;
         }
 
-        @SuppressWarnings("unchecked")
         IReadOnlyAccessor<V> roVAccessor = vDirect ? null : (IReadOnlyAccessor<V>) valueAccessor;
 
         // K direct + V read-only: support auto-fabrication of fresh V instances when structure differs.
@@ -163,7 +162,7 @@ public class MapAccessor<K, V> implements
     // ---------- Network buffer serialization ----------
 
     @Override
-    public void readReadOnlyValueToStream(RegistryFriendlyByteBuf buffer, @NotNull Map<K, V> value) {
+    public void readReadOnlyValueToStream(FriendlyByteBuf buffer, @NotNull Map<K, V> value) {
         buffer.writeVarInt(value.size());
         for (var entry : value.entrySet()) {
             writeChildToStream(buffer, keyAccessor, entry.getKey(), "key");
@@ -172,7 +171,7 @@ public class MapAccessor<K, V> implements
     }
 
     @Override
-    public void writeReadOnlyValueFromStream(RegistryFriendlyByteBuf buffer, @NotNull Map<K, V> value) {
+    public void writeReadOnlyValueFromStream(FriendlyByteBuf buffer, @NotNull Map<K, V> value) {
         int size = buffer.readVarInt();
 
         boolean kDirect = keyAccessor instanceof IDirectAccessor;
@@ -198,7 +197,6 @@ public class MapAccessor<K, V> implements
             // K direct, V read-only: diff-and-rebuild with auto-fabrication.
             // Existing V instances whose K is still in the stream are mutated in place; entries
             // whose K disappeared are dropped; entries whose K is new get a fabricated V.
-            @SuppressWarnings("unchecked")
             IReadOnlyAccessor<V> roVAccessor = (IReadOnlyAccessor<V>) valueAccessor;
             @SuppressWarnings("unchecked")
             Supplier<V> vFabricator = (Supplier<V>) TypeFabricator.fabricator(valueType);
@@ -233,7 +231,6 @@ public class MapAccessor<K, V> implements
         // K read-only: byte-level lookup is impractical, so use order-based pairing.
         // Caller is responsible for deterministic iteration order (LinkedHashMap/TreeMap, or a
         // @ReadOnlyManaged deserializeUid that inserts keys in the same order both sides observe).
-        @SuppressWarnings("unchecked")
         IReadOnlyAccessor<K> roKAccessor = (IReadOnlyAccessor<K>) keyAccessor;
         var iter = value.entrySet().iterator();
         for (int i = 0; i < size; i++) {
@@ -252,7 +249,6 @@ public class MapAccessor<K, V> implements
                 if (existingV == null) {
                     throw new IllegalArgumentException("Null existing read-only V in map at position " + i);
                 }
-                @SuppressWarnings("unchecked")
                 IReadOnlyAccessor<V> roVAccessor = (IReadOnlyAccessor<V>) valueAccessor;
                 roVAccessor.writeReadOnlyValueFromStream(buffer, existingV);
             }
@@ -263,7 +259,7 @@ public class MapAccessor<K, V> implements
 
     @Override
     public Object[] obtainManagedMark(@NotNull Map<K, V> value) {
-        var op = Platform.getFrozenRegistry().createSerializationContext(JavaOps.INSTANCE);
+        var op = Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry());
         var marks = new Object[value.size() * 2];
         int i = 0;
         for (var entry : value.entrySet()) {
@@ -276,7 +272,7 @@ public class MapAccessor<K, V> implements
     @Override
     public boolean areDifferent(Object[] managedMark, @NotNull Map<K, V> value) {
         if (managedMark.length != value.size() * 2) return true;
-        var op = Platform.getFrozenRegistry().createSerializationContext(JavaOps.INSTANCE);
+        var op = Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry());
         int i = 0;
         for (var entry : value.entrySet()) {
             if (childMarkDiffers(op, keyAccessor, managedMark[i++], entry.getKey())) return true;
@@ -331,7 +327,7 @@ public class MapAccessor<K, V> implements
         return null;
     }
 
-    private void writeChildToStream(RegistryFriendlyByteBuf buffer, IAccessor<?> accessor, Object obj, String role) {
+    private void writeChildToStream(FriendlyByteBuf buffer, IAccessor<?> accessor, Object obj, String role) {
         if (accessor instanceof IDirectAccessor directAccessor) {
             if (obj == null) {
                 buffer.writeBoolean(true);
@@ -351,7 +347,7 @@ public class MapAccessor<K, V> implements
         throw new IllegalArgumentException("Child accessor not managed for map " + role + ": " + accessor);
     }
 
-    private <X> X readChildFromStreamForCreate(RegistryFriendlyByteBuf buffer, IAccessor<?> accessor, Class<?> type, String role) {
+    private <X> X readChildFromStreamForCreate(FriendlyByteBuf buffer, IAccessor<?> accessor, Class<?> type, String role) {
         if (accessor instanceof IDirectAccessor directAccessor) {
             if (buffer.readBoolean()) return null;
             var holder = ManagedHolderVar.ofNull(type);
@@ -363,24 +359,26 @@ public class MapAccessor<K, V> implements
 
     private Object obtainChildMark(DynamicOps<?> op, IAccessor<?> accessor, Object obj) {
         if (obj == null) return null;
-        return switch (accessor) {
-            case IMarkFunction markFunction -> markFunction.obtainManagedMark(obj);
-            case IDirectAccessor directAccessor -> directAccessor.readDirectVar((DynamicOps) op, ManagedHolderVar.of(obj));
-            case IReadOnlyAccessor readOnlyAccessor -> readOnlyAccessor.readReadOnlyValue((DynamicOps) op, obj);
-            case null, default -> throw new IllegalArgumentException("Unsupported child accessor: " + accessor);
-        };
+        if (accessor instanceof IMarkFunction markFunction) {
+            return markFunction.obtainManagedMark(obj);
+        } else if (accessor instanceof IDirectAccessor directAccessor) {
+            return directAccessor.readDirectVar(op, ManagedHolderVar.of(obj));
+        } else if (accessor instanceof IReadOnlyAccessor readOnlyAccessor) {
+            return readOnlyAccessor.readReadOnlyValue(op, obj);
+        }
+        throw new IllegalArgumentException("Unsupported child accessor: " + accessor);
     }
 
     private boolean childMarkDiffers(DynamicOps<?> op, IAccessor<?> accessor, Object mark, Object obj) {
         if (obj == null) return mark != null;
         if (mark == null) return true;
-        return switch (accessor) {
-            case IMarkFunction markFunction -> markFunction.areDifferent(mark, obj);
-            case IDirectAccessor directAccessor ->
-                    !directAccessor.readDirectVar((DynamicOps) op, ManagedHolderVar.of(obj)).equals(mark);
-            case IReadOnlyAccessor readOnlyAccessor ->
-                    !readOnlyAccessor.readReadOnlyValue((DynamicOps) op, obj).equals(mark);
-            case null, default -> throw new IllegalArgumentException("Unsupported child accessor: " + accessor);
-        };
+        if (accessor instanceof IMarkFunction markFunction) {
+            return markFunction.areDifferent(mark, obj);
+        } else if (accessor instanceof IDirectAccessor directAccessor) {
+            return !directAccessor.readDirectVar(op, ManagedHolderVar.of(obj)).equals(mark);
+        } else if (accessor instanceof IReadOnlyAccessor readOnlyAccessor) {
+            return !readOnlyAccessor.readReadOnlyValue(op, obj).equals(mark);
+        }
+        throw new IllegalArgumentException("Unsupported child accessor: " + accessor);
     }
 }

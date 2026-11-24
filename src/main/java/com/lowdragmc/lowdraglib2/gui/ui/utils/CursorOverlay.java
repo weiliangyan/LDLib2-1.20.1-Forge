@@ -4,8 +4,8 @@ import com.lowdragmc.lowdraglib2.gui.ColorPattern;
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib2.gui.texture.Icons;
 import net.minecraft.client.gui.GuiGraphics;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
 /**

@@ -1,7 +1,7 @@
 package com.lowdragmc.lowdraglib2.client.window;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * Whatever fills an {@link OsWindow}. {@link OsWindowManager} drives one of these per frame in the

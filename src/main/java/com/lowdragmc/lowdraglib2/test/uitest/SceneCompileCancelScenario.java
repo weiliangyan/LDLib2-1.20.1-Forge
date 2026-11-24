@@ -139,7 +139,7 @@ public class SceneCompileCancelScenario implements UIScenario {
 
     private void checkNoThreadFailures(TestContext ctx) {
         if (!threadFailures.isEmpty()) {
-            ctx.attach("thread_failure", threadFailures.getFirst().toString());
+            ctx.attach("thread_failure", threadFailures.get(0).toString());
         }
         ctx.check("no uncaught exception off the render thread", threadFailures.isEmpty());
     }

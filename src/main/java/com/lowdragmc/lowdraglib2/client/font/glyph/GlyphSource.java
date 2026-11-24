@@ -9,6 +9,16 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface GlyphSource extends AutoCloseable {
     /**
+     * How far {@code BakedGlyph#render} pulls a glyph quad up: it subtracts this from the quad's top and bottom
+     * before emitting it. A source has to add it back when it reports where its bitmap sits, or every glyph is
+     * drawn this many design pixels too high.
+     * <p>
+     * Minecraft 1.21 dropped that subtraction, which is why the numbers in the upstream sources look three
+     * pixels off on 1.20.1: there they cancel out automatically, here they have to be compensated for.
+     */
+    float QUAD_OFFSET = 3f;
+
+    /**
      * Metrics only lookup, used by everything that measures text. Must not rasterize.
      *
      * @return the metrics, or null when this source does not provide the codepoint

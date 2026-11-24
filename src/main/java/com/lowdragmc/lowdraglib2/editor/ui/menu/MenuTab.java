@@ -12,7 +12,8 @@ import com.lowdragmc.lowdraglib2.gui.util.TreeBuilder;
 import com.lowdragmc.lowdraglib2.syncdata.ISubscription;
 import net.minecraft.network.chat.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
 
 public abstract class MenuTab {

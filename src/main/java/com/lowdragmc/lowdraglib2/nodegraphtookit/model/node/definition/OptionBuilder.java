@@ -1,7 +1,9 @@
 package com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.definition;
 
 import com.lowdragmc.lowdraglib2.gui.ui.data.Tooltips;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.api.node.*;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.api.node.INodeOption;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.api.node.IOptionBuilder;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.api.node.OptionVisibility;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.type.ITypeConfigurable;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.type.TypeHandle;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.constant.Constant;

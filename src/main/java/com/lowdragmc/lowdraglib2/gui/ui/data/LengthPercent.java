@@ -3,8 +3,7 @@ package com.lowdragmc.lowdraglib2.gui.ui.data;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lombok.Data;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
+import net.nikdo53.neobackports.io.StreamCodec;
 
 /**
  * A length value that can be either an absolute pixel value or a percentage.
@@ -19,7 +18,7 @@ public final class LengthPercent {
             Codec.BOOL.fieldOf("percent").forGetter(LengthPercent::isPercent)
     ).apply(instance, LengthPercent::new));
 
-    public static final StreamCodec<FriendlyByteBuf, LengthPercent> STREAM_CODEC = StreamCodec.of(
+    public static final StreamCodec<LengthPercent> STREAM_CODEC = StreamCodec.of(
             (buf, lp) -> {
                 buf.writeFloat(lp.value);
                 buf.writeBoolean(lp.percent);

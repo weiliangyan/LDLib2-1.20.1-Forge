@@ -22,7 +22,7 @@ public class EntityTypeAccessor extends TypesAccessor<EntityType<?>> {
     @Override
     public EntityType<?> defaultValue(@Nullable Field field, @Nullable Class<?> type) {
         if (field != null && field.isAnnotationPresent(DefaultValue.class)) {
-            return BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(field.getAnnotation(DefaultValue.class).stringValue()[0]));
+            return BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(field.getAnnotation(DefaultValue.class).stringValue()[0]));
         }
         return EntityType.PIG;
     }

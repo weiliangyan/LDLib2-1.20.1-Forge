@@ -97,7 +97,7 @@ public interface IResourcePath {
             if (resourceType != null) {
                 return resourceType.createFullPath(resourcePath);
             } else if (type.equals("pack")) {
-                return new FilePath(ResourceLocation.parse(resourcePath));
+                return new FilePath(new ResourceLocation(resourcePath));
             }
         }
         return null;

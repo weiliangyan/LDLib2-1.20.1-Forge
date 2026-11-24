@@ -1,6 +1,9 @@
 {
     "vertex": "ldlib2:sdf_rect",
     "fragment": "ldlib2:sdf_rect",
+    "attributes": [
+        "Position"
+    ],
     "samplers": [
     ],
     "uniforms": [

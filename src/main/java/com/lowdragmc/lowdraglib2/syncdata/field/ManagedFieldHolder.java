@@ -6,13 +6,9 @@ import com.lowdragmc.lowdraglib2.syncdata.ManagedFieldUtils;
 import com.lowdragmc.lowdraglib2.syncdata.rpc.RPCMethodMeta;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * This class is used to store all the fields of a class that implements {@link IManaged} and all the RPC methods{@link RPCMethodMeta}.

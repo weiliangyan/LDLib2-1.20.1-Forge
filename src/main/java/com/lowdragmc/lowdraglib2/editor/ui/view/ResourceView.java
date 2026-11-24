@@ -11,11 +11,7 @@ import com.lowdragmc.lowdraglib2.editor.ui.View;
 import com.lowdragmc.lowdraglib2.editor.ui.browser.AssetBrowser;
 import com.lowdragmc.lowdraglib2.editor.ui.resource.ResourceContainer;
 import com.lowdragmc.lowdraglib2.gui.ColorPattern;
-import com.lowdragmc.lowdraglib2.gui.texture.DynamicTexture;
-import com.lowdragmc.lowdraglib2.gui.texture.GuiTextureGroup;
-import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
-import com.lowdragmc.lowdraglib2.gui.texture.Icons;
-import com.lowdragmc.lowdraglib2.gui.texture.SpriteTexture;
+import com.lowdragmc.lowdraglib2.gui.texture.*;
 import com.lowdragmc.lowdraglib2.gui.ui.Style;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
@@ -23,8 +19,8 @@ import com.lowdragmc.lowdraglib2.gui.ui.data.ScrollDisplay;
 import com.lowdragmc.lowdraglib2.gui.ui.data.ScrollerMode;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Tab;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.TabView;
-import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvent;
 import com.lowdragmc.lowdraglib2.gui.ui.event.HoverTooltips;
+import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvent;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.ui.layout.LayoutProperties;
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext;
@@ -42,14 +38,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-
 import org.jetbrains.annotations.Nullable;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 
 public class ResourceView extends View {
     /** Marks the view itself, so a theme can reach the whole thing without naming its type. */
@@ -649,7 +640,7 @@ public class ResourceView extends View {
         for (var member : entry.members) {
             if (!isResourceHidden(member)) return member;
         }
-        return entry.members.isEmpty() ? null : entry.members.getFirst();
+        return entry.members.isEmpty() ? null : entry.members.get(0);
     }
 
     /** A grouped resource's tab: a row of icon and name, shown in its group's panel rather than in the strip. */
@@ -777,8 +768,8 @@ public class ResourceView extends View {
     @Nullable
     private Tab ownDrag(UIEvent event) {
         if (event.dragHandler == null) return null;
-        return event.dragHandler.getDraggingObject() instanceof TabDrag(ResourceView view, Tab tab) && view == this
-                ? tab : null;
+        return event.dragHandler.getDraggingObject() instanceof TabDrag tabDrag && tabDrag.view == this
+                ? tabDrag.tab : null;
     }
 
     /**

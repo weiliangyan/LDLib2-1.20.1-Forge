@@ -19,10 +19,6 @@ import java.util.List;
 @Mixin(Screen.class)
 public abstract class ScreenMixin extends AbstractContainerEventHandler implements ContainerEventHandler, GuiEventListener {
     @Shadow
-    @org.jetbrains.annotations.Nullable
-    protected Minecraft minecraft;
-
-    @Shadow
     public abstract List<? extends GuiEventListener> children();
 
     @Inject(method = "tick", at = @At(value = "RETURN"))
@@ -54,7 +50,8 @@ public abstract class ScreenMixin extends AbstractContainerEventHandler implemen
         for (var child : children()) {
             if (child instanceof IModularUIHolder holder) {
                 var mui = holder.getModularUI();
-                if (minecraft != null && mui != null) {
+                var minecraft = Minecraft.getInstance();
+                if (mui != null) {
                     if (!mui.shouldCloseOnKeyInventory()) {
                         InputConstants.Key mouseKey = InputConstants.getKey(keyCode, scanCode);
                         if (minecraft.options.keyInventory.isActiveAndMatches(mouseKey)) {

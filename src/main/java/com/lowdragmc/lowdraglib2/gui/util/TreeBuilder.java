@@ -3,15 +3,14 @@ package com.lowdragmc.lowdraglib2.gui.util;
 import com.lowdragmc.lowdraglib2.gui.ColorPattern;
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
+import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Vertical;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
-import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
 import com.lowdragmc.lowdraglib2.integration.kjs.KJSBindings;
 import dev.vfyjxf.taffy.style.AlignItems;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Tuple;
-import org.appliedenergistics.yoga.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -97,8 +96,8 @@ public class TreeBuilder<K, V> {
             return;
         }
         // dive into deeper branches
-        var path = paths.getFirst();
-        paths.removeFirst();
+        var path = paths.get(0);
+        paths.remove(0);
         current.branch(path, m -> diveBranch(paths, m, menu));
     }
 
@@ -204,7 +203,8 @@ public class TreeBuilder<K, V> {
          * @return the current {@code Menu} instance for method chaining.
          */
         public Menu crossLine() {
-            if (stack.peek().getChildren().isEmpty() || stack.peek().getChildren().getLast().getKey() == CROSS_LINE) {
+            var children = stack.peek().getChildren();
+            if (children.isEmpty() || children.get(children.size() - 1).getKey() == CROSS_LINE) {
                 return this;
             }
             stack.peek().createChild(CROSS_LINE);
@@ -246,8 +246,9 @@ public class TreeBuilder<K, V> {
 
         public Menu endBranch() {
             var peek = stack.peek();
-            if (!peek.getChildren().isEmpty() && peek.getChildren().getLast().getKey() == CROSS_LINE) {
-                peek.removeChild(peek.getChildren().getLast());
+            var children = peek.getChildren();
+            if (!children.isEmpty() && children.get(children.size() - 1).getKey() == CROSS_LINE) {
+                peek.removeChild(children.get(children.size() - 1));
             }
             super.endBranch();
             return this;
@@ -316,8 +317,9 @@ public class TreeBuilder<K, V> {
         @Override
         public TreeNode<Tuple<IGuiTexture, Component>, Runnable> build() {
             var root = super.build();
-            if (!root.getChildren().isEmpty() && root.getChildren().getLast().getKey() == CROSS_LINE) {
-                root.removeChild(root.getChildren().getLast());
+            var children = root.getChildren();
+            if (!children.isEmpty() && children.get(children.size() - 1).getKey() == CROSS_LINE) {
+                root.removeChild(children.get(children.size() - 1));
             }
             return root;
         }

@@ -2,8 +2,6 @@ package com.lowdragmc.lowdraglib2.nodegraphtookit.model;
 
 import com.lowdragmc.lowdraglib2.syncdata.annotation.Persisted;
 import lombok.Getter;
-import lombok.Setter;
-import net.minecraft.network.chat.Component;
 
 import java.util.List;
 

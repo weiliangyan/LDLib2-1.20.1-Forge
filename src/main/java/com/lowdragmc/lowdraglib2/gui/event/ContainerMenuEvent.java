@@ -2,7 +2,7 @@ package com.lowdragmc.lowdraglib2.gui.event;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.neoforged.bus.api.Event;
+import net.minecraftforge.eventbus.api.Event;
 
 public abstract class ContainerMenuEvent extends Event {
     public final Player player;

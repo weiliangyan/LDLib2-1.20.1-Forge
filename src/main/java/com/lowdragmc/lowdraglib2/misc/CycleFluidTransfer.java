@@ -1,6 +1,6 @@
 package com.lowdragmc.lowdraglib2.misc;
 
-import net.neoforged.neoforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

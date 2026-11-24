@@ -1,13 +1,13 @@
 package com.lowdragmc.lowdraglib2.syncdata.ref;
 
-import com.lowdragmc.lowdraglib2.syncdata.accessor.direct.IDirectAccessor;
 import com.lowdragmc.lowdraglib2.syncdata.accessor.arraylike.IArrayLikeAccessor;
+import com.lowdragmc.lowdraglib2.syncdata.accessor.direct.IDirectAccessor;
 import com.lowdragmc.lowdraglib2.syncdata.field.ManagedKey;
 import com.lowdragmc.lowdraglib2.syncdata.var.ArrayVar;
 import com.lowdragmc.lowdraglib2.syncdata.var.IVar;
 import lombok.Getter;
-
 import org.jetbrains.annotations.Nullable;
+
 import java.util.Objects;
 
 public final class DirectArrayRef<TYPE, TYPE_ARRAY> extends UniqueDirectRef<TYPE_ARRAY> implements IArrayRef<TYPE, TYPE_ARRAY> {

@@ -5,9 +5,9 @@ import com.lowdragmc.lowdraglib2.integration.kjs.KJSBindings;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
-import org.jetbrains.annotations.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,6 +25,8 @@ public final class StylesheetManager implements ResourceManagerReloadListener {
     public static final ResourceLocation MC_MERGED = LDLib2.id(PATH + "/mc");
     public static final ResourceLocation MODERN = LDLib2.id(PATH + "/modern.lss");
     public static final ResourceLocation MODERN_MERGED = LDLib2.id(PATH + "/modern");
+    public static final ResourceLocation LIGHT = LDLib2.id(PATH + "/light.lss");
+    public static final ResourceLocation LIGHT_MERGED = LDLib2.id(PATH + "/light");
     /**
      * One design in six palettes — four dark ({@code dusk} blue-grey, {@code carbon} graphite,
      * {@code mint} green, {@code plum} violet) and two light ({@code paper} cool, {@code latte} warm).

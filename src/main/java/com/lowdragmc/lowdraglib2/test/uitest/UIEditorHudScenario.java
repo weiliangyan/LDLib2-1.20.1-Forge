@@ -24,6 +24,7 @@ import com.lowdragmc.lowdraglib2.uitest.TestContext;
 import com.lowdragmc.lowdraglib2.uitest.UIScenario;
 import com.lowdragmc.lowdraglib2.uitest.capture.FrameCapture;
 import com.lowdragmc.lowdraglib2.uitest.input.Keys;
+import com.lowdragmc.lowdraglib2.utils.LDLibExtraCodecs;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.vfyjxf.taffy.style.TaffyDimension;
@@ -156,13 +157,13 @@ public class UIEditorHudScenario implements UIScenario {
                         })
                         .check("saved as a HUD", ctx -> ctx.<UITemplate>get(SAVED).isHud())
                         .check("and still one written and read back", ctx -> {
-                            var ops = Platform.getFrozenRegistry().createSerializationContext(NbtOps.INSTANCE);
-                            var tag = UITemplate.CODEC.encodeStart(ops, ctx.<UITemplate>get(SAVED)).getOrThrow();
-                            return UITemplate.CODEC.parse(ops, tag).getOrThrow().isHud();
+                            var ops = Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry());
+                            var tag = LDLibExtraCodecs.getOrThrow(UITemplate.CODEC.encodeStart(ops, ctx.get(SAVED)));
+                            return LDLibExtraCodecs.getOrThrow(UITemplate.CODEC.parse(ops, tag)).isHud();
                         })
                         .check("a UI that is not one writes nothing new", ctx -> {
-                            var ops = Platform.getFrozenRegistry().createSerializationContext(NbtOps.INSTANCE);
-                            var tag = UITemplate.CODEC.encodeStart(ops, UITemplate.of(new UIElement())).getOrThrow();
+                            var ops = Platform.registryOps(NbtOps.INSTANCE, Platform.getFrozenRegistry());
+                            var tag = LDLibExtraCodecs.getOrThrow(UITemplate.CODEC.encodeStart(ops, UITemplate.of(new UIElement())));
                             return tag instanceof CompoundTag compound && !compound.contains("hud");
                         }))
 

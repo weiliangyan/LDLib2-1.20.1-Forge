@@ -1,6 +1,5 @@
 package com.lowdragmc.lowdraglib2.utils.data;
 
-import com.lowdragmc.lowdraglib2.Platform;
 import com.lowdragmc.lowdraglib2.configurator.IConfigurable;
 import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
 import com.lowdragmc.lowdraglib2.syncdata.IPersistedSerializable;
@@ -90,11 +89,11 @@ public class BlockInfo implements IPersistedSerializable, IConfigurable {
 
     public void postEntity(BlockEntity blockEntity) {
         if (tag != null && blockEntity != null) {
-            var compoundTag2 = blockEntity.saveWithoutMetadata(Platform.getFrozenRegistry());
+            var compoundTag2 = blockEntity.saveWithoutMetadata();
             var compoundTag3 = compoundTag2.copy();
             compoundTag2.merge(tag);
             if (!compoundTag2.equals(compoundTag3)) {
-                blockEntity.loadWithComponents(compoundTag2, Platform.getFrozenRegistry());
+                blockEntity.load(compoundTag2);
             }
         }
         if (postCreate != null && blockEntity != null) {

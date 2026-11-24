@@ -4,8 +4,8 @@ import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.command.IGraphCommand;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Verifies the command-policy plumbing: a {@link com.lowdragmc.lowdraglib2.nodegraphtookit.api.graph.Graph}

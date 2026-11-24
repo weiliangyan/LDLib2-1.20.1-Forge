@@ -6,7 +6,7 @@ import lombok.Getter;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

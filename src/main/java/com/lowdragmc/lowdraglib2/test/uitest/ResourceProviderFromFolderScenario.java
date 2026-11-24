@@ -21,11 +21,7 @@ import com.lowdragmc.lowdraglib2.registry.RegistrationEnvironment;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
 import com.lowdragmc.lowdraglib2.test.TestEditor;
 import com.lowdragmc.lowdraglib2.test.TestProject;
-import com.lowdragmc.lowdraglib2.uitest.ElementRef;
-import com.lowdragmc.lowdraglib2.uitest.ScenarioBuilder;
-import com.lowdragmc.lowdraglib2.uitest.ScenarioOptions;
-import com.lowdragmc.lowdraglib2.uitest.TestContext;
-import com.lowdragmc.lowdraglib2.uitest.UIScenario;
+import com.lowdragmc.lowdraglib2.uitest.*;
 import com.lowdragmc.lowdraglib2.uitest.input.Keys;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
@@ -137,7 +133,7 @@ public class ResourceProviderFromFolderScenario implements UIScenario {
 
                 .group("the sort menu orders the grid by name", g -> g
                         .step("open the sort menu", ctx -> {
-                            var button = grid(ctx).toolbar.getChildren().getFirst();
+                            var button = grid(ctx).toolbar.getChildren().get(0);
                             var x = button.getPositionX() + button.getSizeWidth() / 2f;
                             var y = button.getPositionY() + button.getSizeHeight() / 2f;
                             ctx.input().moveTo(x, y);
@@ -274,7 +270,7 @@ public class ResourceProviderFromFolderScenario implements UIScenario {
     }
 
     private static String labelOf(UIElement cell) {
-        return cell.getChildren().isEmpty() || !(cell.getChildren().getLast() instanceof TextElement label)
+        return cell.getChildren().isEmpty() || !(cell.getChildren().get(cell.getChildren().size() - 1) instanceof TextElement label)
                 ? "" : label.getText().getString();
     }
 

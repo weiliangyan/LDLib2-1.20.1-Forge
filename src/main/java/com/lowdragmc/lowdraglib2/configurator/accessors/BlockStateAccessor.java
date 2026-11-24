@@ -137,7 +137,7 @@ public class BlockStateAccessor extends TypesAccessor<BlockState> {
         var value = rawValue.trim();
         var propertiesStart = value.indexOf('[');
         var blockName = propertiesStart >= 0 ? value.substring(0, propertiesStart) : value;
-        var state = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(blockName)).defaultBlockState();
+        var state = BuiltInRegistries.BLOCK.get(new ResourceLocation(blockName)).defaultBlockState();
         if (propertiesStart < 0) return state;
 
         var propertiesEnd = value.lastIndexOf(']');

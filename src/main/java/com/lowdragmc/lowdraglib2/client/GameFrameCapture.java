@@ -12,12 +12,12 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderFrameEvent;
-import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
@@ -31,7 +31,7 @@ import org.lwjgl.opengl.GL30;
  * drawing them: the first copy of a frame is the one kept.
  */
 @OnlyIn(Dist.CLIENT)
-@EventBusSubscriber(modid = LDLib2.MOD_ID, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = LDLib2.MOD_ID, value = Dist.CLIENT)
 public final class GameFrameCapture {
     /** Frames nobody drew it for before the texture is let go, a window sized texture is tens of megabytes. */
     private static final int IDLE_FRAMES = 200;
@@ -108,14 +108,15 @@ public final class GameFrameCapture {
         // drawn at once, what is batched before it would otherwise be drawn over it
         graphics.flush();
         var pose = graphics.pose().last().pose();
-        var buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        var buffer = Tesselator.getInstance().getBuilder();
+        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, texture);
-        buffer.addVertex(pose, x + width, y + height, 0).setUv(1, 0);
-        buffer.addVertex(pose, x + width, y, 0).setUv(1, 1);
-        buffer.addVertex(pose, x, y, 0).setUv(0, 1);
-        buffer.addVertex(pose, x, y + height, 0).setUv(0, 0);
-        BufferUploader.drawWithShader(buffer.buildOrThrow());
+        buffer.vertex(pose, x + width, y + height, 0).uv(1, 0).endVertex();
+        buffer.vertex(pose, x + width, y, 0).uv(1, 1).endVertex();
+        buffer.vertex(pose, x, y, 0).uv(0, 1).endVertex();
+        buffer.vertex(pose, x, y + height, 0).uv(0, 0).endVertex();
+        BufferUploader.drawWithShader(buffer.end());
     }
 
     @SubscribeEvent
@@ -128,7 +129,8 @@ public final class GameFrameCapture {
     }
 
     @SubscribeEvent
-    public static void onFrameRendered(RenderFrameEvent.Post event) {
+    public static void onFrameRendered(TickEvent.RenderTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
         if (Minecraft.getInstance().screen == null) {
             capture();
         }

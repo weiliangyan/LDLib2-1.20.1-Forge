@@ -16,8 +16,8 @@ import com.lowdragmc.lowdraglib2.test.ui.IScreenTest;
 import com.lowdragmc.lowdraglib2.uitest.UIRecording;
 import com.lowdragmc.lowdraglib2.uitest.UIScenario;
 import com.lowdragmc.lowdraglib2.uitest.mp.MPScenario;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.function.Supplier;
 

@@ -12,6 +12,7 @@ import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
@@ -49,7 +50,7 @@ public class TestJEIPlugin {
         public TestRecipeCategory(IJeiHelpers helpers, RecipeType<T> recipeType,
                                   IModularUIProvider<T> uiProvider, String title, int width, int height) {
             super(uiProvider);
-            this.icon = helpers.getGuiHelper().createDrawableItemLike(TestItem.ITEM);
+            this.icon = helpers.getGuiHelper().createDrawableItemStack(new ItemStack(TestItem.ITEM));
             this.recipeType = recipeType;
             this.title = Component.literal(title);
             this.width = width;
@@ -64,6 +65,11 @@ public class TestJEIPlugin {
         @Override
         public Component getTitle() {
             return title;
+        }
+
+        @Override
+        public IDrawable getBackground() {
+            return icon;
         }
 
         @Override

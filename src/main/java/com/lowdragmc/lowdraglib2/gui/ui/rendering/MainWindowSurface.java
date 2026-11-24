@@ -2,8 +2,8 @@ package com.lowdragmc.lowdraglib2.gui.ui.rendering;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * The game window itself — the surface every UI used to be drawn into implicitly.

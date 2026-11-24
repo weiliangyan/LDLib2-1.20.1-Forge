@@ -1,10 +1,10 @@
 package com.lowdragmc.lowdraglib2.gui.texture;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
-import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigSetter;
-import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
 import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigColor;
 import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigNumber;
+import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigSetter;
+import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
 import com.lowdragmc.lowdraglib2.gui.LDLibFonts;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext;
@@ -14,14 +14,14 @@ import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
 import com.lowdragmc.lowdraglib2.utils.LocalizationUtils;
 import com.mojang.blaze3d.systems.RenderSystem;
 import lombok.Setter;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4f;
 

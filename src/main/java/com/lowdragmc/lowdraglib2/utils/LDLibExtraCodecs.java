@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib2.utils;
 
+import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.Platform;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
@@ -10,12 +11,12 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.Recipe;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
+import org.joml.Vector4f;
 
 import java.util.Arrays;
 import java.util.List;
@@ -43,9 +44,23 @@ public final class LDLibExtraCodecs {
 
     public final static Codec<UUID> UUID = Codec.STRING.xmap(java.util.UUID::fromString, java.util.UUID::toString);
 
-    public final static Codec<Tag> TAG = ExtraCodecs.converter(NbtOps.INSTANCE);
+    public final static Codec<Tag> TAG = new Codec<>() {
+        @Override
+        public <T> DataResult<Pair<Tag, T>> decode(DynamicOps<T> ops, T input) {
+            return DataResult.success(Pair.of(ops.convertTo(NbtOps.INSTANCE, input), input));
+        }
 
-    public final static Codec<RecipeHolder> RECIPE_HOLDER_ID = ResourceLocation.CODEC.flatXmap(id -> {
+        @Override
+        public <T> DataResult<T> encode(Tag input, DynamicOps<T> ops, T prefix) {
+            return DataResult.success(NbtOps.INSTANCE.convertTo(ops, input));
+        }
+    };
+
+    public static <T> T getOrThrow(DataResult<T> result) {
+        return result.getOrThrow(false, LDLib2.LOGGER::error);
+    }
+
+    public final static Codec<Recipe> RECIPE_ID = ResourceLocation.CODEC.flatXmap(id -> {
         if (Platform.getMinecraftServer() != null) {
             return Platform.getMinecraftServer().getRecipeManager().byKey(id).map(DataResult::success).orElseGet(() -> DataResult.error(() -> "Unknown recipe: " + id));
         } else if (Platform.isClient()){
@@ -54,7 +69,7 @@ public final class LDLibExtraCodecs {
             return level.getRecipeManager().byKey(id).map(DataResult::success).orElseGet(() -> DataResult.error(() -> "Unknown recipe: " + id));
         }
         return DataResult.error(() -> "No recipe manager available");
-    }, recipeHolder -> DataResult.success(recipeHolder.id()));
+    }, recipe -> DataResult.success(recipe.getId()));
 
     public final static PrimitiveCodec<Character> CHAR = new PrimitiveCodec<>() {
         public <T> DataResult<Character> read(DynamicOps<T> ops, T input) {
@@ -71,25 +86,25 @@ public final class LDLibExtraCodecs {
     };
 
     public final static Codec<Number> NUMBER = TAG.xmap(
-            tag -> switch (tag) {
-                case IntTag intTag -> intTag.getAsInt();
-                case LongTag longTag -> longTag.getAsLong();
-                case ByteTag byteTag -> byteTag.getAsByte();
-                case ShortTag shortTag -> shortTag.getAsShort();
-                case FloatTag floatTag -> floatTag.getAsFloat();
-                case DoubleTag doubleTag -> doubleTag.getAsDouble();
-                case null -> null;
-                default -> throw new IllegalArgumentException("Invalid tag type: " + tag.getClass().getName());
+            tag -> {
+                if (tag instanceof IntTag intTag) return intTag.getAsInt();
+                if (tag instanceof LongTag longTag) return longTag.getAsLong();
+                if (tag instanceof ByteTag byteTag) return byteTag.getAsByte();
+                if (tag instanceof ShortTag shortTag) return shortTag.getAsShort();
+                if (tag instanceof FloatTag floatTag) return floatTag.getAsFloat();
+                if (tag instanceof DoubleTag doubleTag) return doubleTag.getAsDouble();
+                if (tag == null) return null;
+                throw new IllegalArgumentException("Invalid tag type: " + tag.getClass().getName());
             },
-            number -> switch (number) {
-                case Integer value -> IntTag.valueOf(value);
-                case Long value -> LongTag.valueOf(value);
-                case Byte value -> ByteTag.valueOf(value);
-                case Short value -> ShortTag.valueOf(value);
-                case Float value -> FloatTag.valueOf(value);
-                case Double value -> DoubleTag.valueOf(value);
-                case null -> null;
-                default -> DoubleTag.valueOf(number.doubleValue());
+            number -> {
+                if (number instanceof Integer value) return IntTag.valueOf(value);
+                if (number instanceof Long value) return LongTag.valueOf(value);
+                if (number instanceof Byte value) return ByteTag.valueOf(value);
+                if (number instanceof Short value) return ShortTag.valueOf(value);
+                if (number instanceof Float value) return FloatTag.valueOf(value);
+                if (number instanceof Double value) return DoubleTag.valueOf(value);
+                if (number == null) return null;
+                return DoubleTag.valueOf(number.doubleValue());
             }
     );
 
@@ -114,31 +129,38 @@ public final class LDLibExtraCodecs {
                     vec2i -> List.of(vec2i.x, vec2i.y)
             );
 
+    public static final Codec<Vector4f> VECTOR4F = Codec.FLOAT
+            .listOf()
+            .comapFlatMap(
+                    list -> Util.fixedSize(list, 4).map(l -> new Vector4f(l.get(0), l.get(1), l.get(2), l.get(3))),
+                    vec4f -> List.of(vec4f.x, vec4f.y, vec4f.z, vec4f.w)
+            );
+
     public static final Codec<ItemStack> ITEM_STACK = new Codec<>() {
         @Override
         public <T> DataResult<Pair<ItemStack, T>> decode(DynamicOps<T> ops, T input) {
-            var result = ItemStack.OPTIONAL_CODEC.decode(ops, input);
-            if (result.isSuccess()) return result;
+            var result = ItemStack.CODEC.decode(ops, input);
+            if (result.result().isPresent()) return result;
 
-            var realOp = Platform.getClientRegistryAccess().createSerializationContext(ops);
-            result = ItemStack.OPTIONAL_CODEC.decode(realOp, input);
-            if (result.isSuccess()) return result;
+            var realOp = Platform.registryOps(ops, Platform.getClientRegistryAccess());
+            result = ItemStack.CODEC.decode(realOp, input);
+            if (result.result().isPresent()) return result;
 
-            realOp = Platform.getServerRegistryAccess().createSerializationContext(ops);
-            return ItemStack.OPTIONAL_CODEC.decode(realOp, input);
+            realOp = Platform.registryOps(ops, Platform.getServerRegistryAccess());
+            return ItemStack.CODEC.decode(realOp, input);
         }
 
         @Override
         public <T> DataResult<T> encode(ItemStack input, DynamicOps<T> ops, T prefix) {
-            var result = ItemStack.OPTIONAL_CODEC.encode(input, ops, prefix);
-            if (result.isSuccess()) return result;
+            var result = ItemStack.CODEC.encode(input, ops, prefix);
+            if (result.result().isPresent()) return result;
 
-            var realOp = Platform.getClientRegistryAccess().createSerializationContext(ops);
-            result = ItemStack.OPTIONAL_CODEC.encode(input, realOp, prefix);
-            if (result.isSuccess()) return result;
+            var realOp = Platform.registryOps(ops, Platform.getClientRegistryAccess());
+            result = ItemStack.CODEC.encode(input, realOp, prefix);
+            if (result.result().isPresent()) return result;
             
-            realOp = Platform.getServerRegistryAccess().createSerializationContext(ops);
-            return ItemStack.OPTIONAL_CODEC.encode(input, realOp, prefix);
+            realOp = Platform.registryOps(ops, Platform.getServerRegistryAccess());
+            return ItemStack.CODEC.encode(input, realOp, prefix);
         }
     };
 
@@ -193,12 +215,12 @@ public final class LDLibExtraCodecs {
         }
         if (outdated.length == 1) {
             return Codec.either(latest, outdated[0]).xmap(
-                    Either::unwrap,
+                    either -> either.map(value -> value, value -> value),
                     Either::left
             );
         }
         return Codec.either(latest, compat(outdated[0], Arrays.copyOfRange(outdated, 1, outdated.length))).xmap(
-                Either::unwrap,
+                either -> either.map(value -> value, value -> value),
                 Either::left
         );
     }

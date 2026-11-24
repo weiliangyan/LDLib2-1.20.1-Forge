@@ -70,7 +70,7 @@ public class NgtPortRecommendationScenario implements UIScenario {
                         .check("it is at the top", ctx -> library(ctx).resultContainer.verticalScroller.getNormalizedValue() == 0)
                         // a float constant matches the type exactly and its tree is walked first
                         .check("first is a node of its group, not a float constant", ctx ->
-                                "test".equals(recommended(ctx).getFirst().getGroup()))
+                                "test".equals(recommended(ctx).get(0).getGroup()))
                         .step("close the library", ctx -> library(ctx).hide()))
 
                 .openModularUI("a graph with a node in each tier",

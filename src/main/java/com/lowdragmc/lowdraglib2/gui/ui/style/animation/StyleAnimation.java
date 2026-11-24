@@ -2,17 +2,20 @@ package com.lowdragmc.lowdraglib2.gui.ui.style.animation;
 
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
-import com.lowdragmc.lowdraglib2.gui.ui.style.*;
+import com.lowdragmc.lowdraglib2.gui.ui.style.Property;
+import com.lowdragmc.lowdraglib2.gui.ui.style.PropertyRegistry;
+import com.lowdragmc.lowdraglib2.gui.ui.style.StyleOrigin;
+import com.lowdragmc.lowdraglib2.gui.ui.style.StyleSlot;
 import com.lowdragmc.lowdraglib2.math.interpolate.Eases;
 import com.lowdragmc.lowdraglib2.math.interpolate.IEase;
 import com.lowdragmc.lowdraglib2.syncdata.ISubscription;
 import com.lowdragmc.lowdraglib2.utils.animation.*;
+import com.lowdragmc.lowdraglib2.utils.function.LDConsumers;
 import it.unimi.dsi.fastutil.floats.FloatObjectPair;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.apache.commons.lang3.function.Consumers;
-
 import org.jetbrains.annotations.Nullable;
+
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -43,7 +46,7 @@ public class StyleAnimation {
     @Setter
     private BiConsumer<AnimationRuntime, UIElement> onInterpolate = (r, e) -> {};
     @Setter
-    private Consumer<UIElement> onFinished = Consumers.nop();
+    private Consumer<UIElement> onFinished = LDConsumers.nop();
 
     private StyleAnimation(@Nullable ModularUI mui) {
         this.mui = mui;
@@ -95,10 +98,10 @@ public class StyleAnimation {
                     currentValue = p.initialValue;
                 }
                 // check if 0 and 1 missing
-                if (slots.isEmpty() || slots.getFirst().leftFloat() != 0f) {
-                    slots.addFirst(FloatObjectPair.of(0f, currentValue));
+                if (slots.isEmpty() || slots.get(0).leftFloat() != 0f) {
+                    slots.add(0, FloatObjectPair.of(0f, currentValue));
                 }
-                if (slots.getLast().leftFloat() != 1f) {
+                if (slots.get(slots.size() - 1).leftFloat() != 1f) {
                     slots.add(FloatObjectPair.of(1f, currentValue));
                 }
                 var keyFrame = KeyFrames.of(p.getInterpolator(), slots.toArray(new FloatObjectPair[0]));
@@ -120,7 +123,7 @@ public class StyleAnimation {
                                 slot -> slot.origin() == animationOrigin
                                         && slot.specificity() == 999
                                         && slot.sourceOrder() == 0,
-                                StyleSlot.of(p, origin, specificity, sourceOrder, slots.getLast().right()));
+                                StyleSlot.of(p, origin, specificity, sourceOrder, slots.get(slots.size() - 1).right()));
                         onFinished.accept(target);
                     }
                 });

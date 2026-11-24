@@ -1,9 +1,9 @@
 package com.lowdragmc.lowdraglib2.test.noddegraphtoolkit;
 
+import com.lowdragmc.lowdraglib2.nodegraphtookit.api.node.Node;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.node.NodeAttribute;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.definition.IOptionDefinitionContext;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.definition.IPortDefinitionContext;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.api.node.Node;
 import net.minecraft.network.chat.Component;
 
 import java.util.Optional;
@@ -26,7 +26,7 @@ public class TestAddNode extends Node {
     @Override
     public void onDefinePorts(IPortDefinitionContext context) {
         super.onDefinePorts(context);
-        Optional.ofNullable(getNodeOptionById("inputs")).ifPresent(o -> o.tryGetValue(Integer.class).ifSuccess(inputs -> {
+        Optional.ofNullable(getNodeOptionById("inputs")).ifPresent(o -> o.tryGetValue(Integer.class).result().ifPresent(inputs -> {
             if (inputs instanceof Integer num) {
                 for (var i = 0; i < num; i++) {
                     context.addInputPort("in" + (i + 1), Float.class);

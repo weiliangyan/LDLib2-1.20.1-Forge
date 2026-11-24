@@ -1,16 +1,14 @@
 package com.lowdragmc.lowdraglib2.configurator.accessors;
 
+import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigNumber;
+import com.lowdragmc.lowdraglib2.configurator.annotation.DefaultValue;
 import com.lowdragmc.lowdraglib2.configurator.ui.Configurator;
 import com.lowdragmc.lowdraglib2.configurator.ui.NumberConfigurator;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
-import com.lowdragmc.lowdraglib2.configurator.annotation.DefaultValue;
-import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigNumber;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import dev.vfyjxf.taffy.style.FlexWrap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import org.appliedenergistics.yoga.YogaEdge;
-import org.appliedenergistics.yoga.YogaGutter;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;

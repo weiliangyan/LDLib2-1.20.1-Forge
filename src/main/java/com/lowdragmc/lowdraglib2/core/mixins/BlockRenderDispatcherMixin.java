@@ -12,7 +12,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.minecraftforge.client.model.data.ModelData;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,7 +39,7 @@ public abstract class BlockRenderDispatcherMixin {
     @Final
     private RandomSource random;
 
-    @Inject(method = "renderBreakingTexture(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/BlockAndTintGetter;Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/neoforged/neoforge/client/model/data/ModelData;)V", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "renderBreakingTexture(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/BlockAndTintGetter;Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraftforge/client/model/data/ModelData;)V", at = @At(value = "HEAD"), cancellable = true, remap = false)
     private void ldlib2$renderBreakingTexture(BlockState state, BlockPos pos, BlockAndTintGetter level,
                                              PoseStack poseStack, VertexConsumer consumer,
                                              ModelData modelData, CallbackInfo ci) {

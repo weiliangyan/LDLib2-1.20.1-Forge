@@ -1,15 +1,15 @@
 package com.lowdragmc.lowdraglib2.networking.both;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
+import com.lowdragmc.lowdraglib2.compat.network.IPayloadContext;
+import com.lowdragmc.lowdraglib2.compat.network.custom.CustomPacketPayload;
 import com.lowdragmc.lowdraglib2.networking.rpc.RPCPacketDistributor;
 import com.lowdragmc.lowdraglib2.syncdata.rpc.RPCSender;
 import lombok.NoArgsConstructor;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.nikdo53.neobackports.io.StreamCodec;
 
 import javax.annotation.Nonnull;
 
@@ -20,7 +20,7 @@ import javax.annotation.Nonnull;
 public class PacketRPCPacket implements CustomPacketPayload {
     public static final ResourceLocation ID = LDLib2.id("rpc_packet");
     public static final Type<PacketRPCPacket> TYPE = new Type<>(ID);
-    public static final StreamCodec<RegistryFriendlyByteBuf, PacketRPCPacket> CODEC = StreamCodec.ofMember(PacketRPCPacket::write, PacketRPCPacket::decode);
+    public static final StreamCodec<PacketRPCPacket> CODEC = StreamCodec.ofMember(PacketRPCPacket::write, PacketRPCPacket::decode);
 
     private String packetID;
 
@@ -35,12 +35,12 @@ public class PacketRPCPacket implements CustomPacketPayload {
         return new PacketRPCPacket(packetID, data);
     }
 
-    public void write(RegistryFriendlyByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeUtf(packetID);
         buf.writeByteArray(data);
     }
 
-    public static PacketRPCPacket decode(RegistryFriendlyByteBuf buffer) {
+    public static PacketRPCPacket decode(FriendlyByteBuf buffer) {
         var packetID = buffer.readUtf();
         var data = buffer.readByteArray();
         return new PacketRPCPacket(packetID, data);

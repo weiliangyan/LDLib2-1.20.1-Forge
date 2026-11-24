@@ -4,9 +4,10 @@ import com.google.common.base.Predicates;
 import com.google.common.util.concurrent.Runnables;
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.Platform;
+import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegister;
+import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
 import com.lowdragmc.lowdraglib2.utils.ReflectionUtils;
 import net.minecraft.resources.ResourceLocation;
-import com.lowdragmc.lowdraglib2.registry.annotation.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,7 +39,7 @@ public class AutoRegistry<A extends Annotation, C, V> extends LDLRegistry.String
     private final BiFunction<A, Class<? extends C>, java.lang.String> keyFactory;
     private final BiFunction<A, Class<? extends C>, V> supplier;
     @Nullable
-    private final Comparator<AutoRegistry.Holder<A, C, V>> sorter;
+    private final Comparator<Holder<A, C, V>> sorter;
 
 
     protected AutoRegistry(ResourceLocation registryName,

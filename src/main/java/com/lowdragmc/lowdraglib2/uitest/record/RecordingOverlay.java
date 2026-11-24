@@ -18,8 +18,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
@@ -180,8 +180,8 @@ public final class RecordingOverlay implements InputListener, AutoCloseable {
         RenderSystem.backupProjectionMatrix();
         RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0, width, height, 0, 1000, 21000), VertexSorting.ORTHOGRAPHIC_Z);
         var modelView = RenderSystem.getModelViewStack();
-        modelView.pushMatrix();
-        modelView.translation(0, 0, -11000);
+        modelView.pushPose();
+        modelView.translate(0, 0, -11000);
         RenderSystem.applyModelViewMatrix();
         var graphics = new GuiGraphics(minecraft, minecraft.renderBuffers().bufferSource());
         try {
@@ -193,7 +193,7 @@ public final class RecordingOverlay implements InputListener, AutoCloseable {
             graphics.flush();
         } finally {
             RenderSystem.disableBlend();
-            modelView.popMatrix();
+            modelView.popPose();
             RenderSystem.applyModelViewMatrix();
             RenderSystem.restoreProjectionMatrix();
         }

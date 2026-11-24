@@ -1,12 +1,12 @@
 package com.lowdragmc.lowdraglib2.gui.ui.elements;
 
 import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
+import com.lowdragmc.lowdraglib2.gui.ui.Style;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.ScrollDisplay;
 import com.lowdragmc.lowdraglib2.gui.ui.data.ScrollerMode;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvent;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
-import com.lowdragmc.lowdraglib2.gui.ui.Style;
 import com.lowdragmc.lowdraglib2.gui.ui.style.Property;
 import com.lowdragmc.lowdraglib2.gui.ui.style.PropertyRegistry;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
@@ -18,7 +18,6 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.util.Mth;
-import org.appliedenergistics.yoga.*;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;

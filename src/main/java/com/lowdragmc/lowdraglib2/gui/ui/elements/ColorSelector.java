@@ -4,7 +4,6 @@ import com.lowdragmc.lowdraglib2.client.shader.LDLibRenderTypes;
 import com.lowdragmc.lowdraglib2.client.shader.LDLibShaders;
 import com.lowdragmc.lowdraglib2.configurator.ui.NumberConfigurator;
 import com.lowdragmc.lowdraglib2.configurator.ui.StringConfigurator;
-import com.lowdragmc.lowdraglib2.core.mixins.accessor.BufferBuilderAccessor;
 import com.lowdragmc.lowdraglib2.editor.ClipboardManager;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvent;
@@ -15,18 +14,16 @@ import com.lowdragmc.lowdraglib2.integration.kjs.KJSBindings;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib2.utils.ColorUtils;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.vfyjxf.taffy.style.AlignItems;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.gui.GuiGraphics;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import org.appliedenergistics.yoga.YogaEdge;
-import org.appliedenergistics.yoga.YogaGutter;
-import org.lwjgl.system.MemoryUtil;
-
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
+
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.function.IntConsumer;
 
@@ -333,8 +330,9 @@ public class ColorSelector extends BindableUIElement<Integer> {
                     _b = b;
                 }
             }
-            buffer.addVertex(pose, x, y, 0.0f);
+            buffer.vertex(pose, x, y, 0.0f);
             putColor(buffer, _h, _s, _b, 1);
+            buffer.endVertex();
         }
 
         {
@@ -356,8 +354,9 @@ public class ColorSelector extends BindableUIElement<Integer> {
                     _b = b;
                 }
             }
-            buffer.addVertex(pose, x, y + height, 0.0f);
+            buffer.vertex(pose, x, y + height, 0.0f);
             putColor(buffer, _h, _s, _b, 1);
+            buffer.endVertex();
         }
 
         {
@@ -379,8 +378,9 @@ public class ColorSelector extends BindableUIElement<Integer> {
                     _b = b;
                 }
             }
-            buffer.addVertex(pose, x + width, y + height, 0.0f);
+            buffer.vertex(pose, x + width, y + height, 0.0f);
             putColor(buffer, _h, _s, _b, 1);
+            buffer.endVertex();
         }
 
         {
@@ -403,8 +403,9 @@ public class ColorSelector extends BindableUIElement<Integer> {
                 }
             }
 
-            buffer.addVertex(pose, x + width, y, 0.0f);
+            buffer.vertex(pose, x + width, y, 0.0f);
             putColor(buffer, _h, _s, _b, 1);
+            buffer.endVertex();
         }
 
         // draw indicator
@@ -454,11 +455,13 @@ public class ColorSelector extends BindableUIElement<Integer> {
                     _b = 0f;
                 }
             }
-            buffer.addVertex(pose, x, y + height, 0.0f);
+            buffer.vertex(pose, x, y + height, 0.0f);
             putColor(buffer, _h, _s, _b, 1);
+            buffer.endVertex();
 
-            buffer.addVertex(pose, x + width, y + height, 0.0f);
+            buffer.vertex(pose, x + width, y + height, 0.0f);
             putColor(buffer, _h, _s, _b, 1);
+            buffer.endVertex();
         }
 
         {
@@ -480,11 +483,13 @@ public class ColorSelector extends BindableUIElement<Integer> {
                     _b = 1f;
                 }
             }
-            buffer.addVertex(pose, x + width, y, 0.0f);
+            buffer.vertex(pose, x + width, y, 0.0f);
             putColor(buffer, _h, _s, _b, 1);
+            buffer.endVertex();
 
-            buffer.addVertex(pose, x, y, 0.0f);
+            buffer.vertex(pose, x, y, 0.0f);
             putColor(buffer, _h, _s, _b, 1);
+            buffer.endVertex();
         }
 
         // draw indicator
@@ -517,14 +522,12 @@ public class ColorSelector extends BindableUIElement<Integer> {
      */
     @OnlyIn(Dist.CLIENT)
     private void putColor(VertexConsumer buffer, float h, float s, float b, float a) {
-        if (buffer instanceof BufferBuilderAccessor accessor) {
-            var i = accessor.invokeBeginElement(LDLibShaders.HSB_Alpha);
-            if (i != -1L) {
-                MemoryUtil.memPutFloat(i, h);
-                MemoryUtil.memPutFloat(i + 4L, s);
-                MemoryUtil.memPutFloat(i + 8L, b);
-                MemoryUtil.memPutFloat(i + 12L, a);
-            }
+        if (buffer instanceof BufferBuilder builder && builder.currentElement().equals(LDLibShaders.HSB_Alpha)) {
+            builder.putFloat(0, h);
+            builder.putFloat(4, s);
+            builder.putFloat(8, b);
+            builder.putFloat(12, a);
+            builder.nextElement();
         }
     }
 

@@ -10,7 +10,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.TagKey;
-import net.neoforged.neoforge.common.Tags;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -79,8 +78,9 @@ final class JEITagNameTooltip {
         return List.of(
                 Component.translatable("jei.tooltip.recipe.tag", StringUtils.capitalize(registryName))
                         .withStyle(ChatFormatting.GRAY),
-                Component.translatableWithFallback(Tags.getTagTranslationKey(tagKey), "#" + tagKey.location())
-                        .withStyle(ChatFormatting.GRAY)
+                //1.20.1 的tag还没有翻译
+                //Component.translatableWithFallback(Tags.getTagTranslationKey(tagKey), "#" + tagKey.location())
+                Component.literal("#" + tagKey.location()).withStyle(ChatFormatting.GRAY)
         );
     }
 

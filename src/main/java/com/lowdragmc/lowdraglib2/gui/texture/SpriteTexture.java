@@ -3,16 +3,16 @@ package com.lowdragmc.lowdraglib2.gui.texture;
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.client.shader.LDLibRenderTypes;
 import com.lowdragmc.lowdraglib2.client.shader.LDLibShaders;
+import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigColor;
 import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigNumber;
 import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigSetter;
 import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
-import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigColor;
 import com.lowdragmc.lowdraglib2.configurator.ui.Configurator;
 import com.lowdragmc.lowdraglib2.configurator.ui.ConfiguratorGroup;
 import com.lowdragmc.lowdraglib2.gui.ui.Style;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.Dialog;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.Dialog;
 import com.lowdragmc.lowdraglib2.gui.ui.style.StyleOrigin;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
 import com.lowdragmc.lowdraglib2.gui.util.DrawerHelper;
@@ -21,8 +21,12 @@ import com.lowdragmc.lowdraglib2.math.Position;
 import com.lowdragmc.lowdraglib2.math.Size;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
 import com.lowdragmc.lowdraglib2.utils.ColorUtils;
+import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import dev.latvian.mods.rhino.util.RemapForJS;
 import dev.vfyjxf.taffy.style.AlignItems;
@@ -32,11 +36,10 @@ import lombok.experimental.Accessors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import org.joml.Matrix4f;
-
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import static com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_TEX_COLOR;
 
@@ -86,7 +89,7 @@ public class SpriteTexture extends TransformTexture {
 
     @HideFromJS
     public static SpriteTexture of(String imageLocation) {
-        return of(ResourceLocation.parse(imageLocation));
+        return of(new ResourceLocation(imageLocation));
     }
 
     @RemapForJS("of")
@@ -179,10 +182,31 @@ public class SpriteTexture extends TransformTexture {
     @OnlyIn(Dist.CLIENT)
     public Size getImageSize() {
         if (imageSizeCache == null) {
+            var minecraft = Minecraft.getInstance();
             try {
-                imageSizeCache = Minecraft.getInstance().getTextureManager().getTexture(imageLocation) instanceof ITextureSize textureSize ?
-                        Size.of(textureSize.ldlib2$getImageWidth(), textureSize.ldlib2$getImageHeight()) : Size.of(1, 1);
-            } catch (Exception e) {
+                if (minecraft.getTextureManager().getTexture(imageLocation) instanceof ITextureSize textureSize) {
+                    int width = textureSize.ldlib2$getImageWidth();
+                    int height = textureSize.ldlib2$getImageHeight();
+                    if (width > 0 && height > 0) {
+                        imageSizeCache = Size.of(width, height);
+                    }
+                }
+            } catch (Exception ignored) {
+                // Fall through to the resource-reader path below.
+            }
+            if (imageSizeCache == null) {
+                try {
+                    var resource = minecraft.getResourceManager().getResource(imageLocation);
+                    if (resource.isPresent()) {
+                        try (var stream = resource.get().open(); var image = NativeImage.read(stream)) {
+                            imageSizeCache = Size.of(image.getWidth(), image.getHeight());
+                        }
+                    }
+                } catch (Exception ignored) {
+                    // Use a non-zero fallback so UV math stays finite for missing resources.
+                }
+            }
+            if (imageSizeCache == null || imageSizeCache.getWidth() <= 0 || imageSizeCache.getHeight() <= 0) {
                 imageSizeCache = Size.of(1, 1);
             }
         }
@@ -300,7 +324,8 @@ public class SpriteTexture extends TransformTexture {
                 // Risky?
                 RenderSystem.setShader(LDLibShaders::getSpriteBlitShader);
                 RenderSystem.setShaderTexture(0, imageLocation);
-                var buffer2 = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, POSITION_TEX_COLOR);
+                var buffer2 = Tesselator.getInstance().getBuilder();
+                buffer2.begin(VertexFormat.Mode.QUADS, POSITION_TEX_COLOR);
                 var shader = LDLibShaders.getSpriteBlitShader();
                 shader.safeGetUniform("UVBounds").set(uCenterStart, vCenterStart, uCenterEnd, vCenterEnd);
                 shader.safeGetUniform("WrapMode").set(wrapMode.ordinal());
@@ -311,7 +336,7 @@ public class SpriteTexture extends TransformTexture {
                         uCenterStart, vCenterStart, u1, v1, color);
 
                 // draw border first
-                var bufferData = buffer2.build();
+                var bufferData = buffer2.end();
                 if (bufferData != null) {
                     BufferUploader.drawWithShader(bufferData);
                 }
@@ -328,10 +353,10 @@ public class SpriteTexture extends TransformTexture {
         float b = (color & 255) / 255.0F;
         float a = (color >> 24 & 255) / 255.0F;
 
-        buffer.addVertex(matrix, x, y + h, 0).setUv(u1, v2).setColor(r, g, b, a);
-        buffer.addVertex(matrix, x + w, y + h, 0).setUv(u2, v2).setColor(r, g, b, a);
-        buffer.addVertex(matrix, x + w, y, 0).setUv(u2, v1).setColor(r, g, b, a);
-        buffer.addVertex(matrix, x, y, 0).setUv(u1, v1).setColor(r, g, b, a);
+        buffer.vertex(matrix, x, y + h, 0).uv(u1, v2).color(r, g, b, a).endVertex();
+        buffer.vertex(matrix, x + w, y + h, 0).uv(u2, v2).color(r, g, b, a).endVertex();
+        buffer.vertex(matrix, x + w, y, 0).uv(u2, v1).color(r, g, b, a).endVertex();
+        buffer.vertex(matrix, x, y, 0).uv(u1, v1).color(r, g, b, a).endVertex();
     }
 
     @Override

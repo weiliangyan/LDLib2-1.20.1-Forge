@@ -6,8 +6,8 @@ import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import net.minecraft.client.gui.font.providers.BitmapProvider;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -110,7 +110,9 @@ public class BitmapSdfSource implements GlyphSource {
         var inkWidth = actualWidth(image, originX, originY);
         var advance = advances.get(codepoint);
 
-        var top = 7f - ascent;
+        // the sheet's ascent is its baseline offset, and vanilla draws the cell so that its ink starts on the
+        // line's top edge: the padding widens the quad in design space by the same amount on each side
+        var top = 7f + QUAD_OFFSET - ascent;
         var right = cellWidth * scale;
         var bottom = top + cellHeight * scale;
         if (inkWidth == 0) {
@@ -167,7 +169,7 @@ public class BitmapSdfSource implements GlyphSource {
                 coverage[y * cellWidth + x] = (byte) (image.getPixelRGBA(originX + x, originY + y) >>> 24);
             }
         }
-        var top = 7f - ascent;
+        var top = 7f + QUAD_OFFSET - ascent;
         return RawGlyph.of(coverage, cellWidth, cellHeight,
                 0f, top, cellWidth * scale, top + cellHeight * scale, advance);
     }

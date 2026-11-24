@@ -1,9 +1,6 @@
 package com.lowdragmc.lowdraglib2.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.world.phys.AABB;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -11,10 +8,13 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
-import org.jetbrains.annotations.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 /**
@@ -81,13 +81,11 @@ public class ATESRRendererProvider<T extends BlockEntity> implements BlockEntity
         return false;
     }
 
-    @Override
     public AABB getRenderBoundingBox(T blockEntity) {
         IRenderer renderer = getRenderer(blockEntity);
         if (renderer != null) {
             return renderer.getRenderBoundingBox(blockEntity);
         }
-        return BlockEntityRenderer.super.getRenderBoundingBox(blockEntity);
+        return new AABB(blockEntity.getBlockPos());
     }
 }
-

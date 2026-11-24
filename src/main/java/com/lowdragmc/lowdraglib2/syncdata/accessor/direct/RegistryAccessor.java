@@ -1,20 +1,21 @@
 package com.lowdragmc.lowdraglib2.syncdata.accessor.direct;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
+import com.lowdragmc.lowdraglib2.compat.network.codec.ByteBufCodecs;
 import com.lowdragmc.lowdraglib2.syncdata.accessor.IMarkFunction;
 import com.lowdragmc.lowdraglib2.syncdata.field.ManagedKey;
-import com.lowdragmc.lowdraglib2.syncdata.var.FieldVar;
 import com.lowdragmc.lowdraglib2.syncdata.ref.DirectRef;
-import com.lowdragmc.lowdraglib2.syncdata.var.IVar;
 import com.lowdragmc.lowdraglib2.syncdata.ref.UniqueDirectRef;
+import com.lowdragmc.lowdraglib2.syncdata.var.FieldVar;
+import com.lowdragmc.lowdraglib2.syncdata.var.IVar;
+import com.lowdragmc.lowdraglib2.utils.LDLibExtraCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import lombok.Getter;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.FriendlyByteBuf;
+import net.nikdo53.neobackports.io.StreamCodec;
 import org.jetbrains.annotations.NotNull;
 
 @Getter
@@ -22,7 +23,7 @@ public final class RegistryAccessor<TYPE> implements IDirectAccessor<TYPE>, IMar
     private final Class<TYPE> typeClass;
     private final Registry<TYPE> registry;
     private final Codec<TYPE> codec;
-    private final StreamCodec<RegistryFriendlyByteBuf, TYPE> streamCodec;
+    private final StreamCodec<TYPE> streamCodec;
 
     private RegistryAccessor(Class<TYPE> typeClass, Registry<TYPE> registry) {
         this.typeClass = typeClass;
@@ -42,7 +43,7 @@ public final class RegistryAccessor<TYPE> implements IDirectAccessor<TYPE>, IMar
 
     @Override
     public <T> T readDirectVar(DynamicOps<T> op, IVar<TYPE> var) {
-        return codec.encodeStart(op, var.value()).getOrThrow();
+        return LDLibExtraCodecs.getOrThrow(codec.encodeStart(op, var.value()));
     }
 
     @Override
@@ -59,12 +60,12 @@ public final class RegistryAccessor<TYPE> implements IDirectAccessor<TYPE>, IMar
     }
 
     @Override
-    public void readDirectVarToStream(RegistryFriendlyByteBuf buffer, IVar<TYPE> var) {
+    public void readDirectVarToStream(FriendlyByteBuf buffer, IVar<TYPE> var) {
         streamCodec.encode(buffer, var.value());
     }
 
     @Override
-    public void writeDirectVarFromStream(RegistryFriendlyByteBuf buffer, IVar<TYPE> var) {
+    public void writeDirectVarFromStream(FriendlyByteBuf buffer, IVar<TYPE> var) {
         var.set(streamCodec.decode(buffer));
     }
 

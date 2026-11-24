@@ -73,7 +73,7 @@ public final class ScenarioRun {
             cursor = 0;
             executionQueue.clear();
             executionQueue.addAll(teardownSteps);
-            return executionQueue.isEmpty() ? null : executionQueue.getFirst();
+            return executionQueue.isEmpty() ? null : executionQueue.get(0);
         }
         return null;
     }

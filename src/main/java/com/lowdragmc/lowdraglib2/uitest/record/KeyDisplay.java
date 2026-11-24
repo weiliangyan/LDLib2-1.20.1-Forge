@@ -138,11 +138,11 @@ final class KeyDisplay {
             return;
         }
         keys.add(new Key(kind, label, now));
-        while (keys.size() > MAX_KEYS) keys.removeFirst();
+        while (keys.size() > MAX_KEYS) keys.remove(0);
     }
 
     private Key latest() {
-        return keys.isEmpty() ? null : keys.getLast();
+        return keys.isEmpty() ? null : keys.get(keys.size() - 1);
     }
 
     private List<String> orderedModifiers() {

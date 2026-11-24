@@ -57,7 +57,7 @@ public class WikiComponentGalleryScenario implements UIScenario {
         s.step("show " + slug, ctx -> ctx.el("#example-" + slug)
                 .as(Toggle.class).setValue(true, true));
         if (slug.equals("selector")) {
-            s.step("open direction selector", ctx -> ctx.query().type(Selector.class).list().getFirst()
+            s.step("open direction selector", ctx -> ctx.query().type(Selector.class).list().get(0)
                     .as(Selector.class).show());
         } else if (slug.equals("search-component")) {
             s.step("open search component", ctx -> ctx.query().type(SearchComponent.class).one()

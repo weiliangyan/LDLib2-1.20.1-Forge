@@ -3,12 +3,12 @@ package com.lowdragmc.lowdraglib2.gui.hud;
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import com.lowdragmc.lowdraglib2.math.Size;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.LayeredDraw;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
+import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -18,7 +18,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 @FunctionalInterface
-public interface ModularHudLayer extends LayeredDraw.Layer {
+public interface ModularHudLayer extends IGuiOverlay {
 
     @Nullable ModularUI getModularUI();
 
@@ -51,12 +51,11 @@ public interface ModularHudLayer extends LayeredDraw.Layer {
     }
 
     @Override
-    default void render(GuiGraphics graphics, DeltaTracker deltaTracker) {
+    default void render(ForgeGui gui, GuiGraphics graphics, float partialTick, int screenWidth, int screenHeight) {
         var mui = getModularUI();
         if (mui == null) return;
         if (validModularUI(mui)) {
-            var partialTicks = deltaTracker.getGameTimeDeltaPartialTick(false);
-            mui.getWidget().render(graphics, Integer.MAX_VALUE, Integer.MAX_VALUE, partialTicks);
+            mui.getWidget().render(graphics, Integer.MAX_VALUE, Integer.MAX_VALUE, partialTick);
         }
     }
 }

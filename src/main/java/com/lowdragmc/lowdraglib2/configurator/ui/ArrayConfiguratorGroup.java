@@ -15,9 +15,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import org.appliedenergistics.yoga.YogaEdge;
-
 import org.jetbrains.annotations.Nullable;
+
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 import java.util.Objects;
@@ -116,8 +115,9 @@ public class ArrayConfiguratorGroup<T> extends ConfiguratorGroup {
                     .collect(Collectors.toList());
             // remove overflow
             while (items.size() > current.size()) {
-                removeConfigurator(items.getLast());
-                if (selected == items.removeLast()) {
+                var last = items.remove(items.size() - 1);
+                removeConfigurator(last);
+                if (selected == last) {
                     setSelected(null);
                 }
             }

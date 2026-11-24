@@ -3,18 +3,21 @@ package com.lowdragmc.lowdraglib2.gui.sync;
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.gui.sync.rpc.RPCEvent;
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
+import com.lowdragmc.lowdraglib2.networking.LDLNetworking;
 import com.lowdragmc.lowdraglib2.networking.both.PacketModularUISync;
 import com.lowdragmc.lowdraglib2.networking.both.PacketUIRPCEvent;
 import com.lowdragmc.lowdraglib2.networking.both.PacketUIRPCEventReturn;
 import com.lowdragmc.lowdraglib2.utils.ByteBufUtil;
 import com.lowdragmc.lowdraglib2.utils.IdentityMap;
+import com.lowdragmc.lowdraglib2.utils.function.LDConsumers;
 import lombok.Getter;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
-import org.apache.commons.lang3.function.Consumers;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -66,11 +69,11 @@ public class UISyncManager {
         if (toSync.isEmpty()) return;
         var data = ByteBufUtil.writeCustomData(buf -> {
             writePack(buf, toSync);
-        }, modularUI.player.level().registryAccess());
+        });
         if (modularUI.player.level().isClientSide) {
-            PacketDistributor.sendToServer(new PacketModularUISync(data));
+            LDLNetworking.sendToServer(new PacketModularUISync(data));
         } else if (modularUI.player instanceof ServerPlayer serverPlayer) {
-            PacketDistributor.sendToPlayer(serverPlayer, new PacketModularUISync(data));
+            LDLNetworking.sendToPlayer(serverPlayer, new PacketModularUISync(data));
         }
     }
 
@@ -85,7 +88,7 @@ public class UISyncManager {
      * here keeps their entry sets equal by construction. {@link #tick()} gets this for free, since
      * {@code hasChanged()} is already false whenever {@code toSync} is.
      */
-    public void writeInitialData(RegistryFriendlyByteBuf buffer) {
+    public void writeInitialData(FriendlyByteBuf buffer) {
         var toSync = new ArrayList<SyncValue<?>>();
         for (SyncValue<?> value : syncValues.values()) {
             value.update();
@@ -96,7 +99,7 @@ public class UISyncManager {
         writePack(buffer, toSync);
     }
 
-    public void readInitialData(RegistryFriendlyByteBuf data) {
+    public void readInitialData(FriendlyByteBuf data) {
         handlePack(data);
         // clear changed flag
         for (var value : syncValues.values()) {
@@ -107,11 +110,11 @@ public class UISyncManager {
         }
     }
 
-    public void handleSyncPacket(RegistryFriendlyByteBuf data) {
+    public void handleSyncPacket(FriendlyByteBuf data) {
         handlePack(data);
     }
 
-    private void writePack(RegistryFriendlyByteBuf buf, Collection<SyncValue<?>> syncValues) {
+    private void writePack(FriendlyByteBuf buf, Collection<SyncValue<?>> syncValues) {
         buf.writeVarInt(syncValues.size());
         for (var syncValue : syncValues) {
             buf.writeVarInt(this.syncValues.getID(syncValue));
@@ -120,7 +123,7 @@ public class UISyncManager {
         }
     }
 
-    private void handlePack(RegistryFriendlyByteBuf buf) {
+    private void handlePack(FriendlyByteBuf buf) {
         var size = buf.readVarInt();
         for (int i = 0; i < size; i++) {
             var id = buf.readVarInt();
@@ -143,7 +146,7 @@ public class UISyncManager {
     }
 
     public void sendEvent(RPCEvent event, Object... args) {
-        sendEvent(event, Consumers.nop(), args);
+        sendEvent(event, LDConsumers.nop(), args);
     }
 
     public <T> void sendEvent(RPCEvent event, Consumer<T> responseCallback, Object... args) {
@@ -167,15 +170,15 @@ public class UISyncManager {
             buf.writeBoolean(response);
             buf.writeVarInt(requestID);
             event.writeParametersToBuffer(buf, args);
-        }, player.level().registryAccess());
+        });
         if (player.level().isClientSide) {
-            PacketDistributor.sendToServer(new PacketUIRPCEvent(data));
+            LDLNetworking.sendToServer(new PacketUIRPCEvent(data));
         } else if (player instanceof ServerPlayer serverPlayer) {
-            PacketDistributor.sendToPlayer(serverPlayer, new PacketUIRPCEvent(data));
+            LDLNetworking.sendToPlayer(serverPlayer, new PacketUIRPCEvent(data));
         }
     }
 
-    public void handEvent(RegistryFriendlyByteBuf buf) {
+    public void handEvent(FriendlyByteBuf buf) {
         var player = modularUI.player;
         if (player == null) return;
 
@@ -200,16 +203,16 @@ public class UISyncManager {
                 returnBuf.writeVarInt(eventID);
                 returnBuf.writeVarInt(requestID);
                 rpcEvent.writeReturnValueToBuffer(returnBuf, returnValue);
-            }, player.level().registryAccess());
+            });
             if (player.level().isClientSide) {
-                PacketDistributor.sendToServer(new PacketUIRPCEventReturn(data));
+                LDLNetworking.sendToServer(new PacketUIRPCEventReturn(data));
             } else if (player instanceof ServerPlayer serverPlayer) {
-                PacketDistributor.sendToPlayer(serverPlayer, new PacketUIRPCEventReturn(data));
+                LDLNetworking.sendToPlayer(serverPlayer, new PacketUIRPCEventReturn(data));
             }
         }
     }
 
-    public void handEventReturn(RegistryFriendlyByteBuf buf) {
+    public void handEventReturn(FriendlyByteBuf buf) {
         var eventID = buf.readVarInt();
         var responseID = buf.readVarInt();
         var rpcEvent = rpcEvents.getValue(eventID);

@@ -1,8 +1,8 @@
 package com.lowdragmc.lowdraglib2.test.noddegraphtoolkit;
 
+import com.lowdragmc.lowdraglib2.nodegraphtookit.api.node.Node;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.node.NodeAttribute;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.definition.IOptionDefinitionContext;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.api.node.Node;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.definition.IPortDefinitionContext;
 import net.minecraft.network.chat.Component;
 

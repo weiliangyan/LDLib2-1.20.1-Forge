@@ -89,7 +89,7 @@ public class TextureValue extends StyleValue<IGuiTexture> {
         if (calls.isEmpty()) return null;
 
         // get the main texture
-        var first = calls.getFirst();
+        var first = calls.get(0);
         IGuiTexture texture = parseMainTexture(first.name.toLowerCase(), first.args);
         if (texture == null) return null;
 
@@ -278,7 +278,7 @@ public class TextureValue extends StyleValue<IGuiTexture> {
             }
             case "shader" -> {
                 if (args.length > 0) {
-                    return new ShaderTexture(ResourceLocation.parse(args[0]));
+                    return new ShaderTexture(new ResourceLocation(args[0]));
                 }
             }
             case "vanilla-sprite" -> {

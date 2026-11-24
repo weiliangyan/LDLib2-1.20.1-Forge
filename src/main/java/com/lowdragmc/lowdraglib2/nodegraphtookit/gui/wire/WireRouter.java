@@ -285,9 +285,9 @@ public final class WireRouter {
     static List<Vector2f> simplify(List<Vector2f> points) {
         var out = new ArrayList<Vector2f>(points.size());
         for (var point : points) {
-            if (!out.isEmpty() && out.getLast().distance(point) < EPSILON) continue;
-            while (out.size() >= 2 && isStraightThrough(out.get(out.size() - 2), out.getLast(), point)) {
-                out.removeLast();
+            if (!out.isEmpty() && out.get(out.size() - 1).distance(point) < EPSILON) continue;
+            while (out.size() >= 2 && isStraightThrough(out.get(out.size() - 2), out.get(out.size() - 1), point)) {
+                out.remove(out.size() - 1);
             }
             out.add(point);
         }

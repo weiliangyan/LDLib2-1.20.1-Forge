@@ -1,20 +1,21 @@
 package com.lowdragmc.lowdraglib2.syncdata.accessor.direct;
 
 import com.lowdragmc.lowdraglib2.Platform;
+import com.lowdragmc.lowdraglib2.compat.serialization.JavaOps;
 import com.lowdragmc.lowdraglib2.syncdata.accessor.IMarkFunction;
-import com.lowdragmc.lowdraglib2.syncdata.mark.MarkStrategies;
 import com.lowdragmc.lowdraglib2.syncdata.field.ManagedKey;
+import com.lowdragmc.lowdraglib2.syncdata.mark.MarkStrategies;
 import com.lowdragmc.lowdraglib2.syncdata.ref.DirectRef;
 import com.lowdragmc.lowdraglib2.syncdata.ref.MutableDirectRef;
 import com.lowdragmc.lowdraglib2.syncdata.ref.UniqueDirectRef;
 import com.lowdragmc.lowdraglib2.syncdata.var.FieldVar;
 import com.lowdragmc.lowdraglib2.syncdata.var.IVar;
+import com.lowdragmc.lowdraglib2.utils.LDLibExtraCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.JavaOps;
 import lombok.Getter;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.FriendlyByteBuf;
+import net.nikdo53.neobackports.io.StreamCodec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,12 +28,12 @@ public class CustomDirectAccessor<TYPE> implements IDirectAccessor<TYPE>, IMarkF
     private final Class<TYPE> type;
     private final boolean supportChildClass;
     private final Codec<TYPE> codec;
-    private final StreamCodec<? super RegistryFriendlyByteBuf, TYPE> streamCodec;
+    private final StreamCodec<TYPE> streamCodec;
     @Nullable
     private final IMarkFunction markFunction;
 
     protected CustomDirectAccessor(Class<TYPE> type, boolean supportChildClass,
-                                   Codec<TYPE> codec, StreamCodec<? super RegistryFriendlyByteBuf, TYPE> streamCodec,
+                                   Codec<TYPE> codec, StreamCodec<TYPE> streamCodec,
                                    @Nullable IMarkFunction<TYPE, ?> markFunction) {
         this.type = type;
         this.supportChildClass = supportChildClass;
@@ -56,21 +57,21 @@ public class CustomDirectAccessor<TYPE> implements IDirectAccessor<TYPE>, IMarkF
 
     @Override
     public <T> T readDirectVar(DynamicOps<T> op, IVar<TYPE> var) {
-        return codec.encodeStart(op, var.value()).getOrThrow();
+        return LDLibExtraCodecs.getOrThrow(codec.encodeStart(op, var.value()));
     }
 
     @Override
     public <T> void writeDirectVar(DynamicOps<T> op, IVar<TYPE> var, T payload) {
-        var.set(codec.parse(op, payload).getOrThrow());
+        var.set(LDLibExtraCodecs.getOrThrow(codec.parse(op, payload)));
     }
 
     @Override
-    public void readDirectVarToStream(RegistryFriendlyByteBuf buffer, IVar<TYPE> var) {
+    public void readDirectVarToStream(FriendlyByteBuf buffer, IVar<TYPE> var) {
         streamCodec.encode(buffer, var.value());
     }
 
     @Override
-    public void writeDirectVarFromStream(RegistryFriendlyByteBuf buffer, IVar<TYPE> var) {
+    public void writeDirectVarFromStream(FriendlyByteBuf buffer, IVar<TYPE> var) {
         var.set(streamCodec.decode(buffer));
     }
 
@@ -109,7 +110,7 @@ public class CustomDirectAccessor<TYPE> implements IDirectAccessor<TYPE>, IMarkF
         private static final Object EMPTY = new Object();
 
         private Object encode(T value) {
-            var encoded = codec.encodeStart(Platform.getFrozenRegistry().createSerializationContext(JavaOps.INSTANCE), value).getOrThrow();
+            var encoded = LDLibExtraCodecs.getOrThrow(codec.encodeStart(Platform.registryOps(JavaOps.INSTANCE, Platform.getFrozenRegistry()), value));
             return encoded == null ? EMPTY : encoded;
         }
 
@@ -134,7 +135,7 @@ public class CustomDirectAccessor<TYPE> implements IDirectAccessor<TYPE>, IMarkF
         private final Class<TYPE> type;
         private final boolean supportChildClass;
         private Codec<TYPE> codec;
-        private StreamCodec<? super RegistryFriendlyByteBuf, TYPE> streamCodec;
+        private StreamCodec<TYPE> streamCodec;
         private @Nullable IMarkFunction<TYPE, ?> markFunction;
         private boolean codecMark;
 
@@ -148,7 +149,7 @@ public class CustomDirectAccessor<TYPE> implements IDirectAccessor<TYPE>, IMarkF
             return this;
         }
 
-        public Builder<TYPE> streamCodec(StreamCodec<? super RegistryFriendlyByteBuf, TYPE> streamCodec) {
+        public Builder<TYPE> streamCodec(StreamCodec<TYPE> streamCodec) {
             this.streamCodec = streamCodec;
             return this;
         }
@@ -170,7 +171,7 @@ public class CustomDirectAccessor<TYPE> implements IDirectAccessor<TYPE>, IMarkF
          * @param managedMarkFunction the function to get the mark from the value.
          */
         public Builder<TYPE> copyMark(Function<TYPE, TYPE> managedMarkFunction) {
-            this.markFunction = new IMarkFunction.Simple<>(managedMarkFunction, (a, b) -> !Objects.equals(a, b));
+            this.markFunction = new Simple<>(managedMarkFunction, (a, b) -> !Objects.equals(a, b));
             this.codecMark = false;
             return this;
         }
@@ -182,7 +183,7 @@ public class CustomDirectAccessor<TYPE> implements IDirectAccessor<TYPE>, IMarkF
          * @param <MARK> the type of the mark.
          */
         public <MARK> Builder<TYPE> customMark(Function<TYPE, MARK> managedMarkFunction, BiPredicate<MARK, TYPE> areEqualFunction) {
-            this.markFunction = new IMarkFunction.Simple<>(managedMarkFunction, (a, b) -> !areEqualFunction.test(a, b));
+            this.markFunction = new Simple<>(managedMarkFunction, (a, b) -> !areEqualFunction.test(a, b));
             this.codecMark = false;
             return this;
         }

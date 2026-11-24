@@ -3,20 +3,19 @@ package com.lowdragmc.lowdraglib2.editor.resource;
 import com.lowdragmc.lowdraglib2.configurator.EditAction;
 import com.lowdragmc.lowdraglib2.editor.ClipboardManager;
 import com.lowdragmc.lowdraglib2.editor.ui.resource.ResourceProviderContainer;
-import com.lowdragmc.lowdraglib2.gui.texture.Icons;
 import com.lowdragmc.lowdraglib2.gui.ColorPattern;
 import com.lowdragmc.lowdraglib2.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.Dialog;
+import com.lowdragmc.lowdraglib2.gui.texture.Icons;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.ColorSelector;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.Dialog;
 import com.lowdragmc.lowdraglib2.integration.kjs.KJSBindings;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-
 import org.jetbrains.annotations.Nullable;
 
 @KJSBindings

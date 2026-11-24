@@ -1,7 +1,7 @@
 package com.lowdragmc.lowdraglib2.client.shader.management;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL31;
 

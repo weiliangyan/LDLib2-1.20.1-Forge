@@ -3,15 +3,15 @@ package com.lowdragmc.lowdraglib2.gui.ui.utils;
 import com.lowdragmc.lowdraglib2.configurator.EditAction;
 import com.lowdragmc.lowdraglib2.configurator.SerializableRecordAction;
 import com.lowdragmc.lowdraglib2.gui.ColorPattern;
+import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Vertical;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
-import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.network.chat.Component;
-
 import org.jetbrains.annotations.Nullable;
+
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Set;

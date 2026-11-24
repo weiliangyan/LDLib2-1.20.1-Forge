@@ -5,11 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileVisitOption;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.EnumSet;
 import java.util.List;
@@ -48,7 +44,12 @@ public final class AssetSearch {
         this.query = query.toLowerCase(Locale.ROOT);
         this.resourceExtensions = List.copyOf(resourceExtensions);
         this.limit = limit;
-        this.thread = async ? Thread.ofVirtual().name("ldlib2-asset-search").start(this::run) : null;
+        if (async) {
+            Thread t = new Thread(this::run, "ldlib2-asset-search");
+            t.setDaemon(true);
+            t.start();
+            this.thread = t;
+        } else this.thread = null;
     }
 
     /**

@@ -122,7 +122,7 @@ public final class TestContext {
         var server = server();
         if (server == null) return null;
         var players = server.getPlayerList().getPlayers();
-        return players.isEmpty() ? null : players.getFirst();
+        return players.isEmpty() ? null : players.get(0);
     }
 
     @Nullable

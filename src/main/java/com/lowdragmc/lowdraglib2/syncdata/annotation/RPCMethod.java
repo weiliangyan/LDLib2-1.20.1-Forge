@@ -1,13 +1,13 @@
 package com.lowdragmc.lowdraglib2.syncdata.annotation;
 
 import com.lowdragmc.lowdraglib2.syncdata.IManaged;
+import com.lowdragmc.lowdraglib2.syncdata.holder.IRPCManagedHolder;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import com.lowdragmc.lowdraglib2.syncdata.holder.IRPCManagedHolder;
-import net.minecraft.server.level.ServerPlayer;
 
 /**
  * Annotate a method, you can send RPC packet between server and remote. You are free to define the parameters of the methods long as the parameters support sync, and send rpc anywhere in your class.

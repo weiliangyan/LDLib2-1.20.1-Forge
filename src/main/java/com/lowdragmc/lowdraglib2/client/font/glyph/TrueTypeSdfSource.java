@@ -3,16 +3,15 @@ package com.lowdragmc.lowdraglib2.client.font.glyph;
 import com.lowdragmc.lowdraglib2.LDLib2;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import net.minecraft.client.gui.font.providers.FreeTypeUtil;
 import net.minecraft.client.gui.font.providers.TrueTypeGlyphProviderDefinition;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.stb.STBTTFontinfo;
+import org.lwjgl.stb.STBTruetype;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
-import org.lwjgl.util.freetype.FT_Face;
-import org.lwjgl.util.freetype.FreeType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,14 +20,17 @@ import java.nio.ByteBuffer;
 /**
  * Rasterizes TrueType/OpenType outlines and turns them into signed distance fields.
  * <p>
- * Rasterization goes through FreeType, the same library Minecraft itself uses for TTF fonts. stb_truetype was
- * tried first and had to be abandoned: its rasterizer writes past the end of its own output buffer at small em
- * sizes, which corrupts the native heap and takes the JVM down a few allocations later. FreeType renders these
- * same fonts every time the vanilla font manager loads them.
+ * Rasterization goes through stb_truetype, the rasterizer Minecraft itself bundles and uses for its own TTF
+ * fonts. On 1.21 LDLib used FreeType for this, but 1.20.1 ships no {@code lwjgl-freetype} binding at all: the
+ * first text draw threw {@code NoClassDefFoundError} and the whole renderer had to be turned off. stb is on the
+ * classpath on every Minecraft version, needs no native download, and is the same library that produces the
+ * vanilla advances, so nothing extra has to be shipped with the mod.
  * <p>
- * Metrics mirror vanilla's {@link com.mojang.blaze3d.font.TrueTypeGlyphProvider}: the face is scaled so one em
- * maps to {@code emPixels} device pixels and every metric is divided by the oversample factor to land back in
- * the 9 pixel design space, so advances stay identical to what the vanilla renderer produced.
+ * Metrics are in the same 9 pixel design space vanilla uses, with one em scaled to {@code emPixels} device
+ * pixels before dividing by the oversample factor. Scaling by the em (rather than by ascent minus descent, as
+ * {@code stbtt_ScaleForPixelHeight} does) is what keeps LDLib's text the size its stylesheets ask for:
+ * {@code font-size} means the em, and a font whose ascender and descender together exceed one em would
+ * otherwise render noticeably smaller than requested.
  */
 @OnlyIn(Dist.CLIENT)
 public class TrueTypeSdfSource implements GlyphSource {
@@ -37,44 +39,43 @@ public class TrueTypeSdfSource implements GlyphSource {
      */
     private static final int PADDING = 6;
     /**
-     * Load flags for a metrics only pass, matching what vanilla's TrueType provider uses.
-     */
-    private static final int LOAD_METRICS = FreeType.FT_LOAD_BITMAP_METRICS_ONLY | FreeType.FT_LOAD_NO_BITMAP;
-    /**
-     * Rendering for the distance field. Hinting is deliberately off: it distorts the outline to fit whatever
-     * pixel grid it is rasterized on, and the field is then sampled at every other size, so that distortion
-     * would be baked in and applied to the wrong grid everywhere.
-     */
-    private static final int LOAD_UNHINTED = FreeType.FT_LOAD_RENDER | FreeType.FT_LOAD_NO_HINTING;
-    /**
-     * Rendering for the exact size raster path, where hinting is exactly what is wanted: the glyph is drawn at
-     * this size and nowhere else, so snapping stems onto the pixel grid is what makes it crisp.
-     */
-    private static final int LOAD_HINTED = FreeType.FT_LOAD_RENDER;
-    /**
      * How close {@code size * oversample} has to be to a whole pixel size for the exact size raster path to be
      * able to map one texel to one device pixel.
      */
     private static final float EXACT_TOLERANCE = 0.01f;
+    /**
+     * Baseline of the 9 pixel design space, plus the offset {@code BakedGlyph#render} takes off again. Placing
+     * glyphs against this baseline is what keeps TTF text on the same line as the bitmap and unifont glyphs it
+     * is mixed with, and inside the line box the caret and selection are drawn in.
+     */
+    private static final float BASELINE_TOP = 7f + QUAD_OFFSET;
 
+    /**
+     * stb keeps a pointer into this buffer, so it has to stay off heap and outlive the font info.
+     */
     @Nullable
     private ByteBuffer fontData;
     @Nullable
-    private FT_Face face;
+    private STBTTFontinfo info;
+    /**
+     * The design size from the font definition, i.e. what one em is worth in design space.
+     */
     private final float size;
-    private final int emPixels;
+    /**
+     * Font units to pixels at the configured em size, from {@code stbtt_ScaleForMappingEmToPixels}.
+     */
+    private final float emScale;
     private final float oversample;
     private final float shiftX;
     private final float shiftY;
     private final IntSet skip = new IntArraySet();
-    private int currentPixelSize = -1;
 
-    private TrueTypeSdfSource(ByteBuffer fontData, FT_Face face, float size, int emPixels,
+    private TrueTypeSdfSource(ByteBuffer fontData, STBTTFontinfo info, float size, int emPixels,
                               float shiftX, float shiftY, String skip) {
         this.fontData = fontData;
-        this.face = face;
+        this.info = info;
         this.size = size;
-        this.emPixels = emPixels;
+        this.emScale = STBTruetype.stbtt_ScaleForMappingEmToPixels(info, emPixels);
         this.oversample = emPixels / size;
         this.shiftX = shiftX;
         this.shiftY = shiftY;
@@ -89,30 +90,20 @@ public class TrueTypeSdfSource implements GlyphSource {
                                          int emPixels) {
         var file = definition.location().withPrefix("font/");
         ByteBuffer data = null;
-        FT_Face face = null;
+        STBTTFontinfo info = null;
         try (InputStream stream = resourceManager.open(file)) {
             var bytes = stream.readAllBytes();
-            // FreeType keeps a pointer into this buffer, so it has to be off heap and outlive the face
             data = MemoryUtil.memAlloc(bytes.length);
             data.put(bytes).flip();
-            synchronized (FreeTypeUtil.LIBRARY_LOCK) {
-                try (var stack = MemoryStack.stackPush()) {
-                    var pointer = stack.mallocPointer(1);
-                    FreeTypeUtil.assertError(
-                            FreeType.FT_New_Memory_Face(FreeTypeUtil.getLibrary(), data, 0L, pointer),
-                            "Initializing font face");
-                    face = FT_Face.create(pointer.get());
-                }
-                FreeTypeUtil.assertError(FreeType.FT_Select_Charmap(face, FreeType.FT_ENCODING_UNICODE),
-                        "Find unicode charmap");
+            info = STBTTFontinfo.malloc();
+            if (!STBTruetype.stbtt_InitFont(info, data)) {
+                throw new IOException("Invalid ttf font " + file);
             }
-            return new TrueTypeSdfSource(data, face, definition.size(), emPixels,
+            return new TrueTypeSdfSource(data, info, definition.size(), emPixels,
                     definition.shift().x(), definition.shift().y(), definition.skip());
-        } catch (IOException | RuntimeException e) {
-            if (face != null) {
-                synchronized (FreeTypeUtil.LIBRARY_LOCK) {
-                    FreeType.FT_Done_Face(face);
-                }
+        } catch (IOException | RuntimeException | LinkageError e) {
+            if (info != null) {
+                info.free();
             }
             if (data != null) {
                 MemoryUtil.memFree(data);
@@ -122,6 +113,10 @@ public class TrueTypeSdfSource implements GlyphSource {
         }
     }
 
+    /**
+     * Advance in design space: the font's hmetric times {@code size} over its units per em, which is what
+     * scaling to {@code emPixels} and dividing by the oversample factor works out to.
+     */
     @Nullable
     @Override
     public synchronized GlyphMetrics metrics(int codepoint) {
@@ -129,16 +124,12 @@ public class TrueTypeSdfSource implements GlyphSource {
         if (index == 0) {
             return null;
         }
-        var face = this.face;
-        setPixelSize(emPixels);
-        if (FreeTypeUtil.checkError(FreeType.FT_Load_Glyph(face, index, LOAD_METRICS), "Loading glyph metrics")) {
-            return null;
+        try (var stack = MemoryStack.stackPush()) {
+            var advance = stack.ints(0);
+            var leftSideBearing = stack.ints(0);
+            STBTruetype.stbtt_GetGlyphHMetrics(info, index, advance, leftSideBearing);
+            return GlyphMetrics.of(advance.get(0) * emScale / oversample);
         }
-        var slot = face.glyph();
-        if (slot == null) {
-            return null;
-        }
-        return GlyphMetrics.of(FreeTypeUtil.x(slot.advance()) / oversample);
     }
 
     @Nullable
@@ -148,25 +139,27 @@ public class TrueTypeSdfSource implements GlyphSource {
         if (index == 0) {
             return null;
         }
-        var rendered = render(index, emPixels, LOAD_UNHINTED);
-        if (rendered == null) {
+        var metrics = metrics(codepoint);
+        if (metrics == null) {
             return null;
         }
-        if (rendered.coverage() == null) {
-            return RawGlyph.space(rendered.advance() / oversample);
+        try (var stack = MemoryStack.stackPush()) {
+            var box = glyphBox(stack, index, emScale);
+            if (box.width() <= 0 || box.height() <= 0) {
+                return RawGlyph.space(metrics.advance());
+            }
+            // fromCoverage, not fromMask: the rasterizer's grey levels say where the outline runs inside each
+            // edge pixel, and throwing that away is what makes large text look jagged
+            var coverage = render(index, box.width(), box.height(), emScale);
+            var sdf = DistanceTransform.fromCoverage(coverage, box.width(), box.height(), PADDING, PADDING);
+            var designPadding = PADDING / oversample;
+            var left = box.x0() / oversample + shiftX - designPadding;
+            var top = BASELINE_TOP + box.y0() / oversample + shiftY - designPadding;
+            var width = box.width() + PADDING * 2;
+            var height = box.height() + PADDING * 2;
+            return RawGlyph.of(sdf, width, height, left, top,
+                    left + width / oversample, top + height / oversample, metrics.advance());
         }
-
-        // fromCoverage, not fromMask: FreeType's grey levels say where the outline runs inside each edge
-        // pixel, and throwing that away is what makes large text look jagged
-        var sdf = DistanceTransform.fromCoverage(rendered.coverage(), rendered.width(), rendered.height(),
-                PADDING, PADDING);
-        var designPadding = PADDING / oversample;
-        var left = rendered.bearingLeft() / oversample + shiftX - designPadding;
-        var top = 7f - rendered.bearingTop() / oversample + shiftY - designPadding;
-        var width = rendered.width() + PADDING * 2;
-        var height = rendered.height() + PADDING * 2;
-        return RawGlyph.of(sdf, width, height, left, top,
-                left + width / oversample, top + height / oversample, rendered.advance() / oversample);
     }
 
     @Nullable
@@ -191,91 +184,74 @@ public class TrueTypeSdfSource implements GlyphSource {
         if (metrics == null) {
             return null;
         }
-        var rendered = render(index, pixelSize, LOAD_HINTED);
-        if (rendered == null) {
-            return null;
+        var scale = STBTruetype.stbtt_ScaleForMappingEmToPixels(info, pixelSize);
+        try (var stack = MemoryStack.stackPush()) {
+            var box = glyphBox(stack, index, scale);
+            if (box.width() <= 0 || box.height() <= 0) {
+                return RawGlyph.space(metrics.advance());
+            }
+            var coverage = render(index, box.width(), box.height(), scale);
+            var left = box.x0() / oversample + shiftX;
+            var top = BASELINE_TOP + box.y0() / oversample + shiftY;
+            return RawGlyph.of(coverage, box.width(), box.height(), left, top,
+                    left + box.width() / oversample, top + box.height() / oversample, metrics.advance());
         }
-        if (rendered.coverage() == null) {
-            return RawGlyph.space(metrics.advance());
-        }
-        var left = rendered.bearingLeft() / oversample + shiftX;
-        var top = 7f - rendered.bearingTop() / oversample + shiftY;
-        return RawGlyph.of(rendered.coverage(), rendered.width(), rendered.height(), left, top,
-                left + rendered.width() / oversample, top + rendered.height() / oversample, metrics.advance());
     }
 
     /**
-     * @param coverage 8 bit grayscale rows, or null when the glyph has no bitmap at all (a space)
+     * The integer bitmap box stb will fill for this glyph at {@code scale}: relative to the pen position, with
+     * the baseline at y = 0, so {@code y0} is the (negative) ascent of the ink and {@code y1} its descent.
      */
-    private record Rendered(@Nullable byte[] coverage, int width, int height,
-                            int bearingLeft, int bearingTop, float advance) {
+    private record Box(int x0, int y0, int x1, int y1) {
+        int width() {
+            return x1 - x0;
+        }
+
+        int height() {
+            return y1 - y0;
+        }
     }
 
-    @Nullable
-    private Rendered render(int glyphIndex, int pixelSize, int loadFlags) {
-        var face = this.face;
-        if (face == null) {
-            return null;
+    private Box glyphBox(MemoryStack stack, int index, float scale) {
+        var x0 = stack.ints(0);
+        var y0 = stack.ints(0);
+        var x1 = stack.ints(0);
+        var y1 = stack.ints(0);
+        STBTruetype.stbtt_GetGlyphBitmapBox(info, index, scale, scale, x0, y0, x1, y1);
+        return new Box(x0.get(0), y0.get(0), x1.get(0), y1.get(0));
+    }
+
+    /**
+     * Renders one glyph into a tightly sized 8 bit coverage bitmap. The buffer is exactly the box stb reported
+     * and its stride is the bitmap width, which is what keeps the rasterizer inside it.
+     */
+    private byte[] render(int index, int width, int height, float scale) {
+        var buffer = MemoryUtil.memAlloc(width * height);
+        try {
+            MemoryUtil.memSet(buffer, 0);
+            STBTruetype.stbtt_MakeGlyphBitmapSubpixel(info, buffer, width, height, width, scale, scale,
+                    0f, 0f, index);
+            var coverage = new byte[width * height];
+            buffer.get(coverage);
+            return coverage;
+        } finally {
+            MemoryUtil.memFree(buffer);
         }
-        setPixelSize(pixelSize);
-        if (FreeTypeUtil.checkError(FreeType.FT_Load_Glyph(face, glyphIndex, loadFlags), "Rendering glyph")) {
-            return null;
-        }
-        var slot = face.glyph();
-        if (slot == null) {
-            return null;
-        }
-        var advance = FreeTypeUtil.x(slot.advance());
-        var bitmap = slot.bitmap();
-        var width = bitmap.width();
-        var height = bitmap.rows();
-        if (width <= 0 || height <= 0) {
-            return new Rendered(null, 0, 0, 0, 0, advance);
-        }
-        if (bitmap.pixel_mode() != FreeType.FT_PIXEL_MODE_GRAY) {
-            LDLib2.LOGGER.warn("Glyph {} was not rendered as 8-bit grayscale, skipping", glyphIndex);
-            return null;
-        }
-        // rows can be padded, and a negative pitch means the rows are stored bottom up
-        var pitch = bitmap.pitch();
-        var stride = Math.abs(pitch);
-        var buffer = bitmap.buffer(stride * height);
-        if (buffer == null) {
-            return new Rendered(null, 0, 0, 0, 0, advance);
-        }
-        var coverage = new byte[width * height];
-        for (int row = 0; row < height; row++) {
-            var sourceRow = pitch < 0 ? (height - 1 - row) : row;
-            buffer.position(sourceRow * stride);
-            buffer.get(coverage, row * width, width);
-        }
-        buffer.position(0);
-        return new Rendered(coverage, width, height, slot.bitmap_left(), slot.bitmap_top(), advance);
     }
 
     private int glyphIndex(int codepoint) {
-        var face = this.face;
-        if (face == null || skip.contains(codepoint)) {
+        var info = this.info;
+        if (info == null || skip.contains(codepoint)) {
             return 0;
         }
-        return FreeType.FT_Get_Char_Index(face, codepoint);
-    }
-
-    private void setPixelSize(int pixelSize) {
-        if (currentPixelSize == pixelSize) {
-            return;
-        }
-        FreeTypeUtil.assertError(FreeType.FT_Set_Pixel_Sizes(face, pixelSize, pixelSize), "Setting pixel size");
-        currentPixelSize = pixelSize;
+        return STBTruetype.stbtt_FindGlyphIndex(info, codepoint);
     }
 
     @Override
     public synchronized void close() {
-        if (face != null) {
-            synchronized (FreeTypeUtil.LIBRARY_LOCK) {
-                FreeTypeUtil.checkError(FreeType.FT_Done_Face(face), "Deleting font face");
-            }
-            face = null;
+        if (info != null) {
+            info.free();
+            info = null;
         }
         if (fontData != null) {
             MemoryUtil.memFree(fontData);

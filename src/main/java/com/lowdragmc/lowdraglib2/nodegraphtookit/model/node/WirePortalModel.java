@@ -4,8 +4,8 @@ import com.lowdragmc.lowdraglib2.nodegraphtookit.api.port.PortType;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.type.TypeHandle;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.type.TypeHandleHelpers;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.api.type.TypeHandles;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.node.CapsuleNodeElement;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.GraphElement;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.node.CapsuleNodeElement;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.Capabilities;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.ChangeHint;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.DeclarationModel;
@@ -17,7 +17,6 @@ import lombok.Setter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;

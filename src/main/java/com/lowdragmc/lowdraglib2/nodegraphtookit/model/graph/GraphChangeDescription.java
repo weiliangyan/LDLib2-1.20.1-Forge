@@ -111,7 +111,7 @@ public class GraphChangeDescription {
             }
         }
         if (shouldSetDirty) {
-            var first = models.getFirst();
+            var first = models.get(0);
             if (first.getGraphModel() != null) {
                 first.getGraphModel().setGraphObjectDirty();
             }
@@ -153,7 +153,7 @@ public class GraphChangeDescription {
             }
         }
         if (shouldSetDirty) {
-            var first = models.getFirst();
+            var first = models.get(0);
             if (first.getGraphModel() != null) {
                 first.getGraphModel().setGraphObjectDirty();
             }
@@ -189,7 +189,7 @@ public class GraphChangeDescription {
             addChangedModel(model.getUid(), changeHint);
         }
         if (shouldSetDirty) {
-            var first = models.getFirst();
+            var first = models.get(0);
             if (first.getGraphModel() != null) {
                 first.getGraphModel().setGraphObjectDirty();
             }

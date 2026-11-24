@@ -6,6 +6,7 @@ import com.lowdragmc.lowdraglib2.gui.holder.ModularUIScreen;
 import com.lowdragmc.lowdraglib2.gui.texture.Icons;
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import com.lowdragmc.lowdraglib2.gui.ui.UI;
+import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.registry.RegistrationEnvironment;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
 import com.lowdragmc.lowdraglib2.test.TestEditor;
@@ -14,7 +15,6 @@ import com.lowdragmc.lowdraglib2.uitest.ScenarioOptions;
 import com.lowdragmc.lowdraglib2.uitest.TestContext;
 import com.lowdragmc.lowdraglib2.uitest.UIScenario;
 import com.lowdragmc.lowdraglib2.uitest.capture.FrameCapture;
-import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.mojang.blaze3d.platform.NativeImage;
 
 import java.util.List;

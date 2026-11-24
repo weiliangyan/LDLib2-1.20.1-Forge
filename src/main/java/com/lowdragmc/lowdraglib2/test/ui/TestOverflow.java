@@ -45,7 +45,8 @@ public class TestOverflow implements IScreenTest {
                 .setLanguage(Languages.LSS)
                 .setLinesResponder(lines -> {
                     var stylesheet = Stylesheet.parse(String.join("\n", lines));
-                    if (clipImage.getModularUI() instanceof ModularUI mui) {
+                    ModularUI mui = clipImage.getModularUI();
+                    if (mui != null) {
                         mui.getStyleEngine().removeStylesheet(stylesheetRef.get());
                         mui.getStyleEngine().addStylesheet(stylesheet);
                     }

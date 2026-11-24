@@ -1,4 +1,4 @@
-//package com.lowdragmc.lowdraglib2.integration.moddevmcp;
+package com.lowdragmc.lowdraglib2.integration.moddevmcp;
 //
 //import com.lowdragmc.lowdraglib2.LDLib2;
 //import com.lowdragmc.lowdraglib2.gui.holder.IModularUIHolder;

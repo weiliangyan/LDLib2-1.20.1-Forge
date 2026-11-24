@@ -24,7 +24,7 @@ public class FluidAccessor extends TypesAccessor<Fluid> {
     @Override
     public Fluid defaultValue(@Nullable Field field, @Nullable Class<?> type) {
         if (field != null && field.isAnnotationPresent(DefaultValue.class)) {
-            return BuiltInRegistries.FLUID.get(ResourceLocation.parse(field.getAnnotation(DefaultValue.class).stringValue()[0]));
+            return BuiltInRegistries.FLUID.get(new ResourceLocation(field.getAnnotation(DefaultValue.class).stringValue()[0]));
         }
         return Fluids.WATER;
     }

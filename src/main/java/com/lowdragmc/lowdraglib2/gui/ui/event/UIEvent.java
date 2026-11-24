@@ -5,10 +5,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.Pair;
 import lombok.ToString;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-
+import net.nikdo53.neobackports.io.StreamCodec;
 import org.jetbrains.annotations.Nullable;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +19,7 @@ public class UIEvent {
             .comapFlatMap(type -> DataResult.success(UIEvent.create(type)), event -> event.type)
             .stable();
 
-    public final static StreamCodec<FriendlyByteBuf, UIEvent> STREAM_CODEC = StreamCodec.of(
+    public final static StreamCodec<UIEvent> STREAM_CODEC = StreamCodec.of(
             (byteBuf, event) -> {
                 byteBuf.writeUtf(event.type);
                 byteBuf.writeVarInt(event.button);

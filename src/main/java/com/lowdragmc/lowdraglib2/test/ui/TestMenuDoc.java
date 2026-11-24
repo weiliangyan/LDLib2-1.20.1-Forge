@@ -17,9 +17,9 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.templates.FluidTank;
+import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 

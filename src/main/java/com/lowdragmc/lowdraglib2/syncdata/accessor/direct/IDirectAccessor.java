@@ -3,11 +3,11 @@ package com.lowdragmc.lowdraglib2.syncdata.accessor.direct;
 import com.lowdragmc.lowdraglib2.syncdata.accessor.IAccessor;
 import com.lowdragmc.lowdraglib2.syncdata.field.ManagedKey;
 import com.lowdragmc.lowdraglib2.syncdata.ref.DirectRef;
-import com.lowdragmc.lowdraglib2.syncdata.var.IVar;
 import com.lowdragmc.lowdraglib2.syncdata.ref.IRef;
+import com.lowdragmc.lowdraglib2.syncdata.var.IVar;
 import com.lowdragmc.lowdraglib2.utils.LDLibExtraCodecs;
 import com.mojang.serialization.DynamicOps;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
 
 public interface IDirectAccessor<TYPE> extends IAccessor<TYPE> {
@@ -32,14 +32,14 @@ public interface IDirectAccessor<TYPE> extends IAccessor<TYPE> {
      * @param buffer The buffer to write.
      * @param var The var to read.
      */
-    void readDirectVarToStream(RegistryFriendlyByteBuf buffer, IVar<TYPE> var);
+    void readDirectVarToStream(FriendlyByteBuf buffer, IVar<TYPE> var);
 
     /**
      * Write the var value from the buffer. The field's internal value is guaranteed to be non-empty.
      * @param buffer The buffer to read.
      * @param var The var to write.
      */
-    void writeDirectVarFromStream(RegistryFriendlyByteBuf buffer, IVar<TYPE> var);
+    void writeDirectVarFromStream(FriendlyByteBuf buffer, IVar<TYPE> var);
 
     /**
      * Create a direct reference with the given var
@@ -85,7 +85,7 @@ public interface IDirectAccessor<TYPE> extends IAccessor<TYPE> {
     }
 
     @Override
-    default void readFieldToStream(RegistryFriendlyByteBuf buffer, IRef<TYPE> ref) {
+    default void readFieldToStream(FriendlyByteBuf buffer, IRef<TYPE> ref) {
         var managedField = ((DirectRef<TYPE>)ref).getField();
         if (!managedField.isPrimitive() && managedField.value() == null) {
             buffer.writeBoolean(true);
@@ -96,7 +96,7 @@ public interface IDirectAccessor<TYPE> extends IAccessor<TYPE> {
     }
 
     @Override
-    default void writeFieldFromStream(RegistryFriendlyByteBuf buffer, IRef<TYPE> ref) {
+    default void writeFieldFromStream(FriendlyByteBuf buffer, IRef<TYPE> ref) {
         var managedField = ((DirectRef<TYPE>)ref).getField();
         var isNull = buffer.readBoolean();
         if (isNull && !managedField.isPrimitive()) {

@@ -3,26 +3,21 @@ package com.lowdragmc.lowdraglib2.gui.util;
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.Platform;
 import com.lowdragmc.lowdraglib2.client.shader.LDLibRenderTypes;
-import com.lowdragmc.lowdraglib2.client.shader.LDLibShaders;
-import com.lowdragmc.lowdraglib2.client.shader.management.ShaderProgram;
-import com.lowdragmc.lowdraglib2.client.shader.uniform.UniformCache;
 import com.lowdragmc.lowdraglib2.client.utils.RenderBufferUtils;
 import com.lowdragmc.lowdraglib2.core.mixins.accessor.GuiGraphicsAccessor;
-import com.lowdragmc.lowdraglib2.utils.FluidHelper;
-import com.lowdragmc.lowdraglib2.utils.ColorUtils;
-import com.lowdragmc.lowdraglib2.math.Position;
+import com.lowdragmc.lowdraglib2.gui.LDLibFonts;
 import com.lowdragmc.lowdraglib2.math.Rect;
+import com.lowdragmc.lowdraglib2.utils.ColorUtils;
+import com.lowdragmc.lowdraglib2.utils.FluidHelper;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
-import net.minecraft.Util;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
-import com.lowdragmc.lowdraglib2.gui.LDLibFonts;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -32,20 +27,17 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.ClientHooks;
-import net.minecraft.world.phys.Vec2;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
-import net.neoforged.neoforge.fluids.FluidStack;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+import net.minecraftforge.fluids.FluidStack;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
-import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,10 +53,10 @@ public class DrawerHelper {
         vMax = vMax - maskTop / 16f * (vMax - vMin);
 
         var mat = pose.pose();
-        buffer.addVertex(mat, xCoord, yCoord + 16, zLevel).setUv(uMin, vMax).setColor(fluidColor);
-        buffer.addVertex(mat, xCoord + 16 - maskRight, yCoord + 16, zLevel).setUv(uMax, vMax).setColor(fluidColor);
-        buffer.addVertex(mat, xCoord + 16 - maskRight, yCoord + maskTop, zLevel).setUv(uMax, vMin).setColor(fluidColor);
-        buffer.addVertex(mat, xCoord, yCoord + maskTop, zLevel).setUv(uMin, vMin).setColor(fluidColor);
+        buffer.vertex(mat, xCoord, yCoord + 16, zLevel).uv(uMin, vMax).color(fluidColor).endVertex();
+        buffer.vertex(mat, xCoord + 16 - maskRight, yCoord + 16, zLevel).uv(uMax, vMax).color(fluidColor).endVertex();
+        buffer.vertex(mat, xCoord + 16 - maskRight, yCoord + maskTop, zLevel).uv(uMax, vMin).color(fluidColor).endVertex();
+        buffer.vertex(mat, xCoord, yCoord + maskTop, zLevel).uv(uMin, vMin).color(fluidColor).endVertex();
     }
 
     public static void drawFluidForGui(@Nonnull GuiGraphics graphics, FluidStack contents, float startX, float startY, float widthT, float heightT, int color) {
@@ -73,7 +65,7 @@ public class DrawerHelper {
         if (fluidStillSprite == null) {
             fluidStillSprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(MissingTextureAtlasSprite.getLocation());
             if (Platform.isDevEnv()) {
-                LDLib2.LOGGER.error("Missing fluid texture for fluid: " + contents.getHoverName().getString());
+                LDLib2.LOGGER.error("Missing fluid texture for fluid: " + contents.getDisplayName().getString());
             }
         }
 
@@ -201,10 +193,10 @@ public class DrawerHelper {
         Matrix4f matrix4f = graphics.pose().last().pose();
         VertexConsumer vertexconsumer = graphics.bufferSource().getBuffer(type);
         RenderSystem.disableDepthTest();
-        vertexconsumer.addVertex(matrix4f, x, y, 0).setColor(color);
-        vertexconsumer.addVertex(matrix4f, x, y + height, 0).setColor(color);
-        vertexconsumer.addVertex(matrix4f, x + width, y + height, 0).setColor(color);
-        vertexconsumer.addVertex(matrix4f, x + width, y, 0).setColor(color);
+        vertexconsumer.vertex(matrix4f, x, y, 0).color(color).endVertex();
+        vertexconsumer.vertex(matrix4f, x, y + height, 0).color(color).endVertex();
+        vertexconsumer.vertex(matrix4f, x + width, y + height, 0).color(color).endVertex();
+        vertexconsumer.vertex(matrix4f, x + width, y, 0).color(color).endVertex();
     }
 
     public static void drawRectShadow(@Nonnull GuiGraphics graphics, float x, float y, float width, float height, int distance) {
@@ -219,13 +211,13 @@ public class DrawerHelper {
         x += width;
         y += height;
         Matrix4f mat = graphics.pose().last().pose();
-        buffer.addVertex(mat, x, y, 0).setColor(0, 0, 0, startAlpha);
-        buffer.addVertex(mat, x, y + distance, 0).setColor(0, 0, 0, 0);
-        buffer.addVertex(mat, x + distance, y + distance, 0).setColor(0, 0, 0, 0);
+        buffer.vertex(mat, x, y, 0).color(0, 0, 0, startAlpha).endVertex();
+        buffer.vertex(mat, x, y + distance, 0).color(0, 0, 0, 0).endVertex();
+        buffer.vertex(mat, x + distance, y + distance, 0).color(0, 0, 0, 0).endVertex();
 
-        buffer.addVertex(mat, x, y, 0).setColor(0, 0, 0, startAlpha);
-        buffer.addVertex(mat, x + distance, y + distance, 0).setColor(0, 0, 0, 0);
-        buffer.addVertex(mat, x + distance, y, 0).setColor(0, 0, 0, 0);
+        buffer.vertex(mat, x, y, 0).color(0, 0, 0, startAlpha).endVertex();
+        buffer.vertex(mat, x + distance, y + distance, 0).color(0, 0, 0, 0).endVertex();
+        buffer.vertex(mat, x + distance, y, 0).color(0, 0, 0, 0).endVertex();
     }
 
     public static void drawGradientRect(@Nonnull GuiGraphics graphics, float x, float y, float width, float height, int startColor, int endColor) {
@@ -251,15 +243,15 @@ public class DrawerHelper {
         );
         Matrix4f mat = graphics.pose().last().pose();
         if (horizontal) {
-            buffer.addVertex(mat,x + width, y, 0).setColor(endRed, endGreen, endBlue, endAlpha);
-            buffer.addVertex(mat,x, y, 0).setColor(startRed, startGreen, startBlue, startAlpha);
-            buffer.addVertex(mat,x, y + height, 0).setColor(startRed, startGreen, startBlue, startAlpha);
-            buffer.addVertex(mat,x + width, y + height, 0).setColor(endRed, endGreen, endBlue, endAlpha);
+            buffer.vertex(mat,x + width, y, 0).color(endRed, endGreen, endBlue, endAlpha).endVertex();
+            buffer.vertex(mat,x, y, 0).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+            buffer.vertex(mat,x, y + height, 0).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+            buffer.vertex(mat,x + width, y + height, 0).color(endRed, endGreen, endBlue, endAlpha).endVertex();
         } else {
-            buffer.addVertex(mat,x + width, y, 0).setColor(startRed, startGreen, startBlue, startAlpha);
-            buffer.addVertex(mat,x, y, 0).setColor(startRed, startGreen, startBlue, startAlpha);
-            buffer.addVertex(mat,x, y + height, 0).setColor(endRed, endGreen, endBlue, endAlpha);
-            buffer.addVertex(mat,x + width, y + height, 0).setColor(endRed, endGreen, endBlue, endAlpha);
+            buffer.vertex(mat,x + width, y, 0).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+            buffer.vertex(mat,x, y, 0).color(startRed, startGreen, startBlue, startAlpha).endVertex();
+            buffer.vertex(mat,x, y + height, 0).color(endRed, endGreen, endBlue, endAlpha).endVertex();
+            buffer.vertex(mat,x + width, y + height, 0).color(endRed, endGreen, endBlue, endAlpha).endVertex();
         }
     }
 
@@ -284,7 +276,7 @@ public class DrawerHelper {
         var accessor = (GuiGraphicsAccessor) graphics;
         accessor.ldlib2$setTooltipStack(tooltipStack);
         try {
-            var components = ClientHooks.gatherTooltipComponents(tooltipStack, tooltipTexts,
+            var components = ForgeHooksClient.gatherTooltipComponents(tooltipStack, tooltipTexts,
                     Optional.ofNullable(tooltipComponent), mouseX,
                     graphics.guiWidth(), graphics.guiHeight(), tooltipFont);
             accessor.ldlib2$renderTooltipInternal(tooltipFont, components, mouseX, mouseY,

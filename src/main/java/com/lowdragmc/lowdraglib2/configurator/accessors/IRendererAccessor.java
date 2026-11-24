@@ -23,7 +23,7 @@ public class IRendererAccessor extends TypesAccessor<IRenderer> {
     @Override
     public IRenderer defaultValue(@Nullable Field field, @Nullable Class<?> type) {
         if (field != null && field.isAnnotationPresent(DefaultValue.class)) {
-            return new IModelRenderer(ResourceLocation.parse(field.getAnnotation(DefaultValue.class).stringValue()[0]));
+            return new IModelRenderer(new ResourceLocation(field.getAnnotation(DefaultValue.class).stringValue()[0]));
         }
         return IRenderer.EMPTY;
     }

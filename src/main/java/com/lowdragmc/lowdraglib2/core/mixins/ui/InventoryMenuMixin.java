@@ -5,7 +5,7 @@ import com.lowdragmc.lowdraglib2.gui.event.ContainerMenuEvent;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
-import net.neoforged.neoforge.common.NeoForge;
+import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,14 +18,14 @@ public abstract class InventoryMenuMixin {
         if (owner.level().isClientSide) {
             // Client-safe scheduling
             Platform.executeOnClient(() -> {
-                NeoForge.EVENT_BUS.post(
+                MinecraftForge.EVENT_BUS.post(
                         new ContainerMenuEvent.Create(owner, (InventoryMenu)(Object)this)
                 );
             });
         } else {
             // Server-safe scheduling
             Platform.executeOnServer(() -> {
-                NeoForge.EVENT_BUS.post(
+                MinecraftForge.EVENT_BUS.post(
                         new ContainerMenuEvent.Create(owner, (InventoryMenu)(Object)this)
                 );
             });

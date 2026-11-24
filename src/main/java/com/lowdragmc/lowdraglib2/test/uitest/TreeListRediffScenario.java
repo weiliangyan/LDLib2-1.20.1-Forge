@@ -98,13 +98,13 @@ public class TreeListRediffScenario implements UIScenario {
 
                 .group("a re-diff keeps the selection of the rows that stay", g -> g
                         .step("open A, select A1", ctx -> {
-                            var a = model(ctx).children.getFirst();
+                            var a = model(ctx).children.get(0);
                             tree(ctx).expandNode(a);
-                            tree(ctx).setSelected(Set.of(a.children.getFirst()), false);
+                            tree(ctx).setSelected(Set.of(a.children.get(0)), false);
                             ctx.put(NOTIFIED, new int[1]);
                         })
                         .frames(3)
-                        .step("add A2 beside A1", ctx -> model(ctx).children.getFirst().add("A2"))
+                        .step("add A2 beside A1", ctx -> model(ctx).children.get(0).add("A2"))
                         .frames(3)
                         .check("A2's row is there", ctx -> ctx.exists("#row_A2"))
                         .check("A1 is still selected", ctx -> selectedKeys(ctx).equals(List.of("A1")))
@@ -121,7 +121,7 @@ public class TreeListRediffScenario implements UIScenario {
                         .check("A1 and B are still selected", ctx -> selectedKeys(ctx).equals(List.of("A1", "B"))))
 
                 .group("a re-diff drops the selection of the rows that went", g -> g
-                        .step("take A1 away", ctx -> model(ctx).children.getFirst().children.removeFirst())
+                        .step("take A1 away", ctx -> model(ctx).children.get(0).children.remove(0))
                         .frames(3)
                         .check("its row is gone", ctx -> !ctx.exists("#row_A1"))
                         .check("only B is selected", ctx -> selectedKeys(ctx).equals(List.of("B")))

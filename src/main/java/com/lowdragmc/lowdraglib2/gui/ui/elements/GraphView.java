@@ -2,16 +2,15 @@ package com.lowdragmc.lowdraglib2.gui.ui.elements;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
+import com.lowdragmc.lowdraglib2.gui.ui.Style;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvent;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext;
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.UISurface;
-import com.lowdragmc.lowdraglib2.gui.ui.Style;
 import com.lowdragmc.lowdraglib2.gui.ui.style.Property;
 import com.lowdragmc.lowdraglib2.gui.ui.style.PropertyRegistry;
 import com.lowdragmc.lowdraglib2.integration.kjs.KJSBindings;
-import com.lowdragmc.lowdraglib2.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib2.utils.ColorUtils;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -22,7 +21,6 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
-import org.appliedenergistics.yoga.YogaOverflow;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
@@ -413,7 +411,9 @@ public class GraphView extends UIElement {
     }
 
     protected void onDragSourceUpdate(UIEvent event) {
-        if (event.dragHandler.draggingObject instanceof DragOffset(float startOffsetX, float startOffsetY)) {
+        if (event.dragHandler.draggingObject instanceof DragOffset dragOffset) {
+            var startOffsetX = dragOffset.startOffsetX();
+            var startOffsetY = dragOffset.startOffsetY();
             float invS = 1f / Math.max(0.0001f, Mth.clamp(scale, graphViewStyle.minScale(), graphViewStyle.maxScale()));
             var localMouse = getLocalMouse(event.x, event.y);
             var localStart = getLocalMouse(event.dragStartX, event.dragStartY);
@@ -584,18 +584,18 @@ public class GraphView extends UIElement {
         for (long i = firstX; i <= lastX; i++) {
             if (skipEvery > 0 && Math.floorMod(i, skipEvery) == 0) continue;
             float screenX = x + (i * cellSize - offsetX) * scale;
-            buffer.addVertex(pose, screenX, y, 0).setColor(color);
-            buffer.addVertex(pose, screenX, y + h, 0).setColor(color);
-            buffer.addVertex(pose, screenX + lineWidth, y + h, 0).setColor(color);
-            buffer.addVertex(pose, screenX + lineWidth, y, 0).setColor(color);
+            buffer.vertex(pose, screenX, y, 0).color(color).endVertex();
+            buffer.vertex(pose, screenX, y + h, 0).color(color).endVertex();
+            buffer.vertex(pose, screenX + lineWidth, y + h, 0).color(color).endVertex();
+            buffer.vertex(pose, screenX + lineWidth, y, 0).color(color).endVertex();
         }
         for (long i = firstY; i <= lastY; i++) {
             if (skipEvery > 0 && Math.floorMod(i, skipEvery) == 0) continue;
             float screenY = y + (i * cellSize - offsetY) * scale;
-            buffer.addVertex(pose, x, screenY, 0).setColor(color);
-            buffer.addVertex(pose, x, screenY + lineWidth, 0).setColor(color);
-            buffer.addVertex(pose, x + w, screenY + lineWidth, 0).setColor(color);
-            buffer.addVertex(pose, x + w, screenY, 0).setColor(color);
+            buffer.vertex(pose, x, screenY, 0).color(color).endVertex();
+            buffer.vertex(pose, x, screenY + lineWidth, 0).color(color).endVertex();
+            buffer.vertex(pose, x + w, screenY + lineWidth, 0).color(color).endVertex();
+            buffer.vertex(pose, x + w, screenY, 0).color(color).endVertex();
         }
     }
 

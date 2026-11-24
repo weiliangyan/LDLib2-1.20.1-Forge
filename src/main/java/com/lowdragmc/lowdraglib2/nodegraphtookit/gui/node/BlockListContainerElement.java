@@ -11,7 +11,6 @@ import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.itemlibrary.BlockLibraryIte
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.ChangeHint;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.BlockNodeModel;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.ContextNodeModel;
-import dev.vfyjxf.taffy.style.FlexDirection;
 import dev.vfyjxf.taffy.style.TaffyDisplay;
 
 import java.util.ArrayList;

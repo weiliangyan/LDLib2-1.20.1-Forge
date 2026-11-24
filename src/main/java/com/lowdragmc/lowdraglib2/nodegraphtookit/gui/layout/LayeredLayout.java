@@ -1,10 +1,6 @@
 package com.lowdragmc.lowdraglib2.nodegraphtookit.gui.layout;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Sugiyama-style layered layout — what every serious dataflow editor converges on (Graphviz

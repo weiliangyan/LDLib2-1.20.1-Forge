@@ -6,8 +6,8 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedInputStream;
@@ -155,10 +155,11 @@ public class UnihexSdfSource implements GlyphSource {
 
         var designPadding = PADDING / OVERSAMPLE;
         var left = -designPadding;
-        // vanilla uses the default bearing of 7, which puts unifont glyphs at y 0 to 8 in design space
-        var top = -designPadding;
+        // unifont glyphs fill the 16 pixel cell, so their ink starts on the line's top edge
+        var top = QUAD_OFFSET - designPadding;
         return RawGlyph.of(sdf, width * UPSCALE + padding * 2, GLYPH_HEIGHT * UPSCALE + padding * 2,
-                        left, top, width / OVERSAMPLE + designPadding, GLYPH_HEIGHT / OVERSAMPLE + designPadding, advance)
+                        left, top, width / OVERSAMPLE + designPadding,
+                        top + GLYPH_HEIGHT / OVERSAMPLE + designPadding * 2, advance)
                 .withOffsets(0.5f, 0.5f);
     }
 
@@ -185,7 +186,7 @@ public class UnihexSdfSource implements GlyphSource {
             return RawGlyph.space(advance).withOffsets(0.5f, 0.5f);
         }
         return RawGlyph.of(mask, width, GLYPH_HEIGHT,
-                        0f, 0f, width / OVERSAMPLE, GLYPH_HEIGHT / OVERSAMPLE, advance)
+                        0f, QUAD_OFFSET, width / OVERSAMPLE, QUAD_OFFSET + GLYPH_HEIGHT / OVERSAMPLE, advance)
                 .withOffsets(0.5f, 0.5f);
     }
 

@@ -1,14 +1,14 @@
 package com.lowdragmc.lowdraglib2.networking.both;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
+import com.lowdragmc.lowdraglib2.compat.network.IPayloadContext;
+import com.lowdragmc.lowdraglib2.compat.network.custom.CustomPacketPayload;
 import com.lowdragmc.lowdraglib2.gui.sync.IUISyncManagerHolder;
 import com.lowdragmc.lowdraglib2.utils.ByteBufUtil;
 import lombok.NoArgsConstructor;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.nikdo53.neobackports.io.StreamCodec;
 
 import javax.annotation.Nonnull;
 
@@ -16,7 +16,7 @@ import javax.annotation.Nonnull;
 public class PacketUIRPCEventReturn implements CustomPacketPayload {
     public static final ResourceLocation ID = LDLib2.id("ui_rpc_event_return");
     public static final Type<PacketUIRPCEventReturn> TYPE = new Type<>(ID);
-    public static final StreamCodec<RegistryFriendlyByteBuf, PacketUIRPCEventReturn> CODEC = StreamCodec.ofMember(PacketUIRPCEventReturn::write, PacketUIRPCEventReturn::decode);
+    public static final StreamCodec<PacketUIRPCEventReturn> CODEC = StreamCodec.ofMember(PacketUIRPCEventReturn::write, PacketUIRPCEventReturn::decode);
 
     public byte[] returnData;
 
@@ -24,11 +24,11 @@ public class PacketUIRPCEventReturn implements CustomPacketPayload {
         this.returnData = returnData;
     }
 
-    public void write(RegistryFriendlyByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeByteArray(returnData);
     }
 
-    public static PacketUIRPCEventReturn decode(RegistryFriendlyByteBuf buf) {
+    public static PacketUIRPCEventReturn decode(FriendlyByteBuf buf) {
         var returnData = buf.readByteArray();
         return new PacketUIRPCEventReturn(returnData);
     }
@@ -38,9 +38,7 @@ public class PacketUIRPCEventReturn implements CustomPacketPayload {
         if (player.containerMenu instanceof IUISyncManagerHolder syncManagerHolder) {
             var syncManager = syncManagerHolder.getSyncManager();
             if (syncManager == null) return;
-            ByteBufUtil.readCustomData(packet.returnData,
-                    syncManager::handEventReturn,
-                    context.player().registryAccess());
+            ByteBufUtil.readCustomData(packet.returnData, syncManager::handEventReturn);
         }
     }
 

@@ -1,10 +1,10 @@
 package com.lowdragmc.lowdraglib2.configurator.accessors;
 
 import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigNumber;
+import com.lowdragmc.lowdraglib2.configurator.annotation.DefaultValue;
 import com.lowdragmc.lowdraglib2.configurator.ui.Configurator;
 import com.lowdragmc.lowdraglib2.configurator.ui.NumberConfigurator;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
-import com.lowdragmc.lowdraglib2.configurator.annotation.DefaultValue;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import dev.vfyjxf.taffy.style.FlexWrap;
 import org.jetbrains.annotations.Nullable;

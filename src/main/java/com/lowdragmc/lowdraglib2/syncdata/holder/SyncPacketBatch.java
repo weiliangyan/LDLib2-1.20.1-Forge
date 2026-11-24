@@ -2,33 +2,24 @@ package com.lowdragmc.lowdraglib2.syncdata.holder;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.async.AsyncThreadData;
+import com.lowdragmc.lowdraglib2.compat.network.custom.CustomPacketPayload;
+import com.lowdragmc.lowdraglib2.networking.LDLNetworking;
 import com.lowdragmc.lowdraglib2.networking.s2c.SPacketAutoSyncBlockEntities;
 import com.lowdragmc.lowdraglib2.networking.s2c.SPacketAutoSyncBlockEntity;
-import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import it.unimi.dsi.fastutil.longs.LongSet;
-import it.unimi.dsi.fastutil.longs.LongSets;
+import it.unimi.dsi.fastutil.longs.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.common.util.FakePlayer;
+import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.network.NetworkDirection;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
 
 /**
  * The syncs an async period found, sent once it ends: the block entity updates of a chunk travel in one packet, and
@@ -130,9 +121,9 @@ public final class SyncPacketBatch implements AsyncThreadData.PeriodTask {
                 var payload = update.holder.createSyncPacket(update.changed, update.data, extra);
                 if (payload.getClass() == SPacketAutoSyncBlockEntity.class) {
                     packets.entries.add(SPacketAutoSyncBlockEntities.Entry.of((SPacketAutoSyncBlockEntity) payload));
-                    packets.singles.add(new ClientboundCustomPayloadPacket(payload));
+                    packets.singles.add((ClientboundCustomPayloadPacket) LDLNetworking.CHANNEL.toVanillaPacket(payload, NetworkDirection.PLAY_TO_CLIENT));
                 } else {
-                    packets.custom.add(new ClientboundCustomPayloadPacket(payload));
+                    packets.custom.add((ClientboundCustomPayloadPacket) LDLNetworking.CHANNEL.toVanillaPacket(payload, NetworkDirection.PLAY_TO_CLIENT));
                 }
             } catch (Throwable e) {
                 LDLib2.LOGGER.error("Failed to build the sync packet of {}", update.holder, e);
@@ -154,7 +145,7 @@ public final class SyncPacketBatch implements AsyncThreadData.PeriodTask {
     private record PlayerReceiver(ServerPlayer player) implements Receiver {
         @Override
         public boolean hasChannel(CustomPacketPayload.Type<?> type) {
-            return player.connection.hasChannel(type);
+            return true/*player.connection.hasChannel(type)*/;
         }
 
         @Override
@@ -171,7 +162,7 @@ public final class SyncPacketBatch implements AsyncThreadData.PeriodTask {
                 if (!packets.entries.isEmpty() && receiver.hasChannel(SPacketAutoSyncBlockEntities.TYPE)) {
                     if (batched == null) {
                         batched = SPacketAutoSyncBlockEntities.pack(packets.entries, MAX_PACKET_BYTES).stream()
-                                .map(ClientboundCustomPayloadPacket::new).toList();
+                                .map(p -> (ClientboundCustomPayloadPacket) LDLNetworking.CHANNEL.toVanillaPacket(p, NetworkDirection.PLAY_TO_CLIENT)).toList();
                     }
                     batched.forEach(receiver::send);
                 } else {
@@ -186,9 +177,9 @@ public final class SyncPacketBatch implements AsyncThreadData.PeriodTask {
 
     private static void sendSupported(Receiver receiver, List<ClientboundCustomPayloadPacket> packets) {
         for (var packet : packets) {
-            if (receiver.hasChannel(packet.payload().type())) {
-                receiver.send(packet);
-            }
+            receiver.send(packet);
+//            if (receiver.hasChannel(packet.payload().type())) {
+//            }
         }
     }
 }

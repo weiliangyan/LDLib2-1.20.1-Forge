@@ -2,11 +2,11 @@ package com.lowdragmc.lowdraglib2.gui.texture;
 
 import com.lowdragmc.lowdraglib2.client.shader.LDLibShaders;
 import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigColor;
-import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext;
 import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigNumber;
 import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigSetter;
 import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Transform2D;
+import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext;
 import com.lowdragmc.lowdraglib2.integration.kjs.KJSBindings;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
 import com.lowdragmc.lowdraglib2.utils.ColorUtils;
@@ -19,11 +19,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.client.gui.GuiGraphics;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Vector4f;
 
-import static com.mojang.blaze3d.vertex.DefaultVertexFormat.*;
+import static com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION;
 
 @KJSBindings
 @LDLRegisterClient(name = "sdf_rect_texture", registry = "ldlib2:gui_texture")
@@ -137,11 +137,10 @@ public class SDFRectTexture extends TransformTexture {
         var mat = pose.last().pose();
 
         var modelView = RenderSystem.getModelViewStack();
-        modelView.pushMatrix();
-        modelView.mul(mat);
+        modelView.pushPose();
+        modelView.mulPoseMatrix(mat);
         RenderSystem.applyModelViewMatrix();
 
-        RenderSystem.enableBlend();
         // the shader writes premultiplied colour
         RenderSystem.blendFuncSeparate(
                 GlStateManager.SourceFactor.ONE,
@@ -163,20 +162,22 @@ public class SDFRectTexture extends TransformTexture {
             shader.safeGetUniform("BorderColor").set(borderVec);
         }
 
-        var buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, POSITION);
+        var tesselator = Tesselator.getInstance();
+        var buffer = tesselator.getBuilder();
+        buffer.begin(VertexFormat.Mode.QUADS, POSITION);
 
         // a margin past the shape, so the anti-aliased edge has pixels to fade out on
         var quadHalfWidth = halfWidth + AA_MARGIN;
         var quadHalfHeight = halfHeight + AA_MARGIN;
-        buffer.addVertex(-quadHalfWidth, quadHalfHeight, 0);
-        buffer.addVertex(quadHalfWidth, quadHalfHeight, 0);
-        buffer.addVertex(quadHalfWidth, -quadHalfHeight, 0);
-        buffer.addVertex(-quadHalfWidth, -quadHalfHeight, 0);
-        BufferUploader.drawWithShader(buffer.buildOrThrow());
+        buffer.vertex(-quadHalfWidth, quadHalfHeight, 0).endVertex();
+        buffer.vertex(quadHalfWidth, quadHalfHeight, 0).endVertex();
+        buffer.vertex(quadHalfWidth, -quadHalfHeight, 0).endVertex();
+        buffer.vertex(-quadHalfWidth, -quadHalfHeight, 0).endVertex();
+        BufferUploader.drawWithShader(buffer.end());
         // back to what the GUI draws with: a blit after this one sets no blend function of its own
         RenderSystem.defaultBlendFunc();
 
-        modelView.popMatrix();
+        modelView.popPose();
         RenderSystem.applyModelViewMatrix();
         pose.popPose();
     }

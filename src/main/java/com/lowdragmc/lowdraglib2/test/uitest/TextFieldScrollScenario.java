@@ -4,7 +4,6 @@ import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import com.lowdragmc.lowdraglib2.gui.ui.UI;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.TextField;
-import com.lowdragmc.lowdraglib2.utils.TextUtilities;
 import com.lowdragmc.lowdraglib2.registry.RegistrationEnvironment;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
 import com.lowdragmc.lowdraglib2.uitest.ScenarioBuilder;
@@ -12,6 +11,7 @@ import com.lowdragmc.lowdraglib2.uitest.ScenarioOptions;
 import com.lowdragmc.lowdraglib2.uitest.TestContext;
 import com.lowdragmc.lowdraglib2.uitest.UIScenario;
 import com.lowdragmc.lowdraglib2.uitest.input.Keys;
+import com.lowdragmc.lowdraglib2.utils.TextUtilities;
 import dev.vfyjxf.taffy.style.FlexDirection;
 
 /**

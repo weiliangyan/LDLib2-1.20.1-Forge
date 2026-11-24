@@ -26,11 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class GraphPanel extends UIElement {
     public static final float DEFAULT_PANEL_W = 150f;
@@ -191,7 +187,7 @@ public class GraphPanel extends UIElement {
         if (selected != null) {
             active = toolTabs.inverse().get(selected);
         }
-        if (active == null) active = tools.getFirst();
+        if (active == null) active = tools.get(0);
         title.setText(active.getTitle());
     }
 

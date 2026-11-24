@@ -17,9 +17,7 @@ public class SearchEngine<T> {
 
     // TODO shall we add a method to schedule searching on the main thread?
     public void searchWord(String word) {
-        Thread virtualThread = Thread.ofVirtual()
-                .name("search-" + word.hashCode())
-                .unstarted(() -> {
+        Thread searchThread = new Thread(() -> {
                     try {
                         search.search(word, value -> {
                             Thread current = Thread.currentThread();
@@ -34,12 +32,12 @@ public class SearchEngine<T> {
                     } finally {
                         currentThread.compareAndSet(Thread.currentThread(), null);
                     }
-                });
-        Thread previousThread = currentThread.getAndSet(virtualThread);
+                }, "search-" + word.hashCode());
+        Thread previousThread = currentThread.getAndSet(searchThread);
         if (previousThread != null && previousThread.isAlive()) {
             previousThread.interrupt();
         }
-        virtualThread.start();
+        searchThread.start();
     }
 
     public boolean isSearching() {

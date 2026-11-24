@@ -5,13 +5,13 @@ import com.lowdragmc.lowdraglib2.gui.ui.elements.Dialog.FileFeature;
 import com.lowdragmc.lowdraglib2.gui.util.FileNode;
 import com.lowdragmc.lowdraglib2.gui.util.TreeBuilder;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.InvalidPathException;
-import org.jetbrains.annotations.Nullable;
+import java.nio.file.Path;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 

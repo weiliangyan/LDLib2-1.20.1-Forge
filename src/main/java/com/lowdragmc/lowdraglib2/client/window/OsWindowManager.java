@@ -3,13 +3,13 @@ package com.lowdragmc.lowdraglib2.client.window;
 import com.lowdragmc.lowdraglib2.LDLib2;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderFrameEvent;
-import net.neoforged.neoforge.event.GameShuttingDownEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.event.GameShuttingDownEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.LinkedHashMap;
@@ -26,7 +26,7 @@ import java.util.List;
  * misbehaving window cannot take the game's frame down with it.
  */
 @OnlyIn(Dist.CLIENT)
-@EventBusSubscriber(modid = LDLib2.MOD_ID, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = LDLib2.MOD_ID, value = Dist.CLIENT)
 public final class OsWindowManager {
 
     /**
@@ -132,9 +132,9 @@ public final class OsWindowManager {
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onFrameRendered(RenderFrameEvent.Post event) {
-        if (ENTRIES.isEmpty()) return;
-        var partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+    public static void onFrameRendered(TickEvent.RenderTickEvent event) {
+        if (ENTRIES.isEmpty() || event.phase == TickEvent.Phase.START) return;
+        var partialTick = event.renderTickTime;
         // Copy: a host can close itself (or another) while being driven — a close button runs inside
         // drainInput, so by the time it returns this host may already be gone.
         for (var host : List.copyOf(ENTRIES.keySet())) {

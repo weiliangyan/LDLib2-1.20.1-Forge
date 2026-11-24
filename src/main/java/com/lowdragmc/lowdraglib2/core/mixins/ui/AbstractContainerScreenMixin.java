@@ -68,15 +68,6 @@ public abstract class AbstractContainerScreenMixin<T extends AbstractContainerMe
         }
     }
 
-    @Inject(method = "renderSlotHighlight(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/inventory/Slot;IIF)V", at = @At(value = "HEAD"), cancellable = true)
-    private void ldlib2$renderSlotHighlight(GuiGraphics guiGraphics, Slot slot, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
-        if (getMenu() instanceof IItemSlotHolderMenu menu) {
-            if (menu.isItemSlot(slot)) {
-                ci.cancel();
-            }
-        }
-    }
-
     @Inject(method = "renderSlot", at = @At(value = "HEAD"), cancellable = true)
     private void ldlib2$renderSlot(GuiGraphics guiGraphics, Slot slot, CallbackInfo ci) {
         if (getMenu() instanceof IItemSlotHolderMenu menu) {

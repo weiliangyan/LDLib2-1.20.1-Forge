@@ -4,19 +4,17 @@ import com.lowdragmc.lowdraglib2.LDLib2;
 import com.lowdragmc.lowdraglib2.Platform;
 import com.lowdragmc.lowdraglib2.editor.ui.resource.ResourceProviderContainer;
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
+import com.lowdragmc.lowdraglib2.utils.FileUtility;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.core.HolderLookup;
-import com.lowdragmc.lowdraglib2.utils.FileUtility;
 import net.minecraft.nbt.Tag;
-
-import net.neoforged.fml.ModLoader;
+import net.minecraft.network.chat.Component;
+import net.minecraftforge.common.MinecraftForge;
 import org.jetbrains.annotations.Nullable;
+
 import java.io.File;
 import java.io.IOException;
-
-import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.common.NeoForge;
 
 public abstract class Resource<T> {
     public enum DisplayMode {
@@ -83,7 +81,7 @@ public abstract class Resource<T> {
 
         // send an Event to register built resources
         var event = new EditorResourceEvent.LoadBuiltin(resourceInstance);
-        ModLoader.postEvent(event);
+        MinecraftForge.EVENT_BUS.post(event);
     }
 
     /**

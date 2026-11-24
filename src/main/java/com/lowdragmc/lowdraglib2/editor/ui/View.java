@@ -15,10 +15,8 @@ import com.lowdragmc.lowdraglib2.gui.util.TreeBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.network.chat.Component;
-import org.appliedenergistics.yoga.YogaDisplay;
-import org.appliedenergistics.yoga.YogaGutter;
-
 import org.jetbrains.annotations.Nullable;
+
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 

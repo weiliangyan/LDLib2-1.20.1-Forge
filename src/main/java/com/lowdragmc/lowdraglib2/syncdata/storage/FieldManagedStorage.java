@@ -1,15 +1,17 @@
 package com.lowdragmc.lowdraglib2.syncdata.storage;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
-import com.lowdragmc.lowdraglib2.syncdata.*;
+import com.lowdragmc.lowdraglib2.syncdata.IManaged;
+import com.lowdragmc.lowdraglib2.syncdata.ISubscription;
+import com.lowdragmc.lowdraglib2.syncdata.ManagedFieldUtils;
 import com.lowdragmc.lowdraglib2.syncdata.annotation.ConditionalSynced;
 import com.lowdragmc.lowdraglib2.syncdata.annotation.RequireRerender;
 import com.lowdragmc.lowdraglib2.syncdata.annotation.UpdateListener;
 import com.lowdragmc.lowdraglib2.syncdata.field.ManagedKey;
 import com.lowdragmc.lowdraglib2.syncdata.holder.blockentity.IBlockEntityManaged;
 import com.lowdragmc.lowdraglib2.syncdata.ref.IRef;
+import com.lowdragmc.lowdraglib2.utils.function.LDConsumers;
 import net.minecraft.Util;
-import org.apache.commons.lang3.function.Consumers;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -69,7 +71,7 @@ public class FieldManagedStorage implements IManagedStorage {
                         } catch (Throwable t) {
                             LDLib2.LOGGER.error("Error occurred while notifying field {} update", key, t);
                         }
-                        return Consumers.nop();
+                        return LDConsumers.nop();
                     });
         }
         return Stream.empty();

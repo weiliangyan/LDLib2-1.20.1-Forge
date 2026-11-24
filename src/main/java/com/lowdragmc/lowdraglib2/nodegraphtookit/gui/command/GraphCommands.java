@@ -5,11 +5,9 @@ import com.lowdragmc.lowdraglib2.nodegraphtookit.model.IMovable;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.Model;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.graph.GraphModel;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wiget.PlacematModel;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wiget.StickyNoteModel;
 import net.minecraft.network.chat.Component;
 import org.joml.Vector2f;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 

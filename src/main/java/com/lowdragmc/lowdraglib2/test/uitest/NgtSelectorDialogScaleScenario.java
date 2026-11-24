@@ -8,11 +8,11 @@ import com.lowdragmc.lowdraglib2.gui.ui.UI;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Vertical;
-import com.lowdragmc.lowdraglib2.gui.ui.event.UIEventListener;
-import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.SearchComponent;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Selector;
+import com.lowdragmc.lowdraglib2.gui.ui.event.UIEventListener;
+import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.ui.utils.UIElementProvider;
 import com.lowdragmc.lowdraglib2.math.HDRColor;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.GraphView;
@@ -21,11 +21,7 @@ import com.lowdragmc.lowdraglib2.registry.RegistrationEnvironment;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
 import com.lowdragmc.lowdraglib2.test.noddegraphtoolkit.OptionTestNode;
 import com.lowdragmc.lowdraglib2.test.noddegraphtoolkit.TestGraph;
-import com.lowdragmc.lowdraglib2.uitest.ElementBounds;
-import com.lowdragmc.lowdraglib2.uitest.ScenarioBuilder;
-import com.lowdragmc.lowdraglib2.uitest.ScenarioOptions;
-import com.lowdragmc.lowdraglib2.uitest.TestContext;
-import com.lowdragmc.lowdraglib2.uitest.UIScenario;
+import com.lowdragmc.lowdraglib2.uitest.*;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import dev.vfyjxf.taffy.style.TaffyPosition;
 import net.minecraft.network.chat.Component;
@@ -176,7 +172,7 @@ public class NgtSelectorDialogScaleScenario implements UIScenario {
 
     private static void checkPreview(TestContext ctx, String name, UIElement preview, float limit) {
         var bounds = ElementBounds.of(preview);
-        var content = preview.getChildren().isEmpty() ? null : ElementBounds.of(preview.getChildren().getFirst());
+        var content = preview.getChildren().isEmpty() ? null : ElementBounds.of(preview.getChildren().get(0));
         ctx.log("%s: preview [%.1f, %.1f] content %s limit %.1f".formatted(name, bounds.x(), bounds.right(),
                 content == null ? "-" : "[%.1f, %.1f]".formatted(content.x(), content.right()), limit));
         ctx.check(name + ": the preview clips what it holds", !preview.getStyle().overflowVisible());

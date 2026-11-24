@@ -6,13 +6,14 @@ import dev.latvian.mods.kubejs.script.ScriptType;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -21,10 +22,11 @@ public class KJSBlockUIMenuType {
         var blockstate = player.level().getBlockState(pos);
         var event = new BlockUIEventJS(player, pos, blockstate, id);
         UIEvents.BLOCK.post(ScriptType.SERVER, id, event);
-        return player.openMenu(event).isPresent();
+        NetworkHooks.openScreen(player, event, buffer -> event.writeClientSideData(null, buffer));
+        return true;
     }
 
-    public static ModularUIContainerMenu create(int windowId, Inventory inv, RegistryFriendlyByteBuf data) {
+    public static ModularUIContainerMenu create(int windowId, Inventory inv, FriendlyByteBuf data) {
         var player = inv.player;
         var pos = data.readBlockPos();
         var blockstate = BlockUIMenuType.BLOCK_STATE_STREAM_CODEC.decode(data);
@@ -55,9 +57,8 @@ public class KJSBlockUIMenuType {
             return LDKJSMenuTypes.BLOCK_UI.get();
         }
 
-        @Override
         @HideFromJS
-        public void writeClientSideData(AbstractContainerMenu menu, RegistryFriendlyByteBuf buffer) {
+        public void writeClientSideData(AbstractContainerMenu menu, FriendlyByteBuf buffer) {
             buffer.writeBlockPos(pos);
             BlockUIMenuType.BLOCK_STATE_STREAM_CODEC.encode(buffer, blockState);
             super.writeClientSideData(menu, buffer);

@@ -11,18 +11,16 @@ import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.node.NodeElement;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.node.PortElement;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.graph.GraphModel;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.PortModel;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire.GhostWireModel;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire.IGhostWireModel;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire.WireModel;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire.WireReroutePointModel;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire.WireSide;
+import com.lowdragmc.lowdraglib2.nodegraphtookit.model.wire.*;
 import it.unimi.dsi.fastutil.Pair;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -459,7 +457,7 @@ public class WireDragHelper {
         var localPosition = graphView.getContentViewContainer().worldToLocalLayoutOffset(worldPosition);
         var portModels = wires.stream().map(w -> w.left().getOtherPort(w.right())).toList();
         if (!portModels.isEmpty()) {
-            if (portModels.getFirst().getDirection() == PortDirection.NONE) return;
+            if (portModels.get(0).getDirection() == PortDirection.NONE) return;
             graphView.itemLibrary.showWithNodesFitPort(worldPosition.x, worldPosition.y, portModels, item -> {
                 if (item instanceof NodeModelLibraryItem nodeItem) {
                     graphView.dispatchCommand(new NodeCommands.CreateNodeCommand().withNodeOnWires(nodeItem, wires, localPosition, null));

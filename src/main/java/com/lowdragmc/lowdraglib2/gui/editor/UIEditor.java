@@ -1,7 +1,10 @@
 package com.lowdragmc.lowdraglib2.gui.editor;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
-import com.lowdragmc.lowdraglib2.editor.resource.*;
+import com.lowdragmc.lowdraglib2.editor.resource.ColorsResource;
+import com.lowdragmc.lowdraglib2.editor.resource.Resources;
+import com.lowdragmc.lowdraglib2.editor.resource.TexturesResource;
+import com.lowdragmc.lowdraglib2.editor.resource.UIResource;
 import com.lowdragmc.lowdraglib2.editor.ui.Editor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -25,8 +28,8 @@ public class UIEditor extends Editor {
     }
 
     public UIEditor() {
-        this.leftWindow.setDisplay(false);
-        this.leftWindow.getParentWindow().removeSplitWindow(this.leftWindow);
+//        this.leftWindow.setDisplay(false);
+//        this.leftWindow.getParentWindow().removeSplitWindow(this.leftWindow);
         initResources();
     }
 

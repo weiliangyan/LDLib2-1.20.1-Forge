@@ -17,8 +17,8 @@ import dev.vfyjxf.taffy.style.FlexDirection;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.network.chat.Component;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
 /**

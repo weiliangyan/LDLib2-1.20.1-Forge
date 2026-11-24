@@ -125,7 +125,7 @@ public class MPBlockEntitySyncScenario implements MPScenario {
                     ctx.check("@LazyManaged held back lazyValue=8", be.lazyValue == 7, 7, be.lazyValue);
                     var changes = be.counterChanges;
                     ctx.check("@UpdateListener saw counter 1->2",
-                            !changes.isEmpty() && changes.getLast().equals("1->2"), "[..., 1->2]", changes);
+                            !changes.isEmpty() && changes.get(changes.size() - 1).equals("1->2"), "[..., 1->2]", changes);
                 }))
         .server("let the held-back fields through", sc -> {
             var be = onServer(sc);

@@ -1,25 +1,26 @@
 package com.lowdragmc.lowdraglib2.gui.factory;
 
-import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
+import com.lowdragmc.lowdraglib2.compat.network.codec.ByteBufCodecs;
 import com.lowdragmc.lowdraglib2.gui.holder.ModularUIContainerMenu;
+import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.network.NetworkHooks;
+import net.nikdo53.neobackports.io.StreamCodec;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
 public class BlockUIMenuType {
-    public static final StreamCodec<RegistryFriendlyByteBuf, BlockState> BLOCK_STATE_STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistries(BlockState.CODEC);
+    public static final StreamCodec<BlockState> BLOCK_STATE_STREAM_CODEC = ByteBufCodecs.fromCodec(BlockState.CODEC);
 
     /**
      * Opens a UI for the specified player at the given block position if the block at that position
@@ -33,12 +34,13 @@ public class BlockUIMenuType {
         var blockstate = player.level().getBlockState(pos);
         if (blockstate.getBlock() instanceof BlockUI blockUI) {
             var holder = blockUI.createUIHolder(player, pos, blockstate);
-            return player.openMenu(holder).isPresent();
+            NetworkHooks.openScreen(player, holder, buffer -> holder.writeClientSideData(null, buffer));
+            return true;
         }
         return false;
     }
 
-    public static ModularUIContainerMenu create(int windowId, Inventory inv, RegistryFriendlyByteBuf data) {
+    public static ModularUIContainerMenu create(int windowId, Inventory inv, FriendlyByteBuf data) {
         var player = inv.player;
         var pos = data.readBlockPos();
         var blockstate = BLOCK_STATE_STREAM_CODEC.decode(data);
@@ -120,8 +122,7 @@ public class BlockUIMenuType {
             return new ModularUIContainerMenu(LDMenuTypes.BLOCK_UI.get(), containerId, playerInventory, this);
         }
 
-        @Override
-        public void writeClientSideData(AbstractContainerMenu menu, RegistryFriendlyByteBuf buffer) {
+        public void writeClientSideData(AbstractContainerMenu menu, FriendlyByteBuf buffer) {
             buffer.writeBlockPos(pos);
             BLOCK_STATE_STREAM_CODEC.encode(buffer, blockState);
         }

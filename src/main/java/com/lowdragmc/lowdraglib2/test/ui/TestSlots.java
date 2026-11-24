@@ -4,14 +4,15 @@ import com.lowdragmc.lowdraglib2.gui.texture.Icons;
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import com.lowdragmc.lowdraglib2.gui.ui.UI;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.*;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.ItemSlot;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.ScrollerView;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.inventory.InventorySlots;
 import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegister;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;

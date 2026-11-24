@@ -41,7 +41,7 @@ public class StringConfigurator extends ValueConfigurator<String> {
         if (newValue == null) newValue = defaultValue;
         if (newValue.equals(value)) return;
         if (isResourceLocation && value != null) {
-            if (ResourceLocation.parse(newValue).equals(ResourceLocation.parse(value))) return;
+            if (new ResourceLocation(newValue).equals(new ResourceLocation(value))) return;
         }
         super.onValueUpdatePassively(newValue);
         textField.setText(newValue, false);

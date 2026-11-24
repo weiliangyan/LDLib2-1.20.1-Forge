@@ -14,7 +14,6 @@ import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
 import it.unimi.dsi.fastutil.floats.FloatObjectPair;
 import lombok.NoArgsConstructor;
 import net.minecraft.world.entity.player.Player;
-import org.appliedenergistics.yoga.YogaEdge;
 import org.joml.Vector2f;
 
 import java.util.List;

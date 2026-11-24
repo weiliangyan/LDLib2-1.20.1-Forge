@@ -1,10 +1,10 @@
 package com.lowdragmc.lowdraglib2.configurator.accessors;
 
 
+import com.lowdragmc.lowdraglib2.configurator.annotation.DefaultValue;
 import com.lowdragmc.lowdraglib2.configurator.ui.Configurator;
 import com.lowdragmc.lowdraglib2.configurator.ui.StringConfigurator;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
-import com.lowdragmc.lowdraglib2.configurator.annotation.DefaultValue;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 

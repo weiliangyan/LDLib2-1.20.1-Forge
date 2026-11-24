@@ -13,7 +13,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 
-import java.awt.*;
 import java.util.Objects;
 
 public class VariableDeclarationModel extends VariableDeclarationModelBase {

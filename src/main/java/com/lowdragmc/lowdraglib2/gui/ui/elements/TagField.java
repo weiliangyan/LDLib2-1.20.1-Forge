@@ -1,10 +1,9 @@
 package com.lowdragmc.lowdraglib2.gui.ui.elements;
 
 import com.google.common.base.Predicates;
+import com.lowdragmc.lowdraglib2.gui.texture.Icons;
 import com.lowdragmc.lowdraglib2.integration.kjs.KJSBindings;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegister;
-import com.lowdragmc.lowdraglib2.gui.texture.Icons;
-import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.mojang.brigadier.StringReader;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import lombok.Getter;

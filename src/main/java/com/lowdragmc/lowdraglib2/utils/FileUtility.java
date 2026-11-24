@@ -28,7 +28,7 @@ public final class FileUtility {
     public static final Gson GSON_PRETTY = new GsonBuilder().setPrettyPrinting().create();
 
     /**
-     * {@link NbtIo#read(Path)}, buffered. Vanilla's reads the file stream directly, so each int of an int array is
+     * {@link NbtIo#read(File)}, buffered. Vanilla's reads the file stream directly, so each int of an int array is
      * four one-byte reads into the OS; a large resource of int arrays spent nearly all its load time there.
      *
      * @return the file's compound, or null when there is no such file
@@ -39,7 +39,7 @@ public final class FileUtility {
             return null;
         }
         try (var in = new DataInputStream(new BufferedInputStream(Files.newInputStream(path)))) {
-            return NbtIo.read(in, NbtAccounter.unlimitedHeap());
+            return NbtIo.read(in, NbtAccounter.UNLIMITED);
         }
     }
 

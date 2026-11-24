@@ -110,7 +110,7 @@ public class FileMenu extends MenuTab {
                 var label = Component.literal(file.getName());
                 if (parent != null) {
                     label.append(Component.literal(" (" + parent.getName() + ")")
-                            .withColor(ColorPattern.GRAY.color));
+                            .withStyle(style -> style.withColor(ColorPattern.GRAY.color)));
                 }
                 branch.leaf(type == null ? Icons.FILE : type.getIcon(file), label, () -> openProject(file));
             }

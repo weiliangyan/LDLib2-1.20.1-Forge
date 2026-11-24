@@ -12,8 +12,6 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.network.chat.Component;
 
-import javax.swing.*;
-
 import static com.lowdragmc.lowdraglib2.test.xei.TestREIPlugin.TestREIRecipeCategory.IDENTIFIER;
 
 public class TestREIPlugin {

@@ -13,7 +13,6 @@ import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.ModelElement;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.command.ElementRenameColorCommands;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.gui.dependency.ModelUpdateVisitor;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.ChangeHint;
-import com.lowdragmc.lowdraglib2.nodegraphtookit.model.IHasName;
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.node.AbstractNodeModel;
 import com.lowdragmc.lowdraglib2.utils.ColorUtils;
 import dev.vfyjxf.taffy.style.AlignItems;
@@ -82,11 +81,11 @@ public class NodeTitleElement extends ModelElement {
      */
     public void startInlineRename() {
         if (inlineRenameField != null) return;
-        if (!(nodeModel instanceof IHasName named) || !nodeModel.isRenamable()) return;
+        if (!nodeModel.isRenamable()) return;
         // The rename command would be refused, so the field would only take the keystrokes and lose them.
         if (isGraphReadOnly()) return;
 
-        var initial = named.getName();
+        var initial = nodeModel.getName();
         Style.importantPipeline(nodeTittle.getLayout(), layout -> layout.display(TaffyDisplay.NONE));
         inlineRenameField = new TextField();
         inlineRenameField.setText(initial == null ? "" : initial);
@@ -101,11 +100,11 @@ public class NodeTitleElement extends ModelElement {
             done[0] = true;
             var newName = inlineRenameField.getValue();
             var graphView = getFirstAncestorOfType(GraphView.class);
-            if (newName != null && !newName.equals(initial)) {
+            if (!newName.equals(initial)) {
                 if (graphView != null) {
                     graphView.dispatchCommand(new ElementRenameColorCommands.RenameElementCommand(nodeModel, newName));
                 } else {
-                    named.setName(newName);
+                    nodeModel.setName(newName);
                 }
             }
             endInlineRename();

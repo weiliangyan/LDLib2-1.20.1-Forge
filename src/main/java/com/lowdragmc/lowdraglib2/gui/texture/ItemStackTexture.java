@@ -4,16 +4,16 @@ import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigColor;
 import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext;
 import com.lowdragmc.lowdraglib2.gui.util.DrawerHelper;
-import com.lowdragmc.lowdraglib2.utils.ColorUtils;
 import com.lowdragmc.lowdraglib2.integration.kjs.KJSBindings;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import com.lowdragmc.lowdraglib2.utils.ColorUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 @KJSBindings
 @LDLRegisterClient(name = "item_stack_texture", registry = "ldlib2:gui_texture")

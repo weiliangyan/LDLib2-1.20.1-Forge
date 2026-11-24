@@ -215,7 +215,7 @@ public class UIDebuggerMultiWindowScenario implements UIScenario {
         if (windows.size() != 1) {
             throw new IllegalStateException("Expected exactly one debugger window, found " + windows.size());
         }
-        return windows.getFirst();
+        return windows.get(0);
     }
 
     private static ModularUI debuggerUI() {

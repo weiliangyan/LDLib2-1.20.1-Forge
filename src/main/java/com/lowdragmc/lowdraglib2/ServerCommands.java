@@ -1,12 +1,8 @@
 package com.lowdragmc.lowdraglib2;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.lowdragmc.lowdraglib2.gui.editor.UIEditor;
 import com.lowdragmc.lowdraglib2.gui.factory.PlayerUIMenuType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -17,6 +13,9 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author KilaBash
@@ -35,7 +34,7 @@ public class ServerCommands {
 											var world = context.getSource().getLevel();
 											var blockEntity = world.getBlockEntity(pos);
 											if (blockEntity != null) {
-												var tag = blockEntity.saveWithoutMetadata(context.getSource().registryAccess());
+												var tag = blockEntity.saveWithoutMetadata();
 												var value = NbtUtils.structureToSnbt(tag);
 												context.getSource().sendSuccess(() -> Component
 														.literal("[Copy to clipboard]")

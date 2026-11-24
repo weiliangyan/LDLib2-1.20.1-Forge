@@ -152,15 +152,15 @@ public class OsWindowGuiScaleScenario implements UIScenario {
                         .check("the saved layout carries it", ctx -> {
                             var layouts = editor(ctx).getFloatingViews().capture();
                             var scales = editor(ctx).getFloatingViews().captureScales();
-                            return layouts.size() == 1 && layouts.getFirst().guiScale() == 4
+                            return layouts.size() == 1 && layouts.get(0).guiScale() == 4
                                     && Integer.valueOf(4).equals(scales.get(editor(ctx).inspectorView.getName()));
                         })
                         .check("and reads it back", ctx -> {
-                            var layout = editor(ctx).getFloatingViews().capture().getFirst();
+                            var layout = editor(ctx).getFloatingViews().capture().get(0);
                             return FloatingLayout.deserialize(layout.serialize()).guiScale() == 4;
                         })
                         .check("a layout saved before scales existed follows the game", ctx -> {
-                            var tag = editor(ctx).getFloatingViews().capture().getFirst().serialize();
+                            var tag = editor(ctx).getFloatingViews().capture().get(0).serialize();
                             tag.remove("guiScale");
                             return FloatingLayout.deserialize(tag).guiScale() == OffscreenSurface.FOLLOW_GAME;
                         })
@@ -335,7 +335,7 @@ public class OsWindowGuiScaleScenario implements UIScenario {
         if (entries.size() != 1) {
             throw new IllegalStateException("Expected one menu entry '" + key + "' but found " + entries.size());
         }
-        return entries.getFirst();
+        return entries.get(0);
     }
 
     /** Entries of open menus in {@code window}'s UI labelled {@code key}; a submenu is a child of its branch. */

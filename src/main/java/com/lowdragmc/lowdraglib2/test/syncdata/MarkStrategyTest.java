@@ -11,7 +11,6 @@ import com.lowdragmc.lowdraglib2.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib2.syncdata.mark.IMarkStrategy;
 import com.lowdragmc.lowdraglib2.syncdata.mark.MarkStrategies;
 import com.mojang.serialization.Codec;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
@@ -19,11 +18,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.neoforge.common.util.INBTSerializable;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -77,14 +76,14 @@ public class MarkStrategyTest {
         public String note = "";
 
         @Override
-        public CompoundTag serializeNBT(HolderLookup.@NotNull Provider provider) {
+        public CompoundTag serializeNBT() {
             var tag = new CompoundTag();
             tag.putInt("counter", counter);
             return tag;
         }
 
         @Override
-        public void deserializeNBT(HolderLookup.@NotNull Provider provider, CompoundTag tag) {
+        public void deserializeNBT(CompoundTag tag) {
             counter = tag.getInt("counter");
         }
     }

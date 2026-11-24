@@ -11,7 +11,8 @@ import com.lowdragmc.lowdraglib2.nodegraphtookit.model.GraphElementModel;
 import lombok.Setter;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public class UIDependencies {
     public record Dependency(ModelElement element, DependencyTypes type) { }

@@ -19,7 +19,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
-import org.appliedenergistics.yoga.YogaEdge;
 
 @LDLRegisterClient(name="scene", registry = "ldlib2:screen_test")
 @NoArgsConstructor

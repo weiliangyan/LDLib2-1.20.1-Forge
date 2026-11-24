@@ -1,8 +1,8 @@
 package com.lowdragmc.lowdraglib2.editor.ui.sceneeditor.sceneobject.utils;
 
 import com.lowdragmc.lowdraglib2.math.Ray;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Vector3f;
 
 import java.util.Optional;

@@ -28,10 +28,10 @@ public class LocalSlot extends Slot {
         public int getMaxStackSize() {
             return Integer.MAX_VALUE;
         }
+    }
 
-        @Override
-        public int getMaxStackSize(ItemStack stack) {
-            return Integer.MAX_VALUE;
-        }
+    @Override
+    public int getMaxStackSize(ItemStack stack) {
+        return Integer.MAX_VALUE;
     }
 }

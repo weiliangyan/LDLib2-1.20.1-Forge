@@ -29,13 +29,7 @@ import com.lowdragmc.lowdraglib2.uitest.input.Keys;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.lowdragmc.lowdraglib2.test.resource.GroupedTestProject.ALPHA;
-import static com.lowdragmc.lowdraglib2.test.resource.GroupedTestProject.ALPHA_ONE;
-import static com.lowdragmc.lowdraglib2.test.resource.GroupedTestProject.ALPHA_THREE;
-import static com.lowdragmc.lowdraglib2.test.resource.GroupedTestProject.ALPHA_TWO;
-import static com.lowdragmc.lowdraglib2.test.resource.GroupedTestProject.BETA;
-import static com.lowdragmc.lowdraglib2.test.resource.GroupedTestProject.BETA_ONE;
-import static com.lowdragmc.lowdraglib2.test.resource.GroupedTestProject.BETA_TWO;
+import static com.lowdragmc.lowdraglib2.test.resource.GroupedTestProject.*;
 
 /**
  * Resource groups in the resource view's strip: one tab per group, standing where its first resource
@@ -365,7 +359,7 @@ public class ResourceViewGroupsScenario implements UIScenario {
                                     var offsets = new ArrayList<Float>();
                                     for (var name : List.of("Alpha One", "Alpha Two", "Alpha Three")) {
                                         var each = row(ctx, name);
-                                        var icon = each.getChildren().getFirst();
+                                        var icon = each.getChildren().get(0);
                                         var iconMiddle = icon.getPositionY() + icon.getSizeHeight() / 2f;
                                         var textMiddle = each.text.getPositionY() + each.text.getSizeHeight() / 2f;
                                         ctx.check(theme + ": " + name + "'s icon and name share a middle",
@@ -549,7 +543,8 @@ public class ResourceViewGroupsScenario implements UIScenario {
 
     /** What a group's tab draws as its icon right now. */
     private static com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture groupIcon(TestContext ctx, ResourceGroup group) {
-        var texture = groupTab(ctx, group).getChildren().getLast().getStyle().backgroundTexture();
+        var children = groupTab(ctx, group).getChildren();
+        var texture = children.get(children.size() - 1).getStyle().backgroundTexture();
         return texture instanceof com.lowdragmc.lowdraglib2.gui.texture.DynamicTexture dynamic ? dynamic.textureSupplier.get() : texture;
     }
 

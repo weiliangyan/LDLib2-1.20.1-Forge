@@ -16,7 +16,6 @@ import com.lowdragmc.lowdraglib2.nodegraphtookit.model.variable.VariableDeclarat
 import com.lowdragmc.lowdraglib2.nodegraphtookit.model.variable.VariableScope;
 import com.lowdragmc.lowdraglib2.utils.TypeUtils;
 import lombok.Getter;
-import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
@@ -115,7 +114,7 @@ public class CustomGraphModelImpl extends GraphModel {
      *       {@code GraphView.updateGraphModelChanges}, corrupting the change set's {@code HashSet} —
      *       a {@code ConcurrentModificationException} or a {@code toArray} overflow, both of which
      *       took down the screen. Caching means the probe runs once, and
-     *       {@link java.util.concurrent.ConcurrentHashMap#computeIfAbsent} serialises even that.</li>
+     *       {@link ConcurrentHashMap#computeIfAbsent} serialises even that.</li>
      * </ul>
      *
      * <p>Keyed by the {@code Graph}'s class where there is one: two graph types can share a model

@@ -1,19 +1,16 @@
 package com.lowdragmc.lowdraglib2.syncdata.accessor.readonly;
 
 import com.lowdragmc.lowdraglib2.Platform;
+import com.lowdragmc.lowdraglib2.compat.network.codec.ByteBufCodecs;
+import com.lowdragmc.lowdraglib2.compat.serialization.JavaOps;
 import com.lowdragmc.lowdraglib2.core.mixins.accessor.DelegatingOpsAccessor;
 import com.lowdragmc.lowdraglib2.syncdata.accessor.IMarkFunction;
 import com.lowdragmc.lowdraglib2.syncdata.mark.MarkStrategies;
 import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.JavaOps;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.RegistryOps;
-import net.neoforged.neoforge.common.CommonHooks;
-import net.neoforged.neoforge.common.util.INBTSerializable;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.common.util.INBTSerializable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -31,17 +28,17 @@ public class INBTSerializableReadOnlyAccessor implements IReadOnlyAccessor<INBTS
     private record SavedTagMark() implements IMarkFunction<INBTSerializable<?>, Tag> {
         @Override
         public @NotNull Tag obtainManagedMark(@NotNull INBTSerializable<?> value) {
-            return value.serializeNBT(Platform.getFrozenRegistry());
+            return value.serializeNBT();
         }
 
         @Override
         public boolean areDifferent(@NotNull Tag managedMark, @NotNull INBTSerializable<?> value) {
-            return !value.serializeNBT(Platform.getFrozenRegistry()).equals(managedMark);
+            return !value.serializeNBT().equals(managedMark);
         }
 
         @Override
         public Tag updateMark(@NotNull Tag managedMark, @NotNull INBTSerializable<?> value) {
-            var tag = value.serializeNBT(Platform.getFrozenRegistry());
+            var tag = value.serializeNBT();
             return tag.equals(managedMark) ? null : tag;
         }
     }
@@ -51,7 +48,7 @@ public class INBTSerializableReadOnlyAccessor implements IReadOnlyAccessor<INBTS
     }
 
     private Object readValue(INBTSerializable<?> value) {
-        return readReadOnlyValue(Platform.getFrozenRegistry().createSerializationContext(JavaOps.INSTANCE), value);
+        return readReadOnlyValue(Platform.registryOps(JavaOps.INSTANCE, Platform.getFrozenRegistry()), value);
     }
 
     @Override
@@ -77,35 +74,27 @@ public class INBTSerializableReadOnlyAccessor implements IReadOnlyAccessor<INBTS
 
     @Override
     public <T> T readReadOnlyValue(DynamicOps<T> op, @NotNull INBTSerializable<?> value) {
-        HolderLookup.Provider registry = Platform.getFrozenRegistry();
-        if (op instanceof RegistryOps<T> registryOps) {
-            registry = CommonHooks.extractLookupProvider(registryOps);
-        }
-        var tag = value.serializeNBT(registry);
+        var tag = value.serializeNBT();
         return (op == NbtOps.INSTANCE || op instanceof DelegatingOpsAccessor<?> accessor && accessor.getDelegate() == NbtOps.INSTANCE) ? (T) tag : NbtOps.INSTANCE.convertTo(op, tag);
     }
 
     @Override
     public <T> void writeReadOnlyValue(DynamicOps<T> op, INBTSerializable<?> value, T payload) {
-        HolderLookup.Provider registry = Platform.getFrozenRegistry();
-        if (op instanceof RegistryOps<T> registryOps) {
-            registry = CommonHooks.extractLookupProvider(registryOps);
-        }
-        ((INBTSerializable)value).deserializeNBT(registry,
-                (op == NbtOps.INSTANCE || op instanceof DelegatingOpsAccessor<?> accessor && accessor.getDelegate() == NbtOps.INSTANCE) ?
-                (Tag) payload : op.convertTo(NbtOps.INSTANCE, payload));
+        Tag tag = (op == NbtOps.INSTANCE || op instanceof DelegatingOpsAccessor<?> accessor && accessor.getDelegate() == NbtOps.INSTANCE) ?
+                (Tag) payload : op.convertTo(NbtOps.INSTANCE, payload);
+        ((INBTSerializable)value).deserializeNBT(tag);
     }
 
     @Override
-    public void readReadOnlyValueToStream(RegistryFriendlyByteBuf buffer, @NotNull INBTSerializable<?> value) {
-        buffer.writeNbt(value.serializeNBT(buffer.registryAccess()));
+    public void readReadOnlyValueToStream(FriendlyByteBuf buffer, @NotNull INBTSerializable<?> value) {
+        ByteBufCodecs.TRUSTED_TAG.encode(buffer, value.serializeNBT());
     }
 
     @Override
-    public void writeReadOnlyValueFromStream(RegistryFriendlyByteBuf buffer, @NotNull INBTSerializable<?> value) {
-        var nbt = buffer.readNbt(NbtAccounter.unlimitedHeap());
+    public void writeReadOnlyValueFromStream(FriendlyByteBuf buffer, @NotNull INBTSerializable<?> value) {
+        var nbt = ByteBufCodecs.TRUSTED_TAG.decode(buffer);
         if (nbt != null) {
-            ((INBTSerializable)value).deserializeNBT(buffer.registryAccess(), nbt);
+            ((INBTSerializable)value).deserializeNBT(nbt);
         }
     }
 

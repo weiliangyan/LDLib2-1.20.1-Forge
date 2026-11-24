@@ -343,7 +343,7 @@ public class PortModel extends GraphElementModel implements IPort, IHasDisplayNa
      */
     public Tooltips getDefaultTooltips() {
         return Tooltips.of(getTitle().copy().append(" (")
-                .append(Component.literal(dataTypeHandle.getFriendlyName()).withColor(dataTypeHandle.getTypeColor()))
+                .append(Component.literal(dataTypeHandle.getFriendlyName()).withStyle(style -> style.withColor(dataTypeHandle.getTypeColor())))
                 .append(")")
         );
     }
@@ -649,7 +649,7 @@ public class PortModel extends GraphElementModel implements IPort, IHasDisplayNa
     }
 
     @Override
-    public java.lang.reflect.Field getValueField() {
+    public Field getValueField() {
         return valueField;
     }
 

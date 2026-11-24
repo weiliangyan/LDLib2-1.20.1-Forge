@@ -11,12 +11,12 @@ import lombok.experimental.Accessors;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.nikdo53.neobackports.io.StreamCodec;
 import org.jetbrains.annotations.NotNull;
-
 import org.jetbrains.annotations.Nullable;
+
 import java.util.*;
 
 public abstract class LDLRegistry<K, V> implements Iterable<V> {
@@ -136,10 +136,10 @@ public abstract class LDLRegistry<K, V> implements Iterable<V> {
         return registry.inverse().getOrDefault(key, defaultKey);
     }
 
-    public abstract void writeBuf(V value, RegistryFriendlyByteBuf buf);
+    public abstract void writeBuf(V value, FriendlyByteBuf buf);
 
     @Nullable
-    public abstract V readBuf(RegistryFriendlyByteBuf buf);
+    public abstract V readBuf(FriendlyByteBuf buf);
 
     public abstract Tag saveToNBT(V value);
 
@@ -154,7 +154,7 @@ public abstract class LDLRegistry<K, V> implements Iterable<V> {
 
     public abstract Codec<Optional<V>> optionalCodec();
 
-    public abstract StreamCodec<RegistryFriendlyByteBuf, V> streamCodec();
+    public abstract StreamCodec<V> streamCodec();
 
     //************************ Built-in Registry ************************//
 
@@ -165,7 +165,7 @@ public abstract class LDLRegistry<K, V> implements Iterable<V> {
         }
 
         @Override
-        public void writeBuf(V value, RegistryFriendlyByteBuf buf) {
+        public void writeBuf(V value, FriendlyByteBuf buf) {
             buf.writeBoolean(containValue(value));
             if (containValue(value)) {
                 buf.writeUtf(getKey(value));
@@ -173,7 +173,7 @@ public abstract class LDLRegistry<K, V> implements Iterable<V> {
         }
 
         @Override
-        public V readBuf(RegistryFriendlyByteBuf buf) {
+        public V readBuf(FriendlyByteBuf buf) {
             if (buf.readBoolean()) {
                 return get(buf.readUtf());
             }
@@ -207,7 +207,7 @@ public abstract class LDLRegistry<K, V> implements Iterable<V> {
                                     DataResult.success(missingKey)));
         }
 
-        public StreamCodec<RegistryFriendlyByteBuf, V> streamCodec() {
+        public StreamCodec<V> streamCodec() {
             return StreamCodec.of((buf, value) -> buf.writeUtf(getKey(value)), buf -> Objects.requireNonNull(get(buf.readUtf())));
         }
 
@@ -220,7 +220,7 @@ public abstract class LDLRegistry<K, V> implements Iterable<V> {
         }
 
         @Override
-        public void writeBuf(V value, RegistryFriendlyByteBuf buf) {
+        public void writeBuf(V value, FriendlyByteBuf buf) {
             buf.writeBoolean(containValue(value));
             if (containValue(value)) {
                 buf.writeUtf(getKey(value).toString());
@@ -228,9 +228,9 @@ public abstract class LDLRegistry<K, V> implements Iterable<V> {
         }
 
         @Override
-        public V readBuf(RegistryFriendlyByteBuf buf) {
+        public V readBuf(FriendlyByteBuf buf) {
             if (buf.readBoolean()) {
-                return get(ResourceLocation.parse(buf.readUtf()));
+                return get(new ResourceLocation(buf.readUtf()));
             }
             return null;
         }
@@ -245,7 +245,7 @@ public abstract class LDLRegistry<K, V> implements Iterable<V> {
 
         @Override
         public V loadFromNBT(Tag tag) {
-            return get(ResourceLocation.parse(tag.getAsString()));
+            return get(new ResourceLocation(tag.getAsString()));
         }
 
         @Override
@@ -263,7 +263,7 @@ public abstract class LDLRegistry<K, V> implements Iterable<V> {
         }
 
         @Override
-        public StreamCodec<RegistryFriendlyByteBuf, V> streamCodec() {
+        public StreamCodec<V> streamCodec() {
             return StreamCodec.of((buf, value) -> buf.writeResourceLocation(getKey(value)), buf -> Objects.requireNonNull(get(buf.readResourceLocation())));
         }
     }

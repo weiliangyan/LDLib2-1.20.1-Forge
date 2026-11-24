@@ -2,8 +2,8 @@ package com.lowdragmc.lowdraglib2.utils;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
 import lombok.experimental.UtilityClass;
-import net.neoforged.fml.ModList;
-import net.neoforged.neoforgespi.language.ModFileScanData;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.forgespi.language.ModFileScanData;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
@@ -23,12 +23,14 @@ public final class ReflectionUtils {
     }
 
     public static Class<?> getRawType(Type type) {
-        return switch (type) {
-            case Class<?> aClass -> aClass;
-            case GenericArrayType genericArrayType -> getRawType(genericArrayType.getGenericComponentType());
-            case ParameterizedType parameterizedType -> getRawType(parameterizedType.getRawType());
-            case null, default -> null;
-        };
+        if (type instanceof Class<?> aClass) {
+            return aClass;
+        } else if (type instanceof GenericArrayType genericArrayType) {
+            return getRawType(genericArrayType.getGenericComponentType());
+        } else if (type instanceof ParameterizedType parameterizedType) {
+            return getRawType(parameterizedType.getRawType());
+        }
+        return null;
     }
 
     public static <A extends Annotation> void findAnnotationClasses(Class<A> annotationClass,

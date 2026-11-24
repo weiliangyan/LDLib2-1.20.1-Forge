@@ -11,9 +11,8 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.ReportedNbtException;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.io.File;
 import java.io.IOException;
@@ -94,7 +93,7 @@ public class ConcurrentResourceReadTest {
                         for (var file : files) {
                             try {
                                 provider.getResource(new FilePath(file));
-                            } catch (ReportedNbtException torn) {
+                            } catch (Exception torn) {
                                 // read while it was being written: the next scan sees the new stamp
                             }
                         }
@@ -145,7 +144,7 @@ public class ConcurrentResourceReadTest {
                     while (!stop.get()) {
                         try {
                             instance.getResource(path);
-                        } catch (ReportedNbtException torn) {
+                        } catch (Exception torn) {
                             // read while it was being written
                         }
                     }
@@ -200,7 +199,7 @@ public class ConcurrentResourceReadTest {
     }
 
     private static void check(GameTestHelper helper, List<Object> read) {
-        var first = read.getFirst();
+        var first = read.get(0);
         if (!(first instanceof Integer value) || value != VALUE) {
             helper.fail("Expected " + VALUE + ", got " + first);
             return;
@@ -225,7 +224,7 @@ public class ConcurrentResourceReadTest {
         var tag = new CompoundTag();
         tag.putString("type", "color");
         tag.put("data", IntTag.valueOf(value));
-        NbtIo.write(tag, file.toPath());
+        NbtIo.write(tag, file);
     }
 
     private static void deleteRecursively(File file) {

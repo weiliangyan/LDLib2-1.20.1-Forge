@@ -34,7 +34,7 @@ public final class ScrollDataSource<T> implements IDataProvider<T>, ITickable, I
 
     private ScrollDataSource(List<T> data) {
         this.data = data;
-        this.current = data.isEmpty() ? null : data.getFirst();
+        this.current = data.isEmpty() ? null : data.get(0);
     }
 
     public <D> ScrollDataSource<D> map(Function<T, D> mapper) {

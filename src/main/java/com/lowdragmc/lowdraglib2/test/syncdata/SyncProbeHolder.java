@@ -1,6 +1,8 @@
 package com.lowdragmc.lowdraglib2.test.syncdata;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
+import com.lowdragmc.lowdraglib2.Platform;
+import com.lowdragmc.lowdraglib2.compat.network.custom.CustomPacketPayload;
 import com.lowdragmc.lowdraglib2.misc.FluidStorage;
 import com.lowdragmc.lowdraglib2.misc.ItemStackTransfer;
 import com.lowdragmc.lowdraglib2.syncdata.IContentVersion;
@@ -16,7 +18,6 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import org.jetbrains.annotations.Nullable;
@@ -134,7 +135,7 @@ public abstract class SyncProbeHolder implements IManaged, ISyncMangedHolder, IP
     }
 
     public Tag syncedValue(String name) {
-        return ref(name).readInitialSync(level.registryAccess().createSerializationContext(NbtOps.INSTANCE));
+        return ref(name).readInitialSync(Platform.registryOps(NbtOps.INSTANCE, level.registryAccess()));
     }
 
     /**
@@ -195,15 +196,15 @@ public abstract class SyncProbeHolder implements IManaged, ISyncMangedHolder, IP
         }
 
         @Override
-        public CompoundTag serializeNBT(HolderLookup.Provider provider) {
-            var tag = super.serializeNBT(provider);
+        public CompoundTag serializeNBT() {
+            var tag = super.serializeNBT();
             tag.putBoolean("locked", locked);
             return tag;
         }
 
         @Override
-        public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
-            super.deserializeNBT(provider, tag);
+        public void deserializeNBT(CompoundTag tag) {
+            super.deserializeNBT(tag);
             locked = tag.getBoolean("locked");
         }
     }

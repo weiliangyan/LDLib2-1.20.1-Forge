@@ -1,10 +1,10 @@
 package com.lowdragmc.lowdraglib2.configurator.accessors;
 
+import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigSelector;
+import com.lowdragmc.lowdraglib2.configurator.annotation.DefaultValue;
 import com.lowdragmc.lowdraglib2.configurator.ui.*;
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
-import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigSelector;
-import com.lowdragmc.lowdraglib2.configurator.annotation.DefaultValue;
 import com.lowdragmc.lowdraglib2.utils.LocalizationUtils;
 import com.lowdragmc.lowdraglib2.utils.ReflectionUtils;
 import net.minecraft.util.StringRepresentable;

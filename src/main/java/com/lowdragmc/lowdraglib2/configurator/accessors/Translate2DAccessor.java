@@ -3,7 +3,6 @@ package com.lowdragmc.lowdraglib2.configurator.accessors;
 import com.lowdragmc.lowdraglib2.configurator.annotation.DefaultValue;
 import com.lowdragmc.lowdraglib2.configurator.ui.Configurator;
 import com.lowdragmc.lowdraglib2.configurator.ui.LengthPercentConfigurator;
-import com.lowdragmc.lowdraglib2.gui.ui.data.LengthPercent;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Translate2D;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
 import dev.vfyjxf.taffy.style.FlexDirection;

@@ -5,22 +5,21 @@ import com.lowdragmc.lowdraglib2.client.model.ModelFactory;
 import com.lowdragmc.lowdraglib2.client.renderer.IBlockRendererProvider;
 import com.lowdragmc.lowdraglib2.client.renderer.IItemRendererProvider;
 import com.lowdragmc.lowdraglib2.client.renderer.IRenderer;
-import com.lowdragmc.lowdraglib2.configurator.ui.Configurator;
-import com.lowdragmc.lowdraglib2.configurator.ui.ConfiguratorGroup;
+import com.lowdragmc.lowdraglib2.compat.TriState;
 import com.lowdragmc.lowdraglib2.configurator.annotation.ConfigSetter;
 import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
+import com.lowdragmc.lowdraglib2.configurator.ui.Configurator;
+import com.lowdragmc.lowdraglib2.configurator.ui.ConfiguratorGroup;
 import com.lowdragmc.lowdraglib2.editor.resource.IRendererResource;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.Dialog;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.Dialog;
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.vfyjxf.taffy.style.AlignItems;
 import lombok.Getter;
-import net.minecraft.client.renderer.RenderType;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.*;
@@ -32,14 +31,17 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.ChunkRenderTypeSet;
-import net.neoforged.neoforge.client.model.data.ModelData;
-import net.neoforged.neoforge.common.util.TriState;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.ChunkRenderTypeSet;
+import net.minecraftforge.client.model.data.ModelData;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
-import org.jetbrains.annotations.Nullable;
 import java.io.File;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
@@ -66,7 +68,7 @@ public class IModelRenderer implements IRenderer {
     protected volatile Map<ModelStateCacheKey, BakedModel> modelCaches;
 
     protected IModelRenderer() {
-        this(ResourceLocation.withDefaultNamespace("block/furnace"));
+        this(new ResourceLocation("block/furnace"));
     }
 
     public IModelRenderer(ResourceLocation modelLocation) {
@@ -116,7 +118,7 @@ public class IModelRenderer implements IRenderer {
             synchronized (this) {
                 if (!unbakedModelInitialized) {
                     // fast path: models registered through the RegisterAdditional pipeline
-                    var model = ModelFactory.getTopLevelModel(ModelResourceLocation.standalone(modelLocation));
+                    var model = ModelFactory.getTopLevelModel(modelLocation);
                     if (model == null) {
                         // renderer created after the initial reload: dynamically load & resolve
                         // the model under the bakery lock (see ModelFactory#loadUnbakedModelDynamically)
@@ -132,7 +134,7 @@ public class IModelRenderer implements IRenderer {
 
     @OnlyIn(Dist.CLIENT)
     protected boolean isTopLevelModelMissing() {
-        return ModelFactory.getTopLevelModel(ModelResourceLocation.standalone(modelLocation)) == null;
+        return ModelFactory.getTopLevelModel(modelLocation) == null;
     }
 
     @Override
@@ -202,10 +204,12 @@ public class IModelRenderer implements IRenderer {
                 if (!itemModelInitialized) {
                     var model = getModel();
                     if (model != null) {
-                        itemModel = model.bake(
+                        itemModel = ModelFactory.bakeUncached(
                                 ModelFactory.getModelBaker(),
+                                model,
+                                BlockModelRotation.X0_Y0,
                                 this::materialMapping,
-                                BlockModelRotation.X0_Y0);
+                                modelLocation);
                     }
                     itemModelInitialized = true;
                 }
@@ -237,10 +241,12 @@ public class IModelRenderer implements IRenderer {
     private BakedModel bakeBlockModel(ModelState modelState) {
         var model = getModel();
         if (model == null) return null;
-        return model.bake(
+        return ModelFactory.bakeUncached(
                 ModelFactory.getModelBaker(),
+                model,
+                modelState,
                 this::materialMapping,
-                modelState);
+                modelLocation);
     }
 
 
@@ -251,8 +257,8 @@ public class IModelRenderer implements IRenderer {
     
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void onAdditionalModel(Consumer<ModelResourceLocation> registry) {
-        registry.accept(ModelResourceLocation.standalone(modelLocation));
+    public void onAdditionalModel(Consumer<ResourceLocation> registry) {
+        registry.accept(modelLocation);
         clearCache();
     }
 
@@ -380,7 +386,7 @@ public class IModelRenderer implements IRenderer {
         var location = modId + ":" + modelPath.substring(0, modelPath.length() - 5); // remove ".json" suffix
 
         if (LDLib2.isValidResourceLocation(location)) {
-            return ResourceLocation.parse(location);
+            return new ResourceLocation(location);
         }
         return null;
     }

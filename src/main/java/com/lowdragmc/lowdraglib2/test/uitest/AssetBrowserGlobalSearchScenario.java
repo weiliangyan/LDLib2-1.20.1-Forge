@@ -189,7 +189,7 @@ public class AssetBrowserGlobalSearchScenario implements UIScenario {
     }
 
     private static String labelOf(UIElement cell) {
-        return cell.getChildren().isEmpty() || !(cell.getChildren().getLast() instanceof TextElement label)
+        return cell.getChildren().isEmpty() || !(cell.getChildren().get(cell.getChildren().size() - 1) instanceof TextElement label)
                 ? "" : label.getText().getString();
     }
 

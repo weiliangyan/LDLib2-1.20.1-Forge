@@ -1,13 +1,13 @@
 package com.lowdragmc.lowdraglib2.editor.ui;
 
 import com.lowdragmc.lowdraglib2.configurator.annotation.Configurable;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.SplitView;
 import com.lowdragmc.lowdraglib2.gui.ColorPattern;
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
+import com.lowdragmc.lowdraglib2.gui.ui.Style;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.SplitView;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvent;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
-import com.lowdragmc.lowdraglib2.gui.ui.Style;
 import com.lowdragmc.lowdraglib2.gui.ui.layout.LayoutProperties;
 import com.lowdragmc.lowdraglib2.gui.ui.style.Property;
 import com.lowdragmc.lowdraglib2.gui.ui.style.PropertyRegistry;
@@ -21,9 +21,9 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import org.appliedenergistics.yoga.YogaEdge;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
-import org.jetbrains.annotations.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 import java.util.function.Consumer;

@@ -2,8 +2,8 @@ package com.lowdragmc.lowdraglib2.editor.resource;
 
 import com.lowdragmc.lowdraglib2.LDLib2Registries;
 import com.lowdragmc.lowdraglib2.editor.ui.resource.ResourceProviderContainer;
-import com.lowdragmc.lowdraglib2.gui.texture.Icons;
 import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
+import com.lowdragmc.lowdraglib2.gui.texture.Icons;
 import com.lowdragmc.lowdraglib2.gui.texture.SpriteTexture;
 import com.lowdragmc.lowdraglib2.gui.texture.UIResourceTexture;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
@@ -67,12 +67,12 @@ public class TexturesResource extends Resource<IGuiTexture> {
 
     @Override
     public Tag serializeResource(IGuiTexture value, HolderLookup.Provider provider) {
-        return IGuiTexture.CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), value).result().orElse(null);
+        return IGuiTexture.CODEC.encodeStart(com.lowdragmc.lowdraglib2.Platform.registryOps(NbtOps.INSTANCE, provider), value).result().orElse(null);
     }
 
     @Override
     public IGuiTexture deserializeResource(Tag nbt, HolderLookup.Provider provider) {
-        return IGuiTexture.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), nbt).result().orElse(IGuiTexture.MISSING_TEXTURE);
+        return IGuiTexture.CODEC.parse(com.lowdragmc.lowdraglib2.Platform.registryOps(NbtOps.INSTANCE, provider), nbt).result().orElse(IGuiTexture.MISSING_TEXTURE);
     }
 
     @Override

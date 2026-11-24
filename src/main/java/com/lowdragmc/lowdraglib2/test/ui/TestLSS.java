@@ -42,7 +42,8 @@ public class TestLSS implements IScreenTest {
                 .setLanguage(Languages.LSS)
                 .setLinesResponder(lines -> {
                     var stylesheet = Stylesheet.parse(String.join("\n", lines));
-                    if (target.getModularUI() instanceof ModularUI mui) {
+                    ModularUI mui = target.getModularUI();
+                    if (mui != null) {
                         mui.getStyleEngine().removeStylesheet(stylesheetRef.get());
                         mui.getStyleEngine().addStylesheet(stylesheet);
                     }

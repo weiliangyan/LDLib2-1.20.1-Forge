@@ -1,6 +1,12 @@
 {
     "vertex": "ldlib2:raster_text",
     "fragment": "ldlib2:raster_text",
+    "attributes": [
+        "Position",
+        "Color",
+        "UV0",
+        "UV2"
+    ],
     "samplers": [
         { "name": "Sampler0" },
         { "name": "Sampler2" }
